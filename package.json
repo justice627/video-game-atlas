@@ -1,0 +1,26 @@
+{
+  "name": "video-game-atlas",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npm run build:data && vite",
+    "build": "npm run build:data && tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "fetch:wikidata": "tsx scripts/fetch-wikidata.ts",
+    "build:data": "tsx scripts/build-data.ts",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.9.0",
+    "js-yaml": "^4.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  },
+  "dependencies": {
+    "maplibre-gl": "^4.7.1"
+  }
+}
