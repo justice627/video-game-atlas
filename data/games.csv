@@ -1,6 +1,6 @@
-id,title,wikidata,release_year,wikipedia,note
-assassins-creed-ii,Assassin's Creed II,Q211735,2009,https://en.wikipedia.org/wiki/Assassin%27s_Creed_II,
-civilization-vi,Civilization VI,Q24050047,2016,https://en.wikipedia.org/wiki/Civilization_VI,
-fifa-world-cup-2010,2010 FIFA World Cup South Africa,Q586736,2010,https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game),
-gta-vice-city,Grand Theft Auto: Vice City,Q94671,2002,https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City,
-hitman-3,Hitman 3,Q96216496,2021,https://en.wikipedia.org/wiki/Hitman_3,
+id,title,series_id,wikidata,release_year,wikipedia,note
+assassins-creed-ii,Assassin's Creed II,assassins-creed,Q211735,2009,https://en.wikipedia.org/wiki/Assassin%27s_Creed_II,
+civilization-vi,Civilization VI,civilization,Q24050047,2016,https://en.wikipedia.org/wiki/Civilization_VI,
+fifa-world-cup-2010,2010 FIFA World Cup South Africa,fifa-world-cup,Q586736,2010,https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game),
+gta-vice-city,Grand Theft Auto: Vice City,grand-theft-auto,Q94671,2002,https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City,
+hitman-3,Hitman 3,hitman,Q96216496,2021,https://en.wikipedia.org/wiki/Hitman_3,

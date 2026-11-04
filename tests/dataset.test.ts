@@ -10,6 +10,11 @@ const errorsAfter = (edit: (t: Tables) => void) => { const t = clone(); edit(t);
 describe('data/*.csv against docs/data-rules.md', () => {
   it('passes validation', () => expect(validate(tables)).toEqual([]));
 
+  it('ships only series that verified games use', () => {
+    const atlas = buildAtlas(tables);
+    expect(atlas.series.map((s) => s.id).sort()).toEqual(['assassins-creed', 'civilization', 'grand-theft-auto', 'hitman']);
+  });
+
   it('shows only verified links', () => {
     const atlas = buildAtlas(tables);
     expect(atlas.games.some((g) => g.id === 'fifa-world-cup-2010')).toBe(false); // all draft
@@ -34,5 +39,6 @@ describe('data/*.csv against docs/data-rules.md', () => {
     expect(errorsAfter((t) => { t.places[0].wikidata = undefined; })).toContain('needs a wikidata or geonames id');
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').place_id = 'atlantis'; })).toContain('place_id "atlantis" is not on the Places sheet');
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').status = 'excluded'; link(t, 'gta-vice-city').note = undefined; })).toContain('excluded links need the reason');
+    expect(errorsAfter((t) => { t.games[0].series_id = 'nope'; })).toContain('series_id "nope" is not on the Series sheet');
   });
 });

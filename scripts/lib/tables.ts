@@ -10,7 +10,8 @@ export const TIME_TYPES = ['fixed', 'era', 'sandbox', 'undated'] as const;
 export const CONFIDENCE = ['high', 'medium', 'low'] as const;
 export const STATUSES = ['draft', 'verified', 'excluded'] as const;
 
-export interface GameRow { id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string; note?: string }
+export interface SeriesRow { id: string; name: string; wikidata?: string; note?: string }
+export interface GameRow { id: string; title: string; series_id?: string; wikidata?: string; release_year?: number; wikipedia?: string; note?: string }
 export interface PlaceRow {
   id: string; name: string; type: string; parent?: string; wikidata?: string; geonames?: string;
   lat?: number; lon?: number; bbox?: string; note?: string;
@@ -25,16 +26,23 @@ export interface CandidateRow {
   id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string;
   lead_source?: string; lead_places?: string; lead_periods?: string; flags?: string; note?: string;
 }
-export interface Tables { games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[] }
+export interface Tables { series: SeriesRow[]; games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[] }
 
 export interface Col { key: string; width: number; help: string; list?: readonly string[]; numeric?: boolean }
 export interface TableDef { name: string; file: string; key: keyof Tables; cols: Col[] }
 
 // Column meanings follow docs/data-rules.md.
 export const TABLES: TableDef[] = [
+  { name: 'Series', file: 'series.csv', key: 'series', cols: [
+    { key: 'id', width: 20, help: 'Unique id, lowercase-with-dashes.' },
+    { key: 'name', width: 30, help: 'Display name of the series or franchise.' },
+    { key: 'wikidata', width: 12, help: 'Wikidata item of the series (the P179 "part of the series" value).' },
+    { key: 'note', width: 40, help: 'Free text.' },
+  ] },
   { name: 'Games', file: 'games.csv', key: 'games', cols: [
     { key: 'id', width: 24, help: 'Unique id, lowercase-with-dashes. Do not change once links use it.' },
     { key: 'title', width: 40, help: 'Display title.' },
+    { key: 'series_id', width: 18, help: 'Series id from the Series sheet; at most one (rules section 5).' },
     { key: 'wikidata', width: 12, help: 'Wikidata item of the game (Q...).' },
     { key: 'release_year', width: 8, help: 'First release year.', numeric: true },
     { key: 'wikipedia', width: 40, help: 'English Wikipedia URL.' },
@@ -57,13 +65,13 @@ export const TABLES: TableDef[] = [
     { key: 'place_id', width: 22, help: 'Place id from the Places sheet.' },
     { key: 'role', width: 11, help: 'How the game uses the place (rules section 3).', list: ROLES },
     { key: 'fictional_name', width: 16, help: 'Required for role inspiration: the fictional place, e.g. Vice City.' },
-    { key: 'name_in_game', width: 22, help: 'Level, mission, track or landmark name, or the historical name the game uses.' },
+    { key: 'name_in_game', width: 22, help: 'Level, mission or track name, or the name the game uses for the place (old venue name, historical city name).' },
     { key: 'time_type', width: 10, help: 'Rules section 4.', list: TIME_TYPES },
     { key: 'from', width: 8, help: 'First year (fixed, or sandbox with known dates). Negative = BCE.', numeric: true },
     { key: 'to', width: 8, help: 'Last year.', numeric: true },
     { key: 'era_id', width: 14, help: 'For time_type era (or sandbox): id from the Eras sheet.' },
     { key: 'sources', width: 50, help: 'One or more URLs, separated by spaces, supporting place, role and time.' },
-    { key: 'confidence', width: 10, help: 'Of the best source (rules section 5).', list: CONFIDENCE },
+    { key: 'confidence', width: 10, help: 'Of the best source (rules section 6).', list: CONFIDENCE },
     { key: 'status', width: 9, help: 'Only verified links appear on the map.', list: STATUSES },
     { key: 'flags', width: 14, help: 'Space separated, e.g. needs-time.' },
     { key: 'note', width: 50, help: 'Quote from the source, reasoning, or the reason for excluded.' },

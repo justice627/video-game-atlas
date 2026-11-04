@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { visiblePlacements, byGame, undatedGames, type Filters } from '../src/filter.ts';
+import { visiblePlacements, byGame, undatedGames, groupEntries, type Filters } from '../src/filter.ts';
 import type { Game, Link } from '../src/types.ts';
 
 const link = (o: Partial<Link>): Link => ({
@@ -41,5 +41,19 @@ describe('filter (docs/data-rules.md section 4)', () => {
     expect(h.approxTime).toBe(true);
     const [h2] = visiblePlacements([wide], { ...base, range: { from: 1000, to: 1900 } });
     expect(h2.approxTime).toBe(false);
+  });
+});
+
+describe('series grouping (docs/data-rules.md section 5)', () => {
+  const arena = (o: Partial<Link>) => link({ role: 'arena', placeType: 'landmark', placeWikidata: 'Q207109', place: 'Johan Cruijff ArenA', lat: 52.31, lon: 4.94, span: { from: 2010, to: 2010 }, ...o });
+  const fifa = (id: string, nameInGame: string): Game => ({ id, title: id, series: 'fifa', links: [arena({ nameInGame })] });
+  const games = [fifa('FIFA 11', 'Amsterdam ArenA'), fifa('FIFA 20', 'Johan Cruijff ArenA'),
+    { id: 'other', title: 'Other', links: [arena({})] }];
+  const hits = visiblePlacements(games, { ...base, roles: new Set(['arena']), range: { from: 2000, to: 2020 } });
+  it('keeps one entry per game when not collapsed', () => expect(groupEntries(hits, false)).toHaveLength(3));
+  it('merges a series at one place into one entry, but never games without a series', () => {
+    const e = groupEntries(hits, true);
+    expect(e.map((x) => x.map((h) => h.game.id))).toEqual([['FIFA 11', 'FIFA 20'], ['other']]);
+    expect(e[0].map((h) => h.link.nameInGame)).toEqual(['Amsterdam ArenA', 'Johan Cruijff ArenA']);
   });
 });

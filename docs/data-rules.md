@@ -6,11 +6,12 @@ How a game gets into the atlas, and what a finished entry looks like. These rule
 
 | Table | One row per | Holds |
 | --- | --- | --- |
-| `games` | game | id, title, Wikidata ID, release year |
+| `series` | game series or franchise | id, name, Wikidata ID |
+| `games` | game | id, title, series, Wikidata ID, release year |
 | `places` | real-world place | id, name, Wikidata or GeoNames ID, coordinates, type, parent place |
 | `links` | game × place × time | game, place, role, time, level or landmark name, source, confidence, status, flags, note |
 
-Almost all the work happens in `links`. Games and places are reference data, and a link is a claim: *this game uses this place, in this way, at this time, and here is the source.*
+Almost all the work happens in `links`. Series, games and places are reference data, and a link is a claim: *this game uses this place, in this way, at this time, and here is the source.*
 
 ## 1. Which games qualify
 
@@ -38,11 +39,19 @@ Each link has exactly one role.
 | --- | --- | --- |
 | `setting` | The game takes place there as a continuous world | Forza Horizon 5 in Guanajuato |
 | `level` | A discrete mission, stage or level is there, among others elsewhere | Hitman 3 in Dubai |
-| `arena` | A real sports venue, circuit, or a multiplayer map based on a real location | Soccer City in a FIFA World Cup game |
+| `arena` | A licensed real venue: stadium, arena, circuit or track. Also multiplayer maps based on a real location | FNB Stadium in 2010 FIFA World Cup South Africa |
 | `inspiration` | A fictional place a source says is based on this real place. The fictional name is required | Vice City → Miami |
 | `strategy` | A grand-strategy or sandbox map covering a region. One link per game, place = the region | Civilization VI → the world |
 
 **Setting or level?** An open, continuous world is `setting`. Separate missions in separate places are `level`.
+
+**Venues in sports and racing games:**
+
+- Every licensed real venue in the game gets its own `arena` link, at the venue itself (type `landmark`), never at its city.
+- Generic, fictional or unlicensed stadiums get no link.
+- The venue list needs a source: the game's own list (Wikipedia, official site, or a fan wiki at `low`), or a source for "the game has the tournament's venues" plus one for which venues those were.
+- Venues change names. The place row uses the venue's current name; the link's `name_in_game` holds the name the game uses (place Johan Cruijff ArenA, shown in an older game as "Amsterdam ArenA").
+- Time is the season or tournament the game depicts (2010 for the 2010 World Cup game). If the game names no season, the link is `undated` and flagged `needs-time`.
 
 ## 4. Time
 
@@ -61,9 +70,17 @@ Further rules for time:
 - **Use the range the source gives.** Don't narrow a sourced range to one year, and don't widen it to an era.
 - **Eras come from one shared list.** Each list entry has a name, years and a source (PeriodO where it has the period). Add entries only when a game needs them.
 - **Present day is not a year.** A game set in its own present with no year stated is `undated`, not its release year. Research may find the year later.
-- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. `undated` links never appear on the timeline. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
+- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. So are `arena` links, the venues of sports and racing games: they're numerous and would crowd out story settings. `undated` links never appear on the timeline. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
 
-## 5. Sources and confidence
+## 5. Series
+
+A series groups games that share a franchise, so overlapping places can be shown once. Most yearly sports games put the same stadiums in game after game.
+
+- Each game belongs to at most one series. Use the Wikidata "part of the series" (P179) item when there is one.
+- When one game sits in several series on Wikidata, pick the one people would look for. For example, a World Cup tie-in might belong to EA's FIFA World Cup series rather than the yearly FIFA series. Explain the choice in the game's note.
+- The map can collapse a series: one pin per place for the whole series, listing which games use it and under which name. The games stay separate rows in the data; collapsing is only a view.
+
+## 6. Sources and confidence
 
 Every link needs at least one source URL that supports its place, role and time. The link's confidence is that of its best source:
 
@@ -75,7 +92,7 @@ Every link needs at least one source URL that supports its place, role and time.
 
 Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 
-## 6. Workflow
+## 7. Workflow
 
 1. **`candidate`:** a game someone or something suggested, for example from Wikidata or a theme idea. Candidates live in `data/candidates.csv`, with Wikidata's claims as unverified leads. Not shown.
 2. **`draft`:** researched, every link sourced. AI may draft at this stage. Not shown.
@@ -94,7 +111,7 @@ All five checked against their Wikipedia articles on 2026-11-04.
 
 **Hitman 3.** Six links, `level`: Dubai, Dartmoor, Berlin, Chongqing, Mendoza and the Carpathian Mountains (`region`, parent Romania). Wikipedia lists exactly these six ([source](https://en.wikipedia.org/wiki/Hitman_3)) but gives no in-game year, so every link is `undated` and flagged `needs-time`. The Andaman Sea location added after launch is fictional and has no stated real counterpart, so it gets no link. v0.1 used an unsourced 2020.
 
-**2010 FIFA World Cup South Africa.** Ten links, `arena`, one per tournament stadium, `fixed` 2010. Wikipedia: "The game includes all 10 venues used at the 2010 FIFA World Cup" ([source](https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game))). The article doesn't list the ten stadiums, so each stadium link needs a second source (the tournament's Wikipedia article). The generic and qualifying-region stadiums get no links. v0.1 had this as one pin on the country of Japan.
+**2010 FIFA World Cup South Africa.** Ten links, `arena`, one per tournament stadium (each a `landmark`), `fixed` 2010, hidden until venues are switched on. Wikipedia: "The game includes all 10 venues used at the 2010 FIFA World Cup" ([source](https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game))). The article doesn't list the ten stadiums, so each stadium link needs a second source (the tournament's Wikipedia article). The generic and qualifying-region stadiums get no links. v0.1 had this as one pin on the country of Japan.
 
 **Civilization VI.** One link: the world, `strategy`, `sandbox`. Wikipedia says players develop their civilization "between ancient times and the near future" ([source](https://en.wikipedia.org/wiki/Civilization_VI)). That gives the eras but not the years, so the link needs "ancient times" and "near future" entries on the era list. v0.1 used an unsourced 4000 BCE–2100. Because it's `strategy` and `sandbox`, it stays off the map unless you switch those games on.
 

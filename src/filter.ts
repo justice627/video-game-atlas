@@ -40,3 +40,19 @@ export function byGame(hits: Hit[]): Map<Game, Hit[]> {
 
 /** Verified games that cannot appear on the timeline yet because none of their links has a time. */
 export const undatedGames = (games: Game[]) => games.filter((g) => g.links.every((l) => l.timeType === 'undated'));
+
+/**
+ * Map entries: one per hit, or, when collapsing by series, one per series × place × role.
+ * Games without a series are never merged with other games.
+ */
+export function groupEntries(hits: Hit[], collapse: boolean): Hit[][] {
+  if (!collapse) return hits.map((h) => [h]);
+  const m = new Map<string, Hit[]>();
+  for (const h of hits) {
+    const owner = h.game.series ? `series:${h.game.series}` : `game:${h.game.id}`;
+    const place = h.link.placeWikidata ?? `${h.link.lat.toFixed(4)},${h.link.lon.toFixed(4)}`;
+    const key = `${owner}|${h.link.role}|${place}`;
+    m.set(key, [...(m.get(key) ?? []), h]);
+  }
+  return [...m.values()];
+}

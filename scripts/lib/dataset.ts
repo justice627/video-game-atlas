@@ -41,6 +41,7 @@ export function validate(t: Tables): string[] {
     }
     return m;
   };
+  const series = unique('Series', t.series as (Tables['series'][number] & Row)[]);
   const games = unique('Games', t.games as (Tables['games'][number] & Row)[]);
   const places = unique('Places', t.places as (PlaceRow & Row)[]);
   const eras = unique('Eras', t.eras as (Tables['eras'][number] & Row)[]);
@@ -49,6 +50,11 @@ export function validate(t: Tables): string[] {
     if (!g.title) errs.push(`${at('Games', g)}: title is empty`);
     if (g.release_year !== undefined && !isInt(g.release_year)) errs.push(`${at('Games', g)}: release_year must be a whole number`);
     if (g.wikidata && !/^Q\d+$/.test(g.wikidata)) errs.push(`${at('Games', g)}: wikidata must look like Q123`);
+    if (g.series_id && !series.has(g.series_id)) errs.push(`${at('Games', g)}: series_id "${g.series_id}" is not on the Series sheet`);
+  }
+  for (const s of t.series as (Tables['series'][number] & Row)[]) {
+    if (!s.name) errs.push(`${at('Series', s)}: name is empty`);
+    if (s.wikidata && !/^Q\d+$/.test(s.wikidata)) errs.push(`${at('Series', s)}: wikidata must look like Q123`);
   }
   for (const p of t.places as (PlaceRow & Row)[]) {
     const w = at('Places', p);
@@ -123,9 +129,12 @@ export function buildAtlas(t: Tables): Atlas {
   }
   const games: Game[] = t.games.filter((g) => byGame.has(g.id)).map((g) => ({
     id: g.id, title: g.title, links: byGame.get(g.id)!,
+    ...(g.series_id ? { series: g.series_id } : {}),
     ...(g.wikidata ? { wikidata: g.wikidata } : {}), ...(g.release_year ? { year: g.release_year } : {}),
     ...(g.wikipedia ? { wikipedia: g.wikipedia } : {}),
   }));
   games.sort((a, b) => a.title.localeCompare(b.title));
-  return { built: new Date().toISOString().slice(0, 10), games };
+  const used = new Set(games.map((g) => g.series).filter(Boolean));
+  const series = t.series.filter((s) => used.has(s.id)).map((s) => ({ id: s.id, name: s.name, ...(s.wikidata ? { wikidata: s.wikidata } : {}) }));
+  return { built: new Date().toISOString().slice(0, 10), series, games };
 }

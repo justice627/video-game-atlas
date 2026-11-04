@@ -5,30 +5,67 @@ import { formatSpan } from './timeline.ts';
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
-export function renderList(root: HTMLElement, count: HTMLElement, hits: Hit[], undated: Game[], onPick: (hits: Hit[]) => void) {
-  const groups = [...byGame(hits)];
-  const places = new Set(hits.map((h) => `${h.link.lat},${h.link.lon}`)).size;
-  count.textContent = `${groups.length} game${groups.length === 1 ? '' : 's'} · ${places} place${places === 1 ? '' : 's'}`;
-  count.dataset.games = String(groups.length);
+export interface ListOptions {
+  /** Nest games under their series. */
+  collapse: boolean;
+  seriesName: (id: string) => string | undefined;
+}
+
+function when(hits: Hit[]): string {
+  const spans = [...new Map(hits.filter((h) => h.matched).map((h) => [`${h.matched!.from}:${h.matched!.to}`, h.matched!])).values()]
+    .sort((a, b) => a.from - b.from);
+  return spans.length ? spans.slice(0, 3).map(formatSpan).join(', ') + (spans.length > 3 ? '…' : '') : 'Across eras';
+}
+function where(hits: Hit[]): string {
+  const w = [...new Set(hits.map((h) => h.link.fictionalName ?? h.link.place))];
+  return esc(w.slice(0, 4).join(', ')) + (w.length > 4 ? ` +${w.length - 4}` : '');
+}
+
+export function renderList(root: HTMLElement, count: HTMLElement, hits: Hit[], undated: Game[], onPick: (hits: Hit[]) => void, opts: ListOptions) {
+  const games = [...byGame(hits)];
+  const places = new Set(hits.map((h) => h.link.placeWikidata ?? `${h.link.lat},${h.link.lon}`)).size;
+  count.textContent = `${games.length} game${games.length === 1 ? '' : 's'} · ${places} place${places === 1 ? '' : 's'}`;
+  count.dataset.games = String(games.length);
   const undatedNote = undated.length
     ? `<p class="note">Not on the timeline yet (no sourced date): ${undated.map((g) => esc(g.title)).join(', ')}.</p>`
     : '';
-  if (!groups.length) {
+  if (!games.length) {
     root.innerHTML = `<p class="empty">No verified games in this range with these filters.</p>${undatedNote}`;
     return;
   }
-  root.innerHTML = groups.map(([game, gh], i) => {
-    const spans = [...new Map(gh.filter((h) => h.matched).map((h) => [`${h.matched!.from}:${h.matched!.to}`, h.matched!])).values()]
-      .sort((a, b) => a.from - b.from);
-    const when = spans.length ? spans.slice(0, 3).map(formatSpan).join(', ') + (spans.length > 3 ? '…' : '') : 'Across eras';
-    const where = [...new Set(gh.map((h) => h.link.fictionalName ?? h.link.place))];
-    return `<li><button type="button" data-i="${i}">
-      <span class="li-title">${esc(game.title)}</span>
-      <span class="li-meta">${when}</span>
-      <span class="li-where">${esc(where.slice(0, 4).join(', '))}${where.length > 4 ? ` +${where.length - 4}` : ''}</span>
+  const picks: Hit[][] = [];
+  const gameRow = ([game, gh]: [Game, Hit[]], nested = false) => {
+    picks.push(gh);
+    return `<li${nested ? ' class="nested"' : ''}><button type="button" data-i="${picks.length - 1}">
+      <span class="li-title">${esc(game.title)}${nested && game.year ? ` <span class="muted">(${game.year})</span>` : ''}</span>
+      <span class="li-meta">${when(gh)}</span>
+      <span class="li-where">${where(gh)}</span>
     </button></li>`;
-  }).join('') + (undatedNote ? `<li>${undatedNote}</li>` : '');
+  };
+
+  let html = '';
+  if (!opts.collapse) html = games.map((g) => gameRow(g)).join('');
+  else {
+    // Series in the order their first game appears; games without a series stay single rows.
+    const groups = new Map<string, [Game, Hit[]][]>();
+    for (const g of games) {
+      const key = g[0].series ? `s:${g[0].series}` : `g:${g[0].id}`;
+      groups.set(key, [...(groups.get(key) ?? []), g]);
+    }
+    for (const [key, members] of groups) {
+      if (key.startsWith('g:') || members.length === 1) { html += gameRow(members[0]); continue; }
+      const all = members.flatMap(([, gh]) => gh);
+      picks.push(all);
+      const name = opts.seriesName(key.slice(2)) ?? key.slice(2);
+      html += `<li class="series"><button type="button" data-i="${picks.length - 1}">
+        <span class="li-title">${esc(name)} <span class="muted">· ${members.length} games</span></span>
+        <span class="li-meta">${when(all)}</span>
+        <span class="li-where">${where(all)}</span>
+      </button><ul>${[...members].sort((a, b) => (a[0].year ?? 0) - (b[0].year ?? 0)).map((m) => gameRow(m, true)).join('')}</ul></li>`;
+    }
+  }
+  root.innerHTML = html + (undatedNote ? `<li>${undatedNote}</li>` : '');
   root.querySelectorAll<HTMLButtonElement>('button[data-i]').forEach((b) =>
-    b.addEventListener('click', () => onPick(groups[Number(b.dataset.i)][1])),
+    b.addEventListener('click', () => onPick(picks[Number(b.dataset.i)])),
   );
 }
