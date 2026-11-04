@@ -8,7 +8,7 @@ How a game gets into the atlas, and what a finished entry looks like. These rule
 | --- | --- | --- |
 | `games` | game | id, title, Wikidata ID, release year |
 | `places` | real-world place | id, name, Wikidata or GeoNames ID, coordinates, type, parent place |
-| `links` | game × place × time | game, place, role, time, level or landmark name, source, confidence, status, note |
+| `links` | game × place × time | game, place, role, time, level or landmark name, source, confidence, status, flags, note |
 
 Almost all the work happens in `links`. Games and places are reference data, and a link is a claim: *this game uses this place, in this way, at this time, and here is the source.*
 
@@ -50,17 +50,17 @@ Time lives on the link, never on the place: Florence has no era, Assassin's Cree
 | Type | Use when | Years |
 | --- | --- | --- |
 | `fixed` | A source gives a year or a short dated range | The years stated: 1986, or 1476–1499 |
-| `contemporary` | Set in its own present day, with no year stated | The release year. The note says so |
 | `era` | Set in a named period without a year (Edo period, ancient Greece) | The era's bounds, from the era list |
 | `sandbox` | The player moves through time (Civilization, Europa Universalis) | The start and end of playable time, from the era list or the game's own dates |
-| `undated` | No source gives a time, and none of the above fits | None. Kept in the data, off the timeline |
+| `undated` | No source gives a time. This includes games set in their own present day with no stated year | None. Flagged `needs-time` for research; kept in the data, off the timeline |
 
 Further rules for time:
 
 - **Different places, different times, separate links.** A frame story only gets links for places the frame depicts.
 - **Use the range the source gives.** Don't narrow a sourced range to one year, and don't widen it to an era.
 - **Eras come from one shared list.** Each list entry has a name, years and a source (PeriodO where it has the period). Add entries only when a game needs them.
-- **Display:** `sandbox` and `undated` links stay off the map by default. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
+- **Present day is not a year.** A game set in its own present with no year stated is `undated`, not its release year. Research may find the year later.
+- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. `undated` links never appear on the timeline. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
 
 ## 5. Sources and confidence
 
@@ -77,11 +77,11 @@ Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 ## 6. Workflow
 
 1. **`candidate`:** a game someone or something suggested, for example from Wikidata or a theme idea. Not shown.
-2. **`draft`:** researched, every link sourced. AI may draft at this stage. Not shown by default.
-3. **`verified`:** you checked the links against the sources. Shown on the map.
+2. **`draft`:** researched, every link sourced. AI may draft at this stage. Not shown.
+3. **`verified`:** you checked the links against the sources. The only status shown on the map.
 4. **`excluded`:** kept for the record, with a reason. Not shown.
 
-A game is done when it has at least one link with a role, a place carrying an ID and coordinates, a time type, a source and a confidence, and you have verified it.
+A game is done when it has at least one link with a role, a place carrying an ID and coordinates, a time type, a source and a confidence, and you have verified it. A verified link can still carry a flag such as `needs-time`: it is correct, just incomplete.
 
 ## Worked examples
 
@@ -91,10 +91,10 @@ All five checked against their Wikipedia articles on 2026-11-04.
 
 **Assassin's Creed II.** Five links: Florence, Venice, Monteriggioni, San Gimignano and Forlì, each `setting`, `fixed` 1476–1499, confidence `medium`. Wikipedia: the story "takes place at the height of the Renaissance in Italy from 1476 to 1499", with the open world "comprising several Italian cities, including Florence, Venice, Monteriggioni, San Gimignano, and Forlì" ([source](https://en.wikipedia.org/wiki/Assassin%27s_Creed_II)). The article gives no year or place for the modern-day frame story, so it gets no link until a source does. v0.1 had this game at a single year, 1476.
 
-**Hitman 3.** Six links, `level`: Dubai, Dartmoor, Berlin, Chongqing, Mendoza and the Carpathian Mountains (`region`, parent Romania). Wikipedia lists exactly these six ([source](https://en.wikipedia.org/wiki/Hitman_3)) but gives no in-game year, so the time is `contemporary`, 2021. The Andaman Sea location added after launch is fictional and has no stated real counterpart, so it gets no link. This example is why `contemporary` exists; v0.1 used an unsourced 2020.
+**Hitman 3.** Six links, `level`: Dubai, Dartmoor, Berlin, Chongqing, Mendoza and the Carpathian Mountains (`region`, parent Romania). Wikipedia lists exactly these six ([source](https://en.wikipedia.org/wiki/Hitman_3)) but gives no in-game year, so every link is `undated` and flagged `needs-time`. The Andaman Sea location added after launch is fictional and has no stated real counterpart, so it gets no link. v0.1 used an unsourced 2020.
 
 **2010 FIFA World Cup South Africa.** Ten links, `arena`, one per tournament stadium, `fixed` 2010. Wikipedia: "The game includes all 10 venues used at the 2010 FIFA World Cup" ([source](https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game))). The article doesn't list the ten stadiums, so each stadium link needs a second source (the tournament's Wikipedia article). The generic and qualifying-region stadiums get no links. v0.1 had this as one pin on the country of Japan.
 
-**Civilization VI.** One link: the world, `strategy`, `sandbox`. Wikipedia says players develop their civilization "between ancient times and the near future" ([source](https://en.wikipedia.org/wiki/Civilization_VI)). That gives the eras but not the years, so the link needs "ancient times" and "near future" entries on the era list. v0.1 used an unsourced 4000 BCE–2100. Because it's `sandbox`, it stays off the map unless you switch sandbox games on.
+**Civilization VI.** One link: the world, `strategy`, `sandbox`. Wikipedia says players develop their civilization "between ancient times and the near future" ([source](https://en.wikipedia.org/wiki/Civilization_VI)). That gives the eras but not the years, so the link needs "ancient times" and "near future" entries on the era list. v0.1 used an unsourced 4000 BCE–2100. Because it's `strategy` and `sandbox`, it stays off the map unless you switch those games on.
 
-**What the examples changed:** `contemporary` (from Hitman 3) and the frame-story rule (from Assassin's Creed II) were added after testing. FIFA showed that one link can need two sources, one for "the game has the venues" and one for which venues those are. All five games are now fully described except two items: the Civilization VI era bounds and the FIFA stadium list.
+**What the examples changed:** the present-day rule and the `needs-time` flag (from Hitman 3) and the frame-story rule (from Assassin's Creed II) were added after testing. FIFA showed that one link can need two sources, one for "the game has the venues" and one for which venues those are. All five games are now fully described except three items: the Civilization VI era bounds, the FIFA stadium list and Hitman 3's year.
