@@ -12,7 +12,8 @@ export async function writeWorkbook(t: Tables, path = WORKBOOK) {
   const readme = wb.addWorksheet('README');
   readme.columns = [{ width: 12 }, { width: 16 }, { width: 110 }];
   readme.addRow(['Video Game Atlas data: editing view.']).font = { bold: true };
-  readme.addRow(['The source of truth is data/games.csv, periods.csv and placements.csv. This workbook is generated from them.']);
+  readme.addRow(['The source of truth is the CSV files in data/ (games, places, links, eras, candidates). This workbook is generated from them.']);
+  readme.addRow(['What goes in each column, and when a link may be verified: docs/data-rules.md.']);
   readme.addRow(['Edit here, then run `npm run data:import` to write your edits back to the CSV files (it validates them too).']);
   readme.addRow(['Keep sheet names and header rows. Rows join on game_id. Row numbers in error messages match the rows in this workbook.']);
   readme.addRow([]);

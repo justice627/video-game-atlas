@@ -3,40 +3,6 @@
  "source": "https://query.wikidata.org (CC0)",
  "games": [
   {
-   "qid": "Q19431",
-   "title": "Grand Theft Auto: London 1969",
-   "places": [
-    {
-     "qid": "Q84",
-     "label": "London",
-     "lat": 51.507222222222,
-     "lon": -0.1275,
-     "types": [
-      "Q1048835",
-      "Q1066984",
-      "Q108178728",
-      "Q174844",
-      "Q200250",
-      "Q208511",
-      "Q515",
-      "Q51929311"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q2485",
-     "label": "1969",
-     "point": [
-      "1969-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 1999,
-   "enwiki": "https://en.wikipedia.org/wiki/Grand_Theft_Auto:_London_1969"
-  },
-  {
    "qid": "Q22986",
    "title": "Amnesia: The Dark Descent",
    "places": [
@@ -588,8 +554,8 @@
     {
      "qid": "Q62",
      "label": "San Francisco",
-     "lat": 37.7775,
-     "lon": -122.41638888889,
+     "lat": 37.775,
+     "lon": -122.41944444444,
      "types": [
       "Q1093829",
       "Q13218382",
@@ -2112,38 +2078,6 @@
    "enwiki": "https://en.wikipedia.org/wiki/F/A-18_Interceptor"
   },
   {
-   "qid": "Q771553",
-   "title": "Day of Defeat",
-   "places": [
-    {
-     "qid": "Q46",
-     "label": "Europe",
-     "lat": 53.5,
-     "lon": 15.5,
-     "types": [
-      "Q2418896",
-      "Q5107"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q362",
-     "label": "World War II",
-     "start": [
-      "1939-09-01T00:00:00Z",
-      11
-     ],
-     "end": [
-      "1945-09-02T00:00:00Z",
-      11
-     ]
-    }
-   ],
-   "year": 2003,
-   "enwiki": "https://en.wikipedia.org/wiki/Day_of_Defeat"
-  },
-  {
    "qid": "Q791439",
    "title": "Battlefield 1942",
    "places": [
@@ -2893,38 +2827,6 @@
    ],
    "year": 2013,
    "enwiki": "https://en.wikipedia.org/wiki/Total_War:_Rome_II"
-  },
-  {
-   "qid": "Q864291",
-   "title": "Rome: Total War: Alexander",
-   "places": [
-    {
-     "qid": "Q41",
-     "label": "Greece",
-     "lat": 38.5,
-     "lon": 23,
-     "types": [
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q41493",
-     "label": "ancient history",
-     "start": [
-      "-3200-01-01T00:00:00Z",
-      6
-     ],
-     "end": [
-      "0500-01-01T00:00:00Z",
-      7
-     ]
-    }
-   ],
-   "year": 2006,
-   "enwiki": "https://en.wikipedia.org/wiki/Rome:_Total_War:_Alexander"
   },
   {
    "qid": "Q865251",
@@ -5907,100 +5809,6 @@
    ],
    "year": 1994,
    "enwiki": "https://en.wikipedia.org/wiki/Live_A_Live"
-  },
-  {
-   "qid": "Q2661073",
-   "title": "Agent",
-   "places": [
-    {
-     "qid": "Q142",
-     "label": "France",
-     "lat": 47,
-     "lon": 2,
-     "types": [
-      "Q3624078",
-      "Q6256",
-      "Q7270"
-     ]
-    },
-    {
-     "qid": "Q39",
-     "label": "Switzerland",
-     "lat": 46.798562,
-     "lon": 8.231973,
-     "types": [
-      "Q123480",
-      "Q3624078",
-      "Q43702",
-      "Q6256",
-      "Q7275"
-     ]
-    },
-    {
-     "qid": "Q61",
-     "label": "Washington, D.C.",
-     "lat": 38.895,
-     "lon": -77.036666666667,
-     "types": [
-      "Q1093829",
-      "Q114496982",
-      "Q1549591",
-      "Q15840617",
-      "Q257391",
-      "Q486972"
-     ]
-    },
-    {
-     "qid": "Q85",
-     "label": "Cairo",
-     "lat": 30.044444444444,
-     "lon": 31.235833333333,
-     "types": [
-      "Q108178728",
-      "Q1200957",
-      "Q1549591",
-      "Q15661340",
-      "Q174844",
-      "Q200250",
-      "Q51929311"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35014",
-     "label": "1970s",
-     "point": [
-      "1970-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1970-01-01T00:00:00Z",
-      11
-     ],
-     "end": [
-      "1979-12-31T00:00:00Z",
-      11
-     ]
-    },
-    {
-     "qid": "Q8683",
-     "label": "Cold War",
-     "point": [
-      "1946-01-01T00:00:00Z",
-      9
-     ],
-     "start": [
-      "1945-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1991-12-25T00:00:00Z",
-      11
-     ]
-    }
-   ],
-   "enwiki": "https://en.wikipedia.org/wiki/Agent_(video_game)"
   },
   {
    "qid": "Q2698836",
@@ -12157,45 +11965,6 @@
    "year": 2021
   },
   {
-   "qid": "Q107398164",
-   "title": "Ghost of Tsushima Director's Cut",
-   "places": [
-    {
-     "qid": "Q1054861",
-     "label": "Tsushima Province",
-     "lat": 34.41194444,
-     "lon": 129.335,
-     "types": [
-      "Q860290"
-     ]
-    },
-    {
-     "qid": "Q494914",
-     "label": "Iki Island",
-     "lat": 33.783333333333,
-     "lon": 129.71666666667,
-     "types": [
-      "Q23442"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q236205",
-     "label": "Kamakura period",
-     "start": [
-      "1185-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1333-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2021
-  },
-  {
    "qid": "Q107518015",
    "title": "Company of Heroes 3",
    "places": [
@@ -12493,47 +12262,6 @@
    "year": 2010
   },
   {
-   "qid": "Q109931593",
-   "title": "Grand Theft Auto: Director's Cut",
-   "places": [
-    {
-     "qid": "Q84",
-     "label": "London",
-     "lat": 51.507222222222,
-     "lon": -0.1275,
-     "types": [
-      "Q1048835",
-      "Q1066984",
-      "Q108178728",
-      "Q174844",
-      "Q200250",
-      "Q208511",
-      "Q515",
-      "Q51929311"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q2088",
-     "label": "1997",
-     "point": [
-      "1997-01-01T00:00:00Z",
-      9
-     ]
-    },
-    {
-     "qid": "Q2485",
-     "label": "1969",
-     "point": [
-      "1969-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 1999
-  },
-  {
    "qid": "Q110811184",
    "title": "Murder in the Alps",
    "places": [
@@ -12567,163 +12295,6 @@
     }
    ],
    "year": 2016
-  },
-  {
-   "qid": "Q110910366",
-   "title": "SimCity 2000: Scenarios Volume I: Great Disasters",
-   "places": [
-    {
-     "qid": "Q11299",
-     "label": "Manhattan",
-     "lat": 40.728333333333,
-     "lon": -73.994166666667,
-     "types": [
-      "Q3301053",
-      "Q408804"
-     ]
-    },
-    {
-     "qid": "Q1297",
-     "label": "Chicago",
-     "lat": 41.881944444444,
-     "lon": -87.627777777778,
-     "types": [
-      "Q110071194",
-      "Q1549591",
-      "Q208511"
-     ]
-    },
-    {
-     "qid": "Q163820",
-     "label": "Silicon Valley",
-     "lat": 37.3775,
-     "lon": -122.0675,
-     "types": [
-      "Q2399626",
-      "Q7631958"
-     ]
-    },
-    {
-     "qid": "Q23556",
-     "label": "Atlanta",
-     "lat": 33.756944444444,
-     "lon": -84.390277777778,
-     "types": [
-      "Q1093829",
-      "Q1549591",
-      "Q62049",
-      "Q76514543"
-     ]
-    },
-    {
-     "qid": "Q26887",
-     "label": "Davenport",
-     "lat": 41.543055555556,
-     "lon": -90.590833333333,
-     "types": [
-      "Q1093829",
-      "Q1549591",
-      "Q62049"
-     ]
-    },
-    {
-     "qid": "Q280557",
-     "label": "Homestead",
-     "lat": 25.4687224,
-     "lon": -80.4775569,
-     "types": [
-      "Q1093829"
-     ]
-    },
-    {
-     "qid": "Q387047",
-     "label": "Malibu",
-     "lat": 34.035,
-     "lon": -118.695,
-     "types": [
-      "Q1093829"
-     ]
-    },
-    {
-     "qid": "Q61",
-     "label": "Washington, D.C.",
-     "lat": 38.895,
-     "lon": -77.036666666667,
-     "types": [
-      "Q1093829",
-      "Q114496982",
-      "Q1549591",
-      "Q15840617",
-      "Q257391",
-      "Q486972"
-     ]
-    },
-    {
-     "qid": "Q6106",
-     "label": "Portland",
-     "lat": 45.515,
-     "lon": -122.67916666667,
-     "types": [
-      "Q1549591",
-      "Q62049",
-      "Q63440326"
-     ]
-    },
-    {
-     "qid": "Q62",
-     "label": "San Francisco",
-     "lat": 37.775,
-     "lon": -122.41944444444,
-     "types": [
-      "Q1093829",
-      "Q13218382",
-      "Q1549591",
-      "Q3559093"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q2024",
-     "label": "2007",
-     "point": [
-      "2007-01-01T00:00:00Z",
-      9
-     ],
-     "start": [
-      "2007-01-01T00:00:00Z",
-      11
-     ],
-     "end": [
-      "2007-12-31T00:00:00Z",
-      11
-     ]
-    },
-    {
-     "qid": "Q2065",
-     "label": "1993",
-     "point": [
-      "1993-01-01T00:00:00Z",
-      9
-     ]
-    },
-    {
-     "qid": "Q3348938",
-     "label": "October 1989",
-     "point": [
-      "1989-10-01T00:00:00Z",
-      10
-     ]
-    },
-    {
-     "qid": "Q69036589",
-     "label": "December 2050",
-     "point": [
-      "2050-12-01T00:00:00Z",
-      10
-     ]
-    }
-   ]
   },
   {
    "qid": "Q110920737",
@@ -12768,7 +12339,7 @@
       9
      ],
      "end": [
-      "1520-01-01T00:00:00Z",
+      "1517-01-01T00:00:00Z",
       9
      ]
     },
@@ -13102,154 +12673,6 @@
    "enwiki": "https://en.wikipedia.org/wiki/Pharaoh:_A_New_Era"
   },
   {
-   "qid": "Q114872386",
-   "title": "Cultist Simulator: The Dancer",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35736",
-     "label": "1920s",
-     "point": [
-      "1920-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1920-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1929-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2018
-  },
-  {
-   "qid": "Q114872391",
-   "title": "Cultist Simulator: The Priest",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35736",
-     "label": "1920s",
-     "point": [
-      "1920-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1920-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1929-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2019
-  },
-  {
-   "qid": "Q114872396",
-   "title": "Cultist Simulator: The Ghoul",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35736",
-     "label": "1920s",
-     "point": [
-      "1920-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1920-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1929-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2019
-  },
-  {
-   "qid": "Q114872401",
-   "title": "Cultist Simulator: The Exile",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35736",
-     "label": "1920s",
-     "point": [
-      "1920-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1920-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1929-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2020
-  },
-  {
    "qid": "Q116195815",
    "title": "Finnish Army Simulator",
    "places": [
@@ -13484,41 +12907,6 @@
      "end": [
       "1615-01-01T00:00:00Z",
       9
-     ]
-    }
-   ],
-   "year": 2023
-  },
-  {
-   "qid": "Q123356551",
-   "title": "Class of '09: The Double Up",
-   "places": [
-    {
-     "qid": "Q30",
-     "label": "United States",
-     "lat": 39.828175,
-     "lon": -98.5795,
-     "types": [
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35024",
-     "label": "2000s",
-     "point": [
-      "2000-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "2000-01-01T00:00:00Z",
-      11
-     ],
-     "end": [
-      "2009-12-31T00:00:00Z",
-      11
      ]
     }
    ],
@@ -14154,42 +13542,6 @@
    "enwiki": "https://en.wikipedia.org/wiki/Kingdom_Come:_Deliverance_II"
   },
   {
-   "qid": "Q125506050",
-   "title": "Cultist Simulator Anthology Edition",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35736",
-     "label": "1920s",
-     "point": [
-      "1920-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1920-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1929-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ]
-  },
-  {
    "qid": "Q125506077",
    "title": "Lorelei and the Laser Eyes",
    "places": [
@@ -14221,43 +13573,6 @@
    "enwiki": "https://en.wikipedia.org/wiki/Lorelei_and_the_Laser_Eyes"
   },
   {
-   "qid": "Q125506354",
-   "title": "Cultist Simulator: Initiate Edition",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35736",
-     "label": "1920s",
-     "point": [
-      "1920-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1920-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1929-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2021
-  },
-  {
    "qid": "Q125587743",
    "title": "Karma: The Dark World",
    "places": [
@@ -14282,43 +13597,6 @@
     }
    ],
    "year": 2025
-  },
-  {
-   "qid": "Q125720634",
-   "title": "BOOK OF HOURS + Soundtrack bundle",
-   "places": [
-    {
-     "qid": "Q145",
-     "label": "United Kingdom",
-     "lat": 54.6,
-     "lon": -2,
-     "types": [
-      "Q112099",
-      "Q20181813",
-      "Q3624078",
-      "Q6256"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q35702",
-     "label": "1930s",
-     "point": [
-      "1930-01-01T00:00:00Z",
-      8
-     ],
-     "start": [
-      "1930-01-01T00:00:00Z",
-      9
-     ],
-     "end": [
-      "1939-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ],
-   "year": 2023
   },
   {
    "qid": "Q126694127",
@@ -14598,39 +13876,6 @@
    "enwiki": "https://en.wikipedia.org/wiki/The_Beekeeper%27s_Picnic"
   },
   {
-   "qid": "Q134741028",
-   "title": "Unheard Screams - King Leopold II's Rule Over The Congo demo",
-   "places": [
-    {
-     "qid": "Q76048",
-     "label": "Congo Free State",
-     "lat": -5.8547222222222,
-     "lon": 13.056666666667,
-     "types": [
-      "Q3024240"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q2056",
-     "label": "1908",
-     "point": [
-      "1908-01-01T00:00:00Z",
-      9
-     ]
-    },
-    {
-     "qid": "Q7821",
-     "label": "1885",
-     "point": [
-      "1885-01-01T00:00:00Z",
-      9
-     ]
-    }
-   ]
-  },
-  {
    "qid": "Q134992215",
    "title": "Liberté",
    "places": [
@@ -14669,62 +13914,6 @@
   {
    "qid": "Q136109318",
    "title": "Hentai - Area 51",
-   "places": [
-    {
-     "qid": "Q177397",
-     "label": "Area 51",
-     "lat": 37.233333333333,
-     "lon": -115.80833333333,
-     "types": [
-      "Q11836899",
-      "Q132753319",
-      "Q695850"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q57350545",
-     "label": "September 20, 2019",
-     "point": [
-      "2019-09-20T00:00:00Z",
-      11
-     ]
-    }
-   ],
-   "year": 2019
-  },
-  {
-   "qid": "Q136116257",
-   "title": "Hentai Area 51 - Soundtrack",
-   "places": [
-    {
-     "qid": "Q177397",
-     "label": "Area 51",
-     "lat": 37.233333333333,
-     "lon": -115.80833333333,
-     "types": [
-      "Q11836899",
-      "Q132753319",
-      "Q695850"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q57350545",
-     "label": "September 20, 2019",
-     "point": [
-      "2019-09-20T00:00:00Z",
-      11
-     ]
-    }
-   ],
-   "year": 2019
-  },
-  {
-   "qid": "Q136116270",
-   "title": "Hentai Area 51 - Adult Patch 18+",
    "places": [
     {
      "qid": "Q177397",
@@ -14849,75 +14038,6 @@
    ],
    "year": 1997,
    "enwiki": "https://en.wikipedia.org/wiki/Zero_Zero_(video_game)"
-  },
-  {
-   "qid": "Q140018987",
-   "title": "Fallout: New Vegas Remake",
-   "places": [
-    {
-     "qid": "Q1227",
-     "label": "Nevada",
-     "lat": 39,
-     "lon": -117,
-     "types": [
-      "Q35657"
-     ]
-    },
-    {
-     "qid": "Q2624848",
-     "label": "Las Vegas Valley",
-     "lat": 36.1318,
-     "lon": -115.184,
-     "types": [
-      "Q1768043"
-     ]
-    },
-    {
-     "qid": "Q816",
-     "label": "Arizona",
-     "lat": 34.286666666667,
-     "lon": -111.65694444444,
-     "types": [
-      "Q35657"
-     ]
-    },
-    {
-     "qid": "Q829",
-     "label": "Utah",
-     "lat": 39.5,
-     "lon": -111.5,
-     "types": [
-      "Q35657"
-     ]
-    },
-    {
-     "qid": "Q99",
-     "label": "California",
-     "lat": 37,
-     "lon": -120,
-     "types": [
-      "Q35657"
-     ]
-    }
-   ],
-   "periods": [
-    {
-     "qid": "Q49832",
-     "label": "23rd century",
-     "point": [
-      "2300-01-01T00:00:00Z",
-      7
-     ],
-     "start": [
-      "2201-01-01T00:00:00Z",
-      11
-     ],
-     "end": [
-      "2300-12-31T00:00:00Z",
-      11
-     ]
-    }
-   ]
   },
   {
    "qid": "Q140087699",

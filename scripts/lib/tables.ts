@@ -2,62 +2,91 @@
 // They are the source of truth (diffable in git, shaped like future database tables).
 // data/atlas.xlsx is an editing view generated from them; see scripts/data-*.ts.
 import { readFileSync, writeFileSync } from 'node:fs';
-import { KINDS } from '../../src/types.ts';
 import { parseCsv, toCsv } from './csv.ts';
 
-export const STATUSES = ['include', 'review', 'exclude'] as const;
-export type Status = (typeof STATUSES)[number];
+export const ROLES = ['setting', 'level', 'arena', 'inspiration', 'strategy'] as const;
+export const PLACE_TYPES = ['landmark', 'city', 'region', 'country'] as const;
+export const TIME_TYPES = ['fixed', 'era', 'sandbox', 'undated'] as const;
+export const CONFIDENCE = ['high', 'medium', 'low'] as const;
+export const STATUSES = ['draft', 'verified', 'excluded'] as const;
 
-export interface GameRow {
-  id: string; status: Status; title: string; source: 'wikidata' | 'curated'; qid?: string;
-  release_year?: number; wikipedia?: string; flags?: string; notes?: string;
+export interface GameRow { id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string; note?: string }
+export interface PlaceRow {
+  id: string; name: string; type: string; parent?: string; wikidata?: string; geonames?: string;
+  lat?: number; lon?: number; bbox?: string; note?: string;
 }
-export interface PeriodRow { game_id: string; label?: string; from: number; to: number; period_qid?: string; note?: string }
-export interface PlacementRow {
-  game_id: string; place: string; place_qid?: string; lat: number; lon: number; kind: string;
-  coarse: 'yes' | 'no'; fictional_name?: string; level_name?: string; bbox?: string;
-  from?: number; to?: number; source_url?: string; note?: string;
+export interface LinkRow {
+  game_id: string; place_id: string; role: string; fictional_name?: string; name_in_game?: string;
+  time_type: string; from?: number; to?: number; era_id?: string; sources?: string;
+  confidence?: string; status: string; flags?: string; note?: string;
 }
-export interface Tables { games: GameRow[]; periods: PeriodRow[]; placements: PlacementRow[] }
+export interface EraRow { id: string; name: string; from: number; to: number; source?: string; note?: string }
+export interface CandidateRow {
+  id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string;
+  lead_source?: string; lead_places?: string; lead_periods?: string; flags?: string; note?: string;
+}
+export interface Tables { games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[] }
 
 export interface Col { key: string; width: number; help: string; list?: readonly string[]; numeric?: boolean }
-export interface TableDef { name: 'Games' | 'Periods' | 'Placements'; file: string; key: keyof Tables; cols: Col[] }
+export interface TableDef { name: string; file: string; key: keyof Tables; cols: Col[] }
 
+// Column meanings follow docs/data-rules.md.
 export const TABLES: TableDef[] = [
   { name: 'Games', file: 'games.csv', key: 'games', cols: [
-    { key: 'id', width: 22, help: 'Unique id. Wikidata games use their QID; curated games use c-<slug>. Do not change once set.' },
-    { key: 'status', width: 10, help: 'include = on the map; review = on the map, still to check; exclude = kept for the record, left off the map.', list: STATUSES },
-    { key: 'title', width: 42, help: 'Display title.' },
-    { key: 'source', width: 10, help: 'Where the row came from.', list: ['wikidata', 'curated'] },
-    { key: 'qid', width: 12, help: 'Wikidata item id of the game, if any.' },
+    { key: 'id', width: 24, help: 'Unique id, lowercase-with-dashes. Do not change once links use it.' },
+    { key: 'title', width: 40, help: 'Display title.' },
+    { key: 'wikidata', width: 12, help: 'Wikidata item of the game (Q...).' },
     { key: 'release_year', width: 8, help: 'First release year.', numeric: true },
-    { key: 'wikipedia', width: 40, help: 'Full English Wikipedia URL.' },
-    { key: 'flags', width: 40, help: 'Audit flags from the review, space separated. Clear them once handled.' },
-    { key: 'notes', width: 60, help: 'Free text: what was checked, sources, doubts.' },
-  ] },
-  { name: 'Periods', file: 'periods.csv', key: 'periods', cols: [
-    { key: 'game_id', width: 22, help: 'Game id from the Games sheet.' },
-    { key: 'label', width: 28, help: 'Name of the period, e.g. "Kamakura period" or "1986".' },
-    { key: 'from', width: 14, help: 'First year, integer. Negative = BCE (-49 is 49 BCE).', numeric: true },
-    { key: 'to', width: 14, help: 'Last year, integer, not before from.', numeric: true },
-    { key: 'period_qid', width: 12, help: 'Wikidata item of the period, if any.' },
-    { key: 'note', width: 50, help: 'Source or reasoning for the dates.' },
-  ] },
-  { name: 'Placements', file: 'placements.csv', key: 'placements', cols: [
-    { key: 'game_id', width: 22, help: 'Game id from the Games sheet.' },
-    { key: 'place', width: 30, help: 'Real-world place name.' },
-    { key: 'place_qid', width: 12, help: 'Wikidata item of the place, if any.' },
-    { key: 'lat', width: 10, help: 'Latitude, decimal degrees.', numeric: true },
-    { key: 'lon', width: 10, help: 'Longitude, decimal degrees.', numeric: true },
-    { key: 'kind', width: 13, help: 'How the game uses the place.', list: KINDS },
-    { key: 'coarse', width: 8, help: 'yes = country/region-level pin, only a rough centroid.', list: ['yes', 'no'] },
-    { key: 'fictional_name', width: 20, help: 'For kind=inspiration: the fictional place, e.g. Vice City.' },
-    { key: 'level_name', width: 26, help: 'Level, mission, track or map name.' },
-    { key: 'bbox', width: 18, help: 'Strategy maps only: west,south,east,north in degrees.' },
-    { key: 'from', width: 8, help: 'Only if this place has its own years; otherwise the game periods apply.', numeric: true },
-    { key: 'to', width: 8, help: 'See from.', numeric: true },
-    { key: 'source_url', width: 40, help: 'Where the place or coordinates come from.' },
+    { key: 'wikipedia', width: 40, help: 'English Wikipedia URL.' },
     { key: 'note', width: 40, help: 'Free text.' },
+  ] },
+  { name: 'Places', file: 'places.csv', key: 'places', cols: [
+    { key: 'id', width: 24, help: 'Unique id, lowercase-with-dashes. One row per real place.' },
+    { key: 'name', width: 28, help: 'Common English name of the place today.' },
+    { key: 'type', width: 10, help: 'Most specific type that fits.', list: PLACE_TYPES },
+    { key: 'parent', width: 20, help: 'Id of the containing place (landmark -> city -> country).' },
+    { key: 'wikidata', width: 12, help: 'Wikidata item. Coordinates must come from this record (or GeoNames).' },
+    { key: 'geonames', width: 10, help: 'GeoNames id, if used instead of or alongside Wikidata.' },
+    { key: 'lat', width: 12, help: 'Latitude from the record. Leave empty if the record has none: the parent location is used, marked approximate.', numeric: true },
+    { key: 'lon', width: 12, help: 'Longitude from the record.', numeric: true },
+    { key: 'bbox', width: 18, help: 'Regions drawn as an area: west,south,east,north.' },
+    { key: 'note', width: 40, help: 'Free text.' },
+  ] },
+  { name: 'Links', file: 'links.csv', key: 'links', cols: [
+    { key: 'game_id', width: 22, help: 'Game id from the Games sheet.' },
+    { key: 'place_id', width: 22, help: 'Place id from the Places sheet.' },
+    { key: 'role', width: 11, help: 'How the game uses the place (rules section 3).', list: ROLES },
+    { key: 'fictional_name', width: 16, help: 'Required for role inspiration: the fictional place, e.g. Vice City.' },
+    { key: 'name_in_game', width: 22, help: 'Level, mission, track or landmark name, or the historical name the game uses.' },
+    { key: 'time_type', width: 10, help: 'Rules section 4.', list: TIME_TYPES },
+    { key: 'from', width: 8, help: 'First year (fixed, or sandbox with known dates). Negative = BCE.', numeric: true },
+    { key: 'to', width: 8, help: 'Last year.', numeric: true },
+    { key: 'era_id', width: 14, help: 'For time_type era (or sandbox): id from the Eras sheet.' },
+    { key: 'sources', width: 50, help: 'One or more URLs, separated by spaces, supporting place, role and time.' },
+    { key: 'confidence', width: 10, help: 'Of the best source (rules section 5).', list: CONFIDENCE },
+    { key: 'status', width: 9, help: 'Only verified links appear on the map.', list: STATUSES },
+    { key: 'flags', width: 14, help: 'Space separated, e.g. needs-time.' },
+    { key: 'note', width: 50, help: 'Quote from the source, reasoning, or the reason for excluded.' },
+  ] },
+  { name: 'Eras', file: 'eras.csv', key: 'eras', cols: [
+    { key: 'id', width: 18, help: 'Unique id.' },
+    { key: 'name', width: 24, help: 'Period name.' },
+    { key: 'from', width: 10, help: 'First year. Negative = BCE.', numeric: true },
+    { key: 'to', width: 10, help: 'Last year.', numeric: true },
+    { key: 'source', width: 40, help: 'Required. PeriodO where it has the period.' },
+    { key: 'note', width: 30, help: 'Free text.' },
+  ] },
+  { name: 'Candidates', file: 'candidates.csv', key: 'candidates', cols: [
+    { key: 'id', width: 14, help: 'Old v0.1 id. Candidates are leads, not data: research one into Games/Links, then delete its row.' },
+    { key: 'title', width: 36, help: 'Title.' },
+    { key: 'wikidata', width: 12, help: 'Wikidata item, if any.' },
+    { key: 'release_year', width: 8, help: 'Release year.', numeric: true },
+    { key: 'wikipedia', width: 36, help: 'Wikipedia URL.' },
+    { key: 'lead_source', width: 14, help: 'Where the leads came from. Not a source for links.' },
+    { key: 'lead_places', width: 50, help: 'Unverified places from Wikidata or v0.1.' },
+    { key: 'lead_periods', width: 36, help: 'Unverified periods from Wikidata or v0.1.' },
+    { key: 'flags', width: 30, help: 'Problems found in the v0.1 review.' },
+    { key: 'note', width: 30, help: 'Free text.' },
   ] },
 ];
 

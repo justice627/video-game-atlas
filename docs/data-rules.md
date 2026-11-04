@@ -26,6 +26,7 @@ A game qualifies when a source says it depicts a real-world place, or a fictiona
 - **Take coordinates from the place's Wikidata or GeoNames record, never from memory.** Store that ID on the place.
 - **Use one row per place.** Paris exists once; every game that uses Paris links to that row.
 - **Use one of four types:** `landmark`, `city`, `region` or `country`. Set the parent for zooming (Eiffel Tower → Paris → France).
+- **No coordinates on the record?** Leave lat/lon empty. The place is drawn at its parent's location and marked approximate (Romanian Carpathians → Romania). Areas such as "the world" get a bounding box instead of a point.
 - **Country pins are a last resort.** Use one only when the source names nothing smaller. They show as approximate pins.
 - **For historical settings, never pin a modern state.** Ancient China is not the People's Republic of China. Use the specific city, or a historical region item that has coordinates. If the place's name has changed, put the place under its modern identity and the name the game uses in the link (Istanbul, shown as "Constantinople").
 
@@ -76,7 +77,7 @@ Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 
 ## 6. Workflow
 
-1. **`candidate`:** a game someone or something suggested, for example from Wikidata or a theme idea. Not shown.
+1. **`candidate`:** a game someone or something suggested, for example from Wikidata or a theme idea. Candidates live in `data/candidates.csv`, with Wikidata's claims as unverified leads. Not shown.
 2. **`draft`:** researched, every link sourced. AI may draft at this stage. Not shown.
 3. **`verified`:** you checked the links against the sources. The only status shown on the map.
 4. **`excluded`:** kept for the record, with a reason. Not shown.

@@ -1,39 +1,38 @@
 import { describe, expect, it } from 'vitest';
 import { readTables, type Tables } from '../scripts/lib/tables.ts';
 import { buildAtlas, validate } from '../scripts/lib/dataset.ts';
-import { visiblePlacements, byGame } from '../src/filter.ts';
-import { KINDS } from '../src/types.ts';
 
 const tables = readTables();
-const atlas = buildAtlas(tables, 'test');
-const find = (t: string) => atlas.games.find((g) => g.title === t);
 const clone = (): Tables => structuredClone(tables);
+const link = (t: Tables, game: string) => t.links.find((l) => l.game_id === game)! as Tables['links'][number] & { _row: number };
+const errorsAfter = (edit: (t: Tables) => void) => { const t = clone(); edit(t); return validate(t).join('\n'); };
 
-describe('dataset (data/*.csv)', () => {
+describe('data/*.csv against docs/data-rules.md', () => {
   it('passes validation', () => expect(validate(tables)).toEqual([]));
-  it('leaves excluded games off the map', () => {
+
+  it('shows only verified links', () => {
+    const atlas = buildAtlas(tables);
+    expect(atlas.games.some((g) => g.id === 'fifa-world-cup-2010')).toBe(false); // all draft
     const t = clone();
-    t.games.find((g) => g.id === 'c-gta-vice-city')!.status = 'exclude';
-    expect(buildAtlas(t, 'x').games.some((g) => g.id === 'c-gta-vice-city')).toBe(false);
+    t.links.filter((l) => l.game_id === 'fifa-world-cup-2010').forEach((l) => (l.status = 'verified'));
+    expect(buildAtlas(t).games.find((g) => g.id === 'fifa-world-cup-2010')!.links).toHaveLength(10);
   });
-  it('reports bad rows with their row number', () => {
-    const t = clone();
-    const p = t.placements[0] as typeof t.placements[0] & { _row: number };
-    p.kind = 'castle';
-    expect(validate(t)).toEqual([`Placements row ${p._row}: kind "castle" must be one of ${KINDS.join(', ')}`]);
+
+  it('places without coordinates use their parent, marked approximate', () => {
+    const h3 = buildAtlas(tables).games.find((g) => g.id === 'hitman-3')!;
+    const carp = h3.links.find((l) => l.place === 'Romanian Carpathians')!;
+    expect([carp.lat, carp.lon, carp.approxPlace]).toEqual([46, 25, true]);
   });
-  it('rejects placements pointing at unknown games', () => {
-    const t = clone();
-    t.placements.push({ game_id: 'nope', place: 'X', lat: 0, lon: 0, kind: 'setting', coarse: 'no' });
-    expect(validate(t).join()).toContain('game_id "nope" is not on the Games sheet');
-  });
-  it('keeps Wikidata periods and flags country pins', () => {
-    expect(find("Assassin's Creed II")!.spans.map((s) => s.from)).toEqual(expect.arrayContaining([1476, 2012]));
-    expect(find('Red Dead Redemption 2')!.placements.every((p) => p.coarse)).toBe(true);
-  });
-  it('shows Vice City and Yakuza 0 in the 1980s', () => {
-    const hits = visiblePlacements(atlas.games, { range: { from: 1980, to: 1989 }, kinds: new Set(KINDS), showCoarse: true });
-    const t = [...byGame(hits).keys()].map((g) => g.title);
-    expect(t).toEqual(expect.arrayContaining(['Grand Theft Auto: Vice City', 'Yakuza 0']));
+
+  it('enforces the rules, naming the row', () => {
+    const vc = link(tables, 'gta-vice-city');
+    expect(errorsAfter((t) => { link(t, 'gta-vice-city').fictional_name = undefined; }))
+      .toContain(`Links row ${vc._row}: role inspiration needs a fictional_name`);
+    expect(errorsAfter((t) => { link(t, 'gta-vice-city').sources = undefined; })).toContain('at least one source URL is required');
+    expect(errorsAfter((t) => { link(t, 'hitman-3').flags = undefined; })).toContain('undated links must carry the needs-time flag');
+    expect(errorsAfter((t) => { link(t, 'assassins-creed-ii').time_type = 'era'; })).toContain('time_type era needs an era_id');
+    expect(errorsAfter((t) => { t.places[0].wikidata = undefined; })).toContain('needs a wikidata or geonames id');
+    expect(errorsAfter((t) => { link(t, 'gta-vice-city').place_id = 'atlantis'; })).toContain('place_id "atlantis" is not on the Places sheet');
+    expect(errorsAfter((t) => { link(t, 'gta-vice-city').status = 'excluded'; link(t, 'gta-vice-city').note = undefined; })).toContain('excluded links need the reason');
   });
 });

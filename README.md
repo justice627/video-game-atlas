@@ -2,9 +2,11 @@
 
 A personal interactive video game atlas on a world map with a dual-knob timeline from ancient history to the future. It maps games, levels, and landmarks to real coordinates, filters by setting type, and generates themed gaming road trips based on topics like an Islamic world tour, eras, regions, or desired playtime.
 
-## v0.1
+## v0.2
 
-One page: a world map, a two-knob timeline from the Big Bang to the year 100,000, and a list of the games in view. It started with 400 games: 355 from Wikidata (every game with both a mappable location and a time period) plus 45 hand-curated ones covering levels, circuits, fictional cities and strategy maps. See [docs/feasibility.md](docs/feasibility.md) for why the data looks like this.
+One page: a world map, a two-knob timeline from the Big Bang to the year 100,000, and a list of the games in view. Only verified data appears. What counts as verified, and how every field is meant, is in [docs/data-rules.md](docs/data-rules.md).
+
+v0.1 (400 games straight from Wikidata plus unverified curation) showed the idea works and the data doesn't: see [docs/review/2026-11-04-review.md](docs/review/2026-11-04-review.md). v0.2 starts over from researched entries.
 
 ```bash
 npm install
@@ -15,33 +17,28 @@ npm run build      # data + typecheck + production build into dist/
 
 ## Data
 
-All game data lives in three CSV tables in `data/`, joined on `game_id`. They are the source of truth: readable in git diffs and shaped like database tables, so a later move to SQLite or Postgres is a direct load.
+Plain CSV tables in `data/` are the source of truth, shaped for a later move to a database.
 
-| File | What it is |
+| File | One row per |
 | --- | --- |
-| `data/games.csv` | One row per game: id, status (`include`, `review`, `exclude`), title, source, Wikidata id, release year, Wikipedia link, audit flags, notes |
-| `data/periods.csv` | One row per time span of a game, with label, years and the Wikidata period id |
-| `data/placements.csv` | One row per map location: place, coordinates, kind, coarse flag, fictional name, level name, strategy-map box, own years, source |
-| `data/atlas.xlsx` | Excel editing view of the three tables, generated from them |
-| `data/wikidata-snapshot.json` | Raw Wikidata pull (CC0), kept for provenance and for adding new games |
+| `games.csv` | game |
+| `places.csv` | real-world place, with Wikidata/GeoNames id and coordinates from that record |
+| `links.csv` | claim that a game uses a place, in a role, at a time, with sources, confidence and status |
+| `eras.csv` | named period with years and a source |
+| `candidates.csv` | game not yet researched, with Wikidata's claims as unverified leads |
+| `atlas.xlsx` | Excel editing view of all of the above, generated |
 
-Editing in Excel:
+Only links with status `verified` reach the map. The build checks every rule it can (sources present, inspiration has a fictional name, undated links flagged `needs-time`, and so on) and names the sheet and row of each problem.
 
 ```bash
-npm run data:export   # tables -> data/atlas.xlsx (only needed if the workbook is missing or stale)
-# edit data/atlas.xlsx in Excel, save
-npm run data:import   # validates, then writes your edits back to the CSV tables
+npm run data:export                       # tables -> data/atlas.xlsx
+npm run data:import                       # data/atlas.xlsx -> tables, after validation
+npm run place:lookup -- "Monteriggioni"   # find a place's Wikidata id
+npm run place:lookup -- Q91228            # its coordinates and type, for places.csv
+npm run fetch:wikidata && npm run sync:wikidata   # refresh the snapshot, add new candidates
 ```
 
-The import refuses files with problems and names the sheet and row of each one. A test fails if `atlas.xlsx` and the CSV tables disagree, so an edited workbook cannot be forgotten. `review` games still show on the map; `exclude` keeps the row for the record and leaves it off the map.
-
-New games from Wikidata: `npm run fetch:wikidata` refreshes the snapshot, then `npm run sync:wikidata` adds games that are not in the tables yet with status `review`. Existing rows are never overwritten.
-
-Years are integers; negative means BCE. A game matches the timeline if any of its periods overlaps the selected range. Hollow pins are country-level or region-level locations whose coordinates are only a rough centroid.
-
-Known data problems are listed in [docs/review/2026-11-04-review.md](docs/review/2026-11-04-review.md) and flagged per game in the `flags` column.
-
-The current view is stored in the URL hash, so views can be shared as links.
+A test fails if `atlas.xlsx` and the CSV tables disagree, so run `data:import` after editing the workbook.
 
 ## Deploy
 
