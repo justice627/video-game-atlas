@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Video Game Atlas</title>
+  <meta name="description" content="Where and when video games are set, on a world map with a timeline.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
+</head>
+<body>
+  <header class="top">
+    <h1>Video Game Atlas <span class="ver">v0.1</span></h1>
+    <span id="meta" class="muted"></span>
+  </header>
+  <main class="layout">
+    <section class="mapwrap">
+      <div id="map" role="region" aria-label="World map of game settings"></div>
+      <div id="timeline" class="timeline"></div>
+    </section>
+    <aside class="panel" aria-label="Games in view">
+      <div id="kinds" class="chips" role="group" aria-label="Placement kinds"></div>
+      <label class="toggle"><input type="checkbox" id="coarse"> Show country-level pins</label>
+      <div id="count" class="count" aria-live="polite"></div>
+      <ul id="list" class="list"></ul>
+    </aside>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+# Hand-curated games that Wikidata cannot place (levels, circuits, fictional cities,
+# strategy maps) or does not hold yet. None of these may duplicate a game in
+# data/wikidata-snapshot.json; fix those through data/overrides.yaml instead.
+#
+# spans: list of [from, to] years (negative = BCE). A placement may carry its own spans.
+# wiki: English Wikipedia page title when it differs from `title`.
+# Coordinates are approximate centroids taken from Wikipedia/Wikidata pages.
+
+# ---------- Levels ----------
+- id: hitman-2016
+  title: Hitman
+  wiki: Hitman (2016 video game)
+  year: 2016
+  spans: [[2016, 2016]]
+  placements:
+    - { place: Paris, lat: 48.8566, lon: 2.3522, kind: level, levelName: The Showstopper }
+    - { place: Amalfi Coast, lat: 40.634, lon: 14.602, kind: inspiration, levelName: World of Tomorrow, fictionalName: Sapienza }
+    - { place: Marrakesh, lat: 31.6295, lon: -7.9811, kind: level, levelName: A Gilded Cage }
+    - { place: Bangkok, lat: 13.7563, lon: 100.5018, kind: level, levelName: Club 27 }
+    - { place: Colorado, lat: 39.55, lon: -105.78, kind: level, levelName: Freedom Fighters, coarse: true }
+    - { place: Hokkaido, lat: 43.2203, lon: 142.8635, kind: level, levelName: Situs Inversus, coarse: true }
+
+- id: hitman-2
+  title: Hitman 2
+  wiki: Hitman 2 (2018 video game)
+  year: 2018
+  spans: [[2018, 2019]]
+  placements:
+    - { place: "Hawke's Bay", lat: -39.49, lon: 176.91, kind: level, levelName: Nightcall }
+    - { place: Miami, lat: 25.7617, lon: -80.1918, kind: level, levelName: The Finish Line }
+    - { place: Colombia, lat: 4.57, lon: -74.3, kind: level, levelName: Three-Headed Serpent, coarse: true }
+    - { place: Mumbai, lat: 19.076, lon: 72.8777, kind: level, levelName: Chasing a Ghost }
+    - { place: Vermont, lat: 44.0, lon: -72.7, kind: level, levelName: Another Life, coarse: true }
+
+- id: hitman-3
+  title: Hitman 3
+  year: 2021
+  spans: [[2020, 2020]]
+  placements:
+    - { place: Dubai, lat: 25.2048, lon: 55.2708, kind: level, levelName: On Top of the World }
+    - { place: Dartmoor, lat: 50.57, lon: -3.92, kind: level, levelName: Death in the Family }
+    - { place: Berlin, lat: 52.52, lon: 13.405, kind: level, levelName: Apex Predator }
+    - { place: Chongqing, lat: 29.563, lon: 106.5516, kind: level, levelName: End of an Era }
+    - { place: Mendoza, lat: -32.8895, lon: -68.8458, kind: level, levelName: The Farewell }
+    - { place: Carpathian Mountains, lat: 45.6, lon: 25.0, kind: level, levelName: Untouchable, coarse: true }
+
+- id: uncharted-2
+  title: "Uncharted 2: Among Thieves"
+  year: 2009
+  spans: [[2009, 2009]]
+  placements:
+    - { place: Istanbul, lat: 41.0082, lon: 28.9784, kind: level, levelName: Topkapi Palace heist }
+    - { place: Borneo, lat: 0.96, lon: 114.55, kind: level, coarse: true }
+    - { place: Kathmandu, lat: 27.7172, lon: 85.324, kind: level, levelName: Urban warfare in Nepal }
+    - { place: Himalayas, lat: 28.0, lon: 86.9, kind: level, levelName: Tibetan village and Shambhala, coarse: true }
+
+- id: uncharted-4
+  title: "Uncharted 4: A Thief's End"
+  year: 2016
+  spans: [[2016, 2016]]
+  placements:
+    - { place: Rome, lat: 41.9028, lon: 12.4964, kind: level, levelName: Italian auction }
+    - { place: Scotland, lat: 56.49, lon: -4.2, kind: level, levelName: St. Dismas cathedral, coarse: true }
+    - { place: Madagascar, lat: -12.27, lon: 49.29, kind: level, levelName: King's Bay }
+    - { place: Panama, lat: 8.538, lon: -80.7821, kind: level, levelName: Prison flashback, coarse: true, spans: [[1999, 2001]] }
+
+- id: thps2
+  title: "Tony Hawk's Pro Skater 2"
+  year: 2000
+  spans: [[2000, 2000]]
+  placements:
+    - { place: Marseille, lat: 43.2965, lon: 5.3698, kind: level }
+    - { place: New York City, lat: 40.7831, lon: -73.9712, kind: level }
+    - { place: Venice Beach, lat: 33.985, lon: -118.4695, kind: level }
+    - { place: Philadelphia, lat: 39.9526, lon: -75.1652, kind: level }
+
+- id: tomb-raider-1996
+  title: Tomb Raider
+  wiki: Tomb Raider (1996 video game)
+  year: 1996
+  spans: [[1996, 1996]]
+  placements:
+    - { place: Vilcabamba, lat: -13.07, lon: -73.41, kind: level, levelName: City of Vilcabamba }
+    - { place: Greece, lat: 39.07, lon: 21.82, kind: level, levelName: "St. Francis' Folly", coarse: true }
+    - { place: Giza, lat: 29.9792, lon: 31.1342, kind: level, levelName: City of Khamoon }
+
+- id: cod-2
+  title: Call of Duty 2
+  year: 2005
+  spans: [[1941, 1945]]
+  placements:
+    - { place: Moscow, lat: 55.7558, lon: 37.6173, kind: level, spans: [[1941, 1941]] }
+    - { place: Stalingrad, lat: 48.708, lon: 44.5133, kind: level, spans: [[1942, 1943]] }
+    - { place: El Alamein, lat: 30.83, lon: 28.95, kind: level, spans: [[1942, 1942]] }
+    - { place: Toujane, lat: 33.47, lon: 10.13, kind: level, spans: [[1943, 1943]] }
+    - { place: Pointe du Hoc, lat: 49.396, lon: -0.989, kind: level, spans: [[1944, 1944]] }
+
+# ---------- Arenas, circuits, sports ----------
+- id: gran-turismo-7
+  title: Gran Turismo 7
+  year: 2022
+  spans: [[2022, 2022]]
+  placements:
+    - { place: Suzuka Circuit, lat: 34.8431, lon: 136.5414, kind: arena }
+    - { place: Nürburgring, lat: 50.3356, lon: 6.9475, kind: arena }
+    - { place: Circuit de Spa-Francorchamps, lat: 50.4372, lon: 5.9714, kind: arena }
+    - { place: Monza, lat: 45.6156, lon: 9.2811, kind: arena }
+    - { place: Laguna Seca, lat: 36.5843, lon: -121.7535, kind: arena }
+    - { place: Tokyo Expressway, lat: 35.6812, lon: 139.7671, kind: arena }
+
+- id: f1-23
+  title: F1 23
+  year: 2023
+  spans: [[2023, 2023]]
+  placements:
+    - { place: Circuit de Monaco, lat: 43.7347, lon: 7.4206, kind: arena }
+    - { place: Silverstone, lat: 52.0786, lon: -1.0169, kind: arena }
+    - { place: Las Vegas Strip Circuit, lat: 36.1147, lon: -115.1728, kind: arena }
+    - { place: Interlagos, lat: -23.7036, lon: -46.6997, kind: arena }
+    - { place: Jeddah Corniche Circuit, lat: 21.6319, lon: 39.1044, kind: arena }
+    - { place: Circuit Zandvoort, lat: 52.3888, lon: 4.5409, kind: arena }
+
+- id: mario-kart-8-deluxe
+  title: Mario Kart 8 Deluxe
+  year: 2017
+  spans: [[2022, 2023]]
+  placements:
+    - { place: Paris, lat: 48.8584, lon: 2.2945, kind: arena, levelName: Paris Promenade }
+    - { place: Tokyo, lat: 35.6586, lon: 139.7454, kind: arena, levelName: Tokyo Blur }
+    - { place: London, lat: 51.5007, lon: -0.1246, kind: arena, levelName: London Loop }
+    - { place: Sydney, lat: -33.8568, lon: 151.2153, kind: arena, levelName: Sydney Sprint }
+    - { place: Singapore, lat: 1.2834, lon: 103.8607, kind: arena, levelName: Singapore Speedway }
+    - { place: Amsterdam, lat: 52.3731, lon: 4.8922, kind: arena, levelName: Amsterdam Drift }
+    - { place: Bangkok, lat: 13.7563, lon: 100.5018, kind: arena, levelName: Bangkok Rush }
+    - { place: New York City, lat: 40.758, lon: -73.9855, kind: arena, levelName: New York Minute }
+    - { place: Athens, lat: 37.9715, lon: 23.7257, kind: arena, levelName: Athens Dash }
+    - { place: Los Angeles, lat: 34.0522, lon: -118.2437, kind: arena, levelName: Los Angeles Laps }
+    - { place: Berlin, lat: 52.5163, lon: 13.3777, kind: arena, levelName: Berlin Byways }
+    - { place: Vancouver, lat: 49.2827, lon: -123.1207, kind: arena, levelName: Vancouver Velocity }
+
+- id: riders-republic
+  title: Riders Republic
+  year: 2021
+  spans: [[2021, 2021]]
+  placements:
+    - { place: Yosemite, lat: 37.8651, lon: -119.5383, kind: arena }
+    - { place: Grand Teton, lat: 43.7904, lon: -110.6818, kind: arena }
+    - { place: Zion, lat: 37.2982, lon: -113.0263, kind: arena }
+    - { place: Bryce Canyon, lat: 37.593, lon: -112.1871, kind: arena }
+    - { place: Canyonlands, lat: 38.3269, lon: -109.8783, kind: arena }
+    - { place: Sequoia, lat: 36.4864, lon: -118.5658, kind: arena }
+    - { place: Mammoth Mountain, lat: 37.6485, lon: -118.9721, kind: arena }
+
+- id: steep
+  title: Steep
+  wiki: Steep (video game)
+  year: 2016
+  spans: [[2016, 2016]]
+  placements:
+    - { place: Mont Blanc, lat: 45.8326, lon: 6.8652, kind: arena }
+    - { place: Matterhorn, lat: 45.9763, lon: 7.6586, kind: arena }
+    - { place: Denali, lat: 63.0692, lon: -151.007, kind: arena }
+
+- id: olympic-games-tokyo-2020
+  title: "Olympic Games Tokyo 2020: The Official Video Game"
+  wiki: "Olympic Games Tokyo 2020 – The Official Video Game"
+  year: 2019
+  spans: [[2020, 2021]]
+  placements:
+    - { place: Japan National Stadium, lat: 35.6779, lon: 139.7147, kind: arena }
+
+- id: forza-horizon-4
+  title: Forza Horizon 4
+  year: 2018
+  spans: [[2018, 2018]]
+  placements:
+    - { place: Edinburgh, lat: 55.9533, lon: -3.1883, kind: setting }
+    - { place: Lake District, lat: 54.4609, lon: -3.0886, kind: setting }
+    - { place: Cotswolds, lat: 51.833, lon: -1.833, kind: setting }
+
+- id: forza-horizon-5
+  title: Forza Horizon 5
+  year: 2021
+  spans: [[2021, 2021]]
+  placements:
+    - { place: Guanajuato, lat: 21.019, lon: -101.2574, kind: setting }
+    - { place: Mulegé, lat: 26.89, lon: -111.98, kind: setting }
+    - { place: Tulum, lat: 20.2114, lon: -87.4654, kind: setting }
+    - { place: Copper Canyon, lat: 27.5, lon: -107.75, kind: setting }
+    - { place: Pico de Orizaba, lat: 19.0303, lon: -97.2686, kind: setting }
+
+# ---------- Fictional cities and their real counterparts ----------
+- id: gta-vice-city
+  title: "Grand Theft Auto: Vice City"
+  year: 2002
+  spans: [[1986, 1986]]
+  placements:
+    - { place: Miami, lat: 25.7617, lon: -80.1918, kind: inspiration, fictionalName: Vice City }
+
+- id: gta-san-andreas
+  title: "Grand Theft Auto: San Andreas"
+  year: 2004
+  spans: [[1992, 1992]]
+  placements:
+    - { place: Los Angeles, lat: 34.0522, lon: -118.2437, kind: inspiration, fictionalName: Los Santos }
+    - { place: San Francisco, lat: 37.7749, lon: -122.4194, kind: inspiration, fictionalName: San Fierro }
+    - { place: Las Vegas, lat: 36.1699, lon: -115.1398, kind: inspiration, fictionalName: Las Venturas }
+
+- id: gta-iv
+  title: Grand Theft Auto IV
+  year: 2008
+  spans: [[2008, 2008]]
+  placements:
+    - { place: New York City, lat: 40.7128, lon: -74.006, kind: inspiration, fictionalName: Liberty City }
+
+- id: gta-v
+  title: Grand Theft Auto V
+  year: 2013
+  spans: [[2013, 2013]]
+  placements:
+    - { place: Los Angeles, lat: 34.0522, lon: -118.2437, kind: inspiration, fictionalName: Los Santos }
+    - { place: Salton Sea, lat: 33.3, lon: -115.8, kind: inspiration, fictionalName: Blaine County }
+
+- id: mafia-2002
+  title: "Mafia: The City of Lost Heaven"
+  wiki: Mafia (video game)
+  year: 2002
+  spans: [[1930, 1938]]
+  placements:
+    - { place: Chicago, lat: 41.8781, lon: -87.6298, kind: inspiration, fictionalName: Lost Heaven }
+
+- id: cyberpunk-2077
+  title: Cyberpunk 2077
+  year: 2020
+  spans: [[2077, 2077]]
+  placements:
+    - { place: Central California coast, lat: 35.3658, lon: -120.8499, kind: inspiration, fictionalName: Night City }
+
+- id: bioshock-infinite
+  title: BioShock Infinite
+  year: 2013
+  spans: [[1912, 1912]]
+  placements:
+    - { place: "Chicago (World's Columbian Exposition)", lat: 41.7906, lon: -87.5836, kind: inspiration, fictionalName: Columbia }
+
+- id: yakuza-0
+  title: Yakuza 0
+  year: 2015
+  spans: [[1988, 1988]]
+  placements:
+    - { place: Kabukichō, lat: 35.6954, lon: 139.7026, kind: inspiration, fictionalName: Kamurochō }
+    - { place: Dōtonbori, lat: 34.6686, lon: 135.5014, kind: inspiration, fictionalName: Sōtenbori }
+
+- id: yakuza-like-a-dragon
+  title: "Yakuza: Like a Dragon"
+  year: 2020
+  spans: [[2019, 2019]]
+  placements:
+    - { place: Isezakichō, lat: 35.4437, lon: 139.628, kind: inspiration, fictionalName: Isezaki Ijinchō }
+
+- id: pentiment
+  title: Pentiment
+  wiki: Pentiment (video game)
+  year: 2022
+  spans: [[1518, 1543]]
+  placements:
+    - { place: Upper Bavaria, lat: 47.6, lon: 11.1, kind: inspiration, fictionalName: Tassing, coarse: true }
+
+# ---------- Real-place settings ----------
+- id: sleeping-dogs
+  title: Sleeping Dogs
+  wiki: Sleeping Dogs (video game)
+  year: 2012
+  spans: [[2012, 2012]]
+  placements:
+    - { place: Hong Kong, lat: 22.3193, lon: 114.1694, kind: setting }
+
+- id: marvels-spider-man
+  title: "Marvel's Spider-Man"
+  wiki: "Spider-Man (2018 video game)"
+  year: 2018
+  spans: [[2018, 2018]]
+  placements:
+    - { place: Manhattan, lat: 40.7831, lon: -73.9712, kind: setting }
+
+- id: watch-dogs-legion
+  title: "Watch Dogs: Legion"
+  year: 2020
+  spans: [[2030, 2040]]
+  placements:
+    - { place: London, lat: 51.5074, lon: -0.1278, kind: setting }
+
+- id: shenmue
+  title: Shenmue
+  wiki: Shenmue (video game)
+  year: 1999
+  spans: [[1986, 1987]]
+  placements:
+    - { place: Yokosuka (Dobuita), lat: 35.2817, lon: 139.6723, kind: setting }
+
+- id: shenmue-ii
+  title: Shenmue II
+  year: 2001
+  spans: [[1987, 1987]]
+  placements:
+    - { place: Hong Kong, lat: 22.3193, lon: 114.1694, kind: setting }
+    - { place: Guilin, lat: 25.2736, lon: 110.29, kind: setting }
+
+- id: la-noire
+  title: L.A. Noire
+  year: 2011
+  spans: [[1947, 1947]]
+  placements:
+    - { place: Los Angeles, lat: 34.0522, lon: -118.2437, kind: setting }
+- id: attentat-1942
+  title: Attentat 1942
+  year: 2017
+  spans: [[1938, 1945]]
+  placements:
+    - { place: Prague, lat: 50.0755, lon: 14.4378, kind: setting }
+
+- id: valiant-hearts
+  title: "Valiant Hearts: The Great War"
+  year: 2014
+  spans: [[1914, 1918]]
+  placements:
+    - { place: Ypres, lat: 50.8503, lon: 2.8853, kind: setting }
+    - { place: Verdun, lat: 49.1599, lon: 5.3844, kind: setting }
+    - { place: Somme, lat: 50.0, lon: 2.7, kind: setting }
+    - { place: Reims, lat: 49.2583, lon: 4.0317, kind: setting }
+
+- id: return-of-the-obra-dinn
+  title: Return of the Obra Dinn
+  year: 2018
+  spans: [[1802, 1807]]
+  placements:
+    - { place: Falmouth, lat: 50.1526, lon: -5.0663, kind: setting }
+
+- id: venba
+  title: Venba
+  year: 2023
+  spans: [[1988, 2008]]
+  placements:
+    - { place: Toronto, lat: 43.6532, lon: -79.3832, kind: setting }
+
+- id: 80-days
+  title: 80 Days
+  wiki: 80 Days (2014 video game)
+  year: 2014
+  spans: [[1872, 1872]]
+  placements:
+    - { place: London (Reform Club), lat: 51.5065, lon: -0.1316, kind: setting }
+    - { place: Suez, lat: 29.9668, lon: 32.5498, kind: setting }
+    - { place: Bombay, lat: 19.076, lon: 72.8777, kind: setting }
+    - { place: Yokohama, lat: 35.4437, lon: 139.638, kind: setting }
+    - { place: San Francisco, lat: 37.7749, lon: -122.4194, kind: setting }
+    - { place: New York City, lat: 40.7128, lon: -74.006, kind: setting }
+
+- id: max-payne-3
+  title: Max Payne 3
+  year: 2012
+  spans: [[2012, 2012]]
+  placements:
+    - { place: São Paulo, lat: -23.5505, lon: -46.6333, kind: setting }
+    - { place: Panama Canal, lat: 9.08, lon: -79.68, kind: setting }
+    - { place: Hoboken, lat: 40.744, lon: -74.0324, kind: setting, spans: [[2003, 2004]] }
+- id: ac-revelations
+  title: "Assassin's Creed Revelations"
+  year: 2011
+  spans: [[1511, 1512]]
+  placements:
+    - { place: Constantinople, lat: 41.0082, lon: 28.9784, kind: setting }
+    - { place: Masyaf, lat: 35.0653, lon: 36.3423, kind: setting }
+    - { place: Cappadocia, lat: 38.6431, lon: 34.8289, kind: setting }
+
+# ---------- Strategy maps ----------
+- id: europa-universalis-iv
+  title: Europa Universalis IV
+  year: 2013
+  spans: [[1444, 1821]]
+  placements:
+    - { place: The world, lat: 48, lon: 10, kind: strategy_map, coarse: true, bbox: [-180, -60, 180, 75] }
+
+- id: crusader-kings-iii
+  title: Crusader Kings III
+  year: 2020
+  spans: [[867, 1453]]
+  placements:
+    - { place: Europe, Africa and Asia to Tibet, lat: 45, lon: 30, kind: strategy_map, coarse: true, bbox: [-25, -10, 105, 72] }
+
+- id: hearts-of-iron-iv
+  title: Hearts of Iron IV
+  year: 2016
+  spans: [[1936, 1948]]
+  placements:
+    - { place: The world, lat: 50, lon: 15, kind: strategy_map, coarse: true, bbox: [-180, -60, 180, 75] }
+
+- id: victoria-3
+  title: Victoria 3
+  year: 2022
+  spans: [[1836, 1936]]
+  placements:
+    - { place: The world, lat: 51.5, lon: -0.1, kind: strategy_map, coarse: true, bbox: [-180, -60, 180, 75] }
+
+- id: civilization-vi
+  title: Civilization VI
+  wiki: "Sid Meier's Civilization VI"
+  year: 2016
+  spans: [[-4000, 2100]]
+  placements:
+    - { place: The world, lat: 30, lon: 35, kind: strategy_map, coarse: true, bbox: [-180, -60, 180, 75] }
+
+- id: medieval-ii-total-war
+  title: "Medieval II: Total War"
+  year: 2006
+  spans: [[1080, 1530]]
+  placements:
+    - { place: Europe and the Middle East, lat: 45, lon: 15, kind: strategy_map, coarse: true, bbox: [-12, 25, 50, 62] }
