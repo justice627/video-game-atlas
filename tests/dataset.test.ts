@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readTables, type Tables } from '../scripts/lib/tables.ts';
 import { buildAtlas, validate } from '../scripts/lib/dataset.ts';
+import { visiblePlacements, groupEntries } from '../src/filter.ts';
 
 const tables = readTables();
 const clone = (): Tables => structuredClone(tables);
@@ -40,5 +41,25 @@ describe('data/*.csv against docs/data-rules.md', () => {
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').place_id = 'atlantis'; })).toContain('place_id "atlantis" is not on the Places sheet');
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').status = 'excluded'; link(t, 'gta-vice-city').note = undefined; })).toContain('excluded links need the reason');
     expect(errorsAfter((t) => { t.games[0].series_id = 'nope'; })).toContain('series_id "nope" is not on the Series sheet');
+  });
+});
+
+describe('FIFA series once verified', () => {
+  const t = structuredClone(tables);
+  t.links.filter((l) => l.game_id.startsWith('fifa-1')).forEach((l) => (l.status = 'verified'));
+  const atlas = buildAtlas(t);
+  const hits = visiblePlacements(atlas.games, { range: { from: 2017, to: 2019 }, roles: new Set(['arena']), showCoarse: true, showStrategy: false });
+  it('collapses shared stadiums into one entry per place', () => {
+    const anfield = groupEntries(hits, true).filter((e) => e[0].link.place === 'Anfield');
+    expect(anfield).toHaveLength(1);
+    expect(anfield[0].map((h) => h.game.title).sort()).toEqual(['FIFA 18', 'FIFA 19']);
+  });
+  it('keeps the World Cup game in its own series', () => {
+    expect(atlas.games.find((g) => g.id === 'fifa-18')!.series).toBe('fifa');
+    expect(tables.games.find((g) => g.id === 'fifa-world-cup-2010')!.series_id).toBe('fifa-world-cup');
+  });
+  it('shows one pin for the Johan Cruyff Arena with both names', () => {
+    const arena = groupEntries(hits, true).find((e) => e[0].link.placeWikidata === 'Q207109')!;
+    expect(arena.map((h) => h.link.nameInGame).sort()).toEqual(['Amsterdam Arena', 'Johan Cruijff ArenA']);
   });
 });

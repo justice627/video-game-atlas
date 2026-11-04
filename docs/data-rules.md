@@ -51,7 +51,8 @@ Each link has exactly one role.
 - **Only licensed venues are included.** A licensed venue is a real stadium, arena, circuit or track that the game shows under its real name, under licence. Generic venues are left out entirely, with no link of any kind. That covers fictional stadiums, and real ones shown under a made-up name because the game lacks the licence. When a source doesn't make clear whether a venue is licensed, it stays out until one does.
 - The venue list needs a source: the game's own list (Wikipedia, official site, or a fan wiki at `low`), or a source for "the game has the tournament's venues" plus one for which venues those were.
 - Venues change names. The place row uses the venue's current name; the link's `name_in_game` holds the name the game uses (place Johan Cruijff ArenA, shown in an older game as "Amsterdam ArenA").
-- Time is the season or tournament the game depicts (2010 for the 2010 World Cup game). If the game names no season, the link is `undated` and flagged `needs-time`.
+- Time is the season or tournament the game depicts (2010 for the 2010 World Cup game).
+- **Season rule for yearly sports games:** unless a source says otherwise, a yearly game depicts the season that starts in its release year (FIFA 19, released 2018, depicts 2018–19). Links dated this way are `fixed`, flagged `inferred-time`, at `low` confidence until a source states the season directly. Games that aren't yearly and name no season are `undated` and flagged `needs-time`.
 
 ## 4. Time
 
@@ -77,6 +78,7 @@ Further rules for time:
 A series groups games that share a franchise, so overlapping places can be shown once. Most yearly sports games put the same stadiums in game after game.
 
 - Each game belongs to at most one series. Use the Wikidata "part of the series" (P179) item when there is one.
+- Tie-ins and successor brands are their own series. The EA World Cup games are not the FIFA series, and EA Sports FC gets its own series rather than continuing FIFA.
 - When one game sits in several series on Wikidata, pick the one people would look for. For example, a World Cup tie-in might belong to EA's FIFA World Cup series rather than the yearly FIFA series. Explain the choice in the game's note.
 - The map can collapse a series: one pin per place for the whole series, listing which games use it and under which name. The games stay separate rows in the data; collapsing is only a view.
 
