@@ -1,14 +1,15 @@
 import { writeFileSync, mkdirSync } from 'node:fs';
+import { readTables } from './lib/tables.ts';
 import { buildAtlas, validate } from './lib/dataset.ts';
 
-const { atlas, report } = buildAtlas();
-for (const d of report.dropped) console.warn(`dropped ${d.qid} ${d.title}: ${d.reason}`);
-const errs = validate(atlas);
+const tables = readTables();
+const errs = validate(tables);
 if (errs.length) {
-  console.error(`Dataset invalid:\n  ${errs.join('\n  ')}`);
+  console.error(`Data has ${errs.length} problem(s). Row numbers match data/*.csv lines and atlas.xlsx rows:\n  ${errs.join('\n  ')}`);
   process.exit(1);
 }
+const atlas = buildAtlas(tables);
 mkdirSync(new URL('../public', import.meta.url), { recursive: true });
 writeFileSync(new URL('../public/atlas.json', import.meta.url), JSON.stringify(atlas));
-const w = atlas.games.filter((g) => g.source === 'wikidata').length;
-console.log(`atlas.json: ${atlas.games.length} games (${w} Wikidata + ${atlas.games.length - w} curated)`);
+const n = (s: string) => tables.links.filter((l) => l.status === s).length;
+console.log(`atlas.json: ${atlas.games.length} games, ${n('verified')} verified links (${n('draft')} draft, ${n('excluded')} excluded not shown); ${tables.candidates.length} candidates`);

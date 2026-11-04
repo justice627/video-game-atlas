@@ -1,42 +1,42 @@
-export type Kind = 'setting' | 'level' | 'arena' | 'inspiration' | 'strategy_map';
-export const KINDS: Kind[] = ['setting', 'level', 'arena', 'inspiration', 'strategy_map'];
-export const KIND_LABEL: Record<Kind, string> = {
-  setting: 'Game setting',
+// Shapes of public/atlas.json. Field meanings follow docs/data-rules.md.
+export type Role = 'setting' | 'level' | 'arena' | 'inspiration' | 'strategy';
+export const ROLES: Role[] = ['setting', 'level', 'arena', 'inspiration', 'strategy'];
+export const ROLE_LABEL: Record<Role, string> = {
+  setting: 'Setting',
   level: 'Level',
-  arena: 'Arena / circuit / map',
+  arena: 'Arena / circuit',
   inspiration: 'Fictional inspiration',
-  strategy_map: 'Strategy map',
+  strategy: 'Strategy map',
 };
+export type TimeType = 'fixed' | 'era' | 'sandbox' | 'undated';
+export type PlaceType = 'landmark' | 'city' | 'region' | 'country';
+export type Confidence = 'high' | 'medium' | 'low';
 
-/** Integer years. Negative = BCE (historical numbering, no year 0: -49 is 49 BCE). */
+/** Integer years. Negative = BCE. */
 export interface Span { from: number; to: number; label?: string }
 
-export interface Placement {
+export interface Link {
   place: string;
-  qid?: string;
+  placeType: PlaceType;
+  placeWikidata?: string;
   lat: number;
   lon: number;
-  kind: Kind;
-  /** Country, continent, empire or similar: the pin is only a rough centroid. */
-  coarse: boolean;
-  /** [west, south, east, north] for strategy maps. */
+  /** The pin is only roughly located: a country or region, or a place shown at its parent's position. */
+  approxPlace: boolean;
+  /** [west, south, east, north] for places drawn as an area. */
   bbox?: [number, number, number, number];
-  /** Name of the fictional place this real location inspired, e.g. "Vice City". */
+  role: Role;
   fictionalName?: string;
-  levelName?: string;
-  /** Overrides the game's spans for this placement when present. */
-  spans?: Span[];
+  nameInGame?: string;
+  timeType: TimeType;
+  /** Absent for undated links and for sandbox links without known years. */
+  span?: Span;
+  sources: string[];
+  confidence: Confidence;
+  flags: string[];
+  note?: string;
 }
 
-export interface Game {
-  id: string;
-  title: string;
-  qid?: string;
-  year?: number;
-  spans: Span[];
-  placements: Placement[];
-  source: 'wikidata' | 'curated';
-  wikipedia?: string;
-}
+export interface Game { id: string; title: string; wikidata?: string; year?: number; wikipedia?: string; links: Link[] }
 
-export interface Atlas { built: string; wikidataFetched: string; games: Game[] }
+export interface Atlas { built: string; games: Game[] }

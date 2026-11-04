@@ -1,122 +1,131 @@
-import { readFileSync } from 'node:fs';
-import yaml from 'js-yaml';
-import type { Atlas, Game, Kind, Placement, Span } from '../../src/types.ts';
-import { KINDS } from '../../src/types.ts';
-import { periodToSpan, type PeriodInput } from './periods.ts';
+// Validates the tables against docs/data-rules.md and builds public/atlas.json from verified links.
+import type { Atlas, Game, Link, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
+import { CONFIDENCE, PLACE_TYPES, ROLES, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
 
-export const TARGET_GAMES = 400;
+type Row = { _row?: number };
+const at = (sheet: string, r: Row) => `${sheet} row ${r._row ?? '?'}`;
+const isInt = (n: unknown): n is number => typeof n === 'number' && Number.isInteger(n);
+const flagsOf = (s?: string) => (s ?? '').split(/\s+/).filter(Boolean);
+const urls = (s?: string) => (s ?? '').split(/\s+/).filter(Boolean);
+const has = (list: readonly string[], v: unknown) => typeof v === 'string' && list.includes(v);
 
-/** Wikidata P31 classes whose coordinates are only a rough centroid. */
-const COARSE_TYPES = new Set([
-  'Q6256', 'Q3624078', 'Q3024240', 'Q5107', 'Q48349', 'Q3336843', 'Q35657', 'Q107390',
-  'Q82794', 'Q1620908', 'Q7275', 'Q10864048', 'Q2418896', 'Q855697', 'Q15642541', 'Q1250464',
-]);
-
-interface SnapGame {
-  qid: string; title: string; year?: number; enwiki?: string;
-  places: { qid: string; label: string; lat: number; lon: number; types: string[] }[];
-  periods: (PeriodInput & { qid: string })[];
-}
-interface Snapshot { fetched: string; games: SnapGame[] }
-interface PeriodOverride { label: string; from: number | 'release'; to: number | 'release' }
-interface Overrides {
-  periods: Record<string, PeriodOverride>;
-  games: Record<string, { drop?: boolean; spans?: [number, number][]; title?: string }>;
-}
-interface CuratedPlacement extends Omit<Placement, 'coarse' | 'spans'> { coarse?: boolean; spans?: [number, number][] }
-interface CuratedGame {
-  id: string; title: string; wiki?: string; year?: number;
-  spans: [number, number][]; placements: CuratedPlacement[];
+export function parseBbox(s: string): [number, number, number, number] | null {
+  const n = s.split(',').map((x) => Number(x.trim()));
+  return n.length === 4 && n.every(Number.isFinite) && n[0] < n[2] && n[1] < n[3] ? (n as [number, number, number, number]) : null;
 }
 
-const read = (rel: string) => readFileSync(new URL(`../../data/${rel}`, import.meta.url), 'utf8');
-const wikiUrl = (title: string) => `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
-const toSpans = (xs: [number, number][]): Span[] => xs.map(([from, to]) => ({ from, to }));
-const slug = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
-
-export interface BuildReport { dropped: { qid: string; title: string; reason: string }[] }
-
-export function buildAtlas(): { atlas: Atlas; report: BuildReport } {
-  const snap = JSON.parse(read('wikidata-snapshot.json')) as Snapshot;
-  const ov = yaml.load(read('overrides.yaml')) as Overrides;
-  const curated = yaml.load(read('curated.yaml')) as CuratedGame[];
-  const report: BuildReport = { dropped: [] };
-
-  const fromWikidata: Game[] = [];
-  for (const g of snap.games) {
-    const patch = ov.games?.[g.qid];
-    if (patch?.drop) { report.dropped.push({ qid: g.qid, title: g.title, reason: 'override: drop' }); continue; }
-    let spans: Span[] = [];
-    if (patch?.spans) spans = toSpans(patch.spans);
-    else {
-      for (const p of g.periods) {
-        const o = ov.periods?.[p.qid];
-        if (o) {
-          const r = (v: number | 'release') => (v === 'release' ? g.year : v);
-          const from = r(o.from), to = r(o.to);
-          if (from !== undefined && to !== undefined) spans.push({ from, to, label: o.label });
-          continue;
-        }
-        const s = periodToSpan(p);
-        if (s) spans.push(s);
-      }
-    }
-    if (!spans.length) { report.dropped.push({ qid: g.qid, title: g.title, reason: 'no resolvable period' }); continue; }
-    fromWikidata.push({
-      id: g.qid, qid: g.qid, title: patch?.title ?? g.title, year: g.year, source: 'wikidata',
-      wikipedia: g.enwiki, spans,
-      placements: g.places.map((p) => ({
-        place: p.label, qid: p.qid, lat: p.lat, lon: p.lon, kind: 'setting' as Kind,
-        coarse: p.types.some((t) => COARSE_TYPES.has(t)),
-      })),
-    });
+/** Where a place is drawn: its own coordinates, else its bbox centre, else the nearest ancestor's. */
+export function locate(placeId: string, places: Map<string, PlaceRow>): { lat: number; lon: number; inherited: boolean } | null {
+  const seen = new Set<string>();
+  let p = places.get(placeId), inherited = false;
+  while (p && !seen.has(p.id)) {
+    seen.add(p.id);
+    if (typeof p.lat === 'number' && typeof p.lon === 'number') return { lat: p.lat, lon: p.lon, inherited };
+    const b = p.bbox ? parseBbox(p.bbox) : null;
+    if (b) return { lat: (b[1] + b[3]) / 2, lon: (b[0] + b[2]) / 2, inherited };
+    p = p.parent ? places.get(p.parent) : undefined;
+    inherited = true;
   }
-
-  const fromCurated: Game[] = curated.map((c) => ({
-    id: `c-${c.id}`, title: c.title, year: c.year, source: 'curated',
-    wikipedia: wikiUrl(c.wiki ?? c.title), spans: toSpans(c.spans),
-    placements: c.placements.map(({ spans, coarse, ...p }) => ({
-      ...p, coarse: coarse ?? false, ...(spans ? { spans: toSpans(spans) } : {}),
-    })),
-  }));
-
-  const games = [...fromWikidata, ...fromCurated].sort((a, b) => a.title.localeCompare(b.title));
-  return {
-    atlas: { built: new Date().toISOString().slice(0, 10), wikidataFetched: snap.fetched, games },
-    report,
-  };
+  return null;
 }
 
-/** Returns a list of problems; empty means valid. */
-export function validate(atlas: Atlas): string[] {
+/** Problems with the data. Empty means valid. */
+export function validate(t: Tables): string[] {
   const errs: string[] = [];
-  const { games } = atlas;
-  if (games.length !== TARGET_GAMES) errs.push(`expected ${TARGET_GAMES} games, got ${games.length}`);
-  const ids = new Set<string>();
-  const titles = new Map<string, string>();
-  const kinds = new Set<Kind>();
-  const checkSpan = (where: string, s: Span) => {
-    if (!Number.isInteger(s.from) || !Number.isInteger(s.to)) errs.push(`${where}: non-integer span`);
-    if (s.from > s.to) errs.push(`${where}: span from > to (${s.from} > ${s.to})`);
+  const unique = <T extends { id: string } & Row>(sheet: string, rows: T[]) => {
+    const m = new Map<string, T>();
+    for (const r of rows) {
+      if (!r.id) errs.push(`${at(sheet, r)}: id is empty`);
+      else if (m.has(r.id)) errs.push(`${at(sheet, r)}: id "${r.id}" already used on ${at(sheet, m.get(r.id)!)}`);
+      else m.set(r.id, r);
+    }
+    return m;
   };
-  for (const g of games) {
-    if (ids.has(g.id)) errs.push(`duplicate id ${g.id}`);
-    ids.add(g.id);
-    const t = slug(g.title);
-    if (titles.has(t)) errs.push(`duplicate title "${g.title}" (${titles.get(t)} and ${g.id})`);
-    titles.set(t, g.id);
-    if (!g.spans.length) errs.push(`${g.id}: no spans`);
-    g.spans.forEach((s) => checkSpan(g.id, s));
-    if (!g.placements.length) errs.push(`${g.id}: no placements`);
-    for (const p of g.placements) {
-      kinds.add(p.kind);
-      if (!KINDS.includes(p.kind)) errs.push(`${g.id}/${p.place}: bad kind ${p.kind}`);
-      if (!(p.lat >= -90 && p.lat <= 90 && p.lon >= -180 && p.lon <= 180)) errs.push(`${g.id}/${p.place}: bad coords`);
-      p.spans?.forEach((s) => checkSpan(`${g.id}/${p.place}`, s));
-      if (p.kind === 'inspiration' && !p.fictionalName) errs.push(`${g.id}/${p.place}: inspiration without fictionalName`);
-      if (p.bbox && !(p.bbox[0] < p.bbox[2] && p.bbox[1] < p.bbox[3])) errs.push(`${g.id}/${p.place}: bad bbox`);
+  const games = unique('Games', t.games as (Tables['games'][number] & Row)[]);
+  const places = unique('Places', t.places as (PlaceRow & Row)[]);
+  const eras = unique('Eras', t.eras as (Tables['eras'][number] & Row)[]);
+
+  for (const g of t.games as (Tables['games'][number] & Row)[]) {
+    if (!g.title) errs.push(`${at('Games', g)}: title is empty`);
+    if (g.release_year !== undefined && !isInt(g.release_year)) errs.push(`${at('Games', g)}: release_year must be a whole number`);
+    if (g.wikidata && !/^Q\d+$/.test(g.wikidata)) errs.push(`${at('Games', g)}: wikidata must look like Q123`);
+  }
+  for (const p of t.places as (PlaceRow & Row)[]) {
+    const w = at('Places', p);
+    if (!p.name) errs.push(`${w}: name is empty`);
+    if (!has(PLACE_TYPES, p.type)) errs.push(`${w}: type "${p.type ?? ''}" must be one of ${PLACE_TYPES.join(', ')}`);
+    if (!p.wikidata && !p.geonames) errs.push(`${w}: needs a wikidata or geonames id (coordinates must come from a record)`);
+    if (p.wikidata && !/^Q\d+$/.test(p.wikidata)) errs.push(`${w}: wikidata must look like Q123`);
+    if (p.parent && !places.has(p.parent)) errs.push(`${w}: parent "${p.parent}" is not on the Places sheet`);
+    const hasLat = p.lat !== undefined, hasLon = p.lon !== undefined;
+    if (hasLat !== hasLon) errs.push(`${w}: give both lat and lon, or neither`);
+    if (hasLat && !(p.lat! >= -90 && p.lat! <= 90)) errs.push(`${w}: lat must be between -90 and 90`);
+    if (hasLon && !(p.lon! >= -180 && p.lon! <= 180)) errs.push(`${w}: lon must be between -180 and 180`);
+    if (p.bbox && !parseBbox(p.bbox)) errs.push(`${w}: bbox must be west,south,east,north with west<east and south<north`);
+    if (places.has(p.id) && !locate(p.id, places)) errs.push(`${w}: no coordinates, bbox or parent with coordinates, so it cannot be drawn`);
+  }
+  for (const e of t.eras as (Tables['eras'][number] & Row)[]) {
+    if (!isInt(e.from) || !isInt(e.to) || e.from > e.to) errs.push(`${at('Eras', e)}: from/to must be whole years, from not after to`);
+    if (!e.source) errs.push(`${at('Eras', e)}: source is required`);
+  }
+  for (const l of t.links as (Tables['links'][number] & Row)[]) {
+    const w = at('Links', l);
+    const flags = flagsOf(l.flags);
+    const years = l.from !== undefined || l.to !== undefined;
+    const yearsOk = isInt(l.from) && isInt(l.to) && l.from <= l.to;
+    if (!games.has(l.game_id)) errs.push(`${w}: game_id "${l.game_id ?? ''}" is not on the Games sheet`);
+    if (!places.has(l.place_id)) errs.push(`${w}: place_id "${l.place_id ?? ''}" is not on the Places sheet`);
+    if (!has(ROLES, l.role)) errs.push(`${w}: role "${l.role ?? ''}" must be one of ${ROLES.join(', ')}`);
+    if (l.role === 'inspiration' && !l.fictional_name) errs.push(`${w}: role inspiration needs a fictional_name`);
+    if (!has(STATUSES, l.status)) errs.push(`${w}: status "${l.status ?? ''}" must be one of ${STATUSES.join(', ')}`);
+    if (l.status === 'excluded' && !l.note) errs.push(`${w}: excluded links need the reason in note`);
+    if (l.status === 'excluded') continue; // kept for the record; nothing else to check
+    if (!urls(l.sources).length) errs.push(`${w}: at least one source URL is required`);
+    for (const u of urls(l.sources)) if (!/^https?:\/\//.test(u)) errs.push(`${w}: source "${u}" is not a URL`);
+    if (!has(CONFIDENCE, l.confidence)) errs.push(`${w}: confidence "${l.confidence ?? ''}" must be one of ${CONFIDENCE.join(', ')}`);
+    if (l.era_id && !eras.has(l.era_id)) errs.push(`${w}: era_id "${l.era_id}" is not on the Eras sheet`);
+    if (years && !yearsOk) errs.push(`${w}: from/to must both be whole years, from not after to`);
+    switch (l.time_type) {
+      case 'fixed': if (!yearsOk) errs.push(`${w}: time_type fixed needs from and to`); break;
+      case 'era': if (!l.era_id) errs.push(`${w}: time_type era needs an era_id`); if (years) errs.push(`${w}: time_type era takes its years from the era; leave from/to empty`); break;
+      case 'sandbox': if (!yearsOk && !l.era_id && !flags.includes('needs-time')) errs.push(`${w}: time_type sandbox needs from/to, an era_id, or the needs-time flag`); break;
+      case 'undated': if (years || l.era_id) errs.push(`${w}: time_type undated takes no years or era`); if (!flags.includes('needs-time')) errs.push(`${w}: undated links must carry the needs-time flag`); break;
+      default: errs.push(`${w}: time_type "${l.time_type ?? ''}" must be one of ${TIME_TYPES.join(', ')}`);
     }
   }
-  for (const k of KINDS) if (!kinds.has(k)) errs.push(`no placement of kind ${k}`);
   return errs;
+}
+
+/** Verified links only, grouped by game. Assumes validate() returned no errors. */
+export function buildAtlas(t: Tables): Atlas {
+  const places = new Map(t.places.map((p) => [p.id, p]));
+  const eras = new Map(t.eras.map((e) => [e.id, e]));
+  const byGame = new Map<string, Link[]>();
+  for (const l of t.links) {
+    if (l.status !== 'verified') continue;
+    const p = places.get(l.place_id)!;
+    const loc = locate(p.id, places)!;
+    const era = l.era_id ? eras.get(l.era_id) : undefined;
+    const span = l.from !== undefined ? { from: l.from, to: l.to! } : era ? { from: era.from, to: era.to, label: era.name } : undefined;
+    const link: Link = {
+      place: p.name, placeType: p.type as PlaceType, lat: loc.lat, lon: loc.lon,
+      approxPlace: loc.inherited || p.type === 'country' || p.type === 'region',
+      role: l.role as Role, timeType: l.time_type as TimeType,
+      sources: urls(l.sources), confidence: l.confidence as Confidence, flags: flagsOf(l.flags),
+      ...(p.wikidata ? { placeWikidata: p.wikidata } : {}),
+      ...(p.bbox ? { bbox: parseBbox(p.bbox)! } : {}),
+      ...(l.fictional_name ? { fictionalName: l.fictional_name } : {}),
+      ...(l.name_in_game ? { nameInGame: l.name_in_game } : {}),
+      ...(span ? { span } : {}),
+      ...(l.note ? { note: l.note } : {}),
+    };
+    byGame.set(l.game_id, [...(byGame.get(l.game_id) ?? []), link]);
+  }
+  const games: Game[] = t.games.filter((g) => byGame.has(g.id)).map((g) => ({
+    id: g.id, title: g.title, links: byGame.get(g.id)!,
+    ...(g.wikidata ? { wikidata: g.wikidata } : {}), ...(g.release_year ? { year: g.release_year } : {}),
+    ...(g.wikipedia ? { wikipedia: g.wikipedia } : {}),
+  }));
+  games.sort((a, b) => a.title.localeCompare(b.title));
+  return { built: new Date().toISOString().slice(0, 10), games };
 }

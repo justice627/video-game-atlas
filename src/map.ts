@@ -1,16 +1,16 @@
 import maplibregl, { type GeoJSONSource, type MapGeoJSONFeature, type StyleSpecification } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import type { Hit } from './filter.ts';
-import type { Kind } from './types.ts';
-import { KIND_LABEL } from './types.ts';
+import type { Role } from './types.ts';
+import { ROLE_LABEL } from './types.ts';
 import { formatSpan, formatYear } from './timeline.ts';
 
-export const KIND_COLOR: Record<Kind, string> = {
+export const ROLE_COLOR: Record<Role, string> = {
   setting: '#2a6fdb',
   level: '#d9771e',
   arena: '#1f9d63',
   inspiration: '#9b45c2',
-  strategy_map: '#d23c4b',
+  strategy: '#d23c4b',
 };
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
@@ -34,20 +34,26 @@ async function loadStyle(): Promise<string | StyleSpecification> {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
+const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
+
 function hitHtml(h: Hit): string {
-  const p = h.placement;
-  const where = p.fictionalName
-    ? `${esc(p.fictionalName)} <span class="muted">(based on ${esc(p.place)})</span>`
-    : esc(p.place);
+  const l = h.link;
+  const where = l.fictionalName
+    ? `${esc(l.fictionalName)} <span class="muted">(based on ${esc(l.place)})</span>`
+    : esc(l.place);
   const title = h.game.wikipedia
     ? `<a href="${esc(h.game.wikipedia)}" target="_blank" rel="noopener">${esc(h.game.title)}</a>`
     : esc(h.game.title);
+  const when = l.span
+    ? (l.span.label ? `${esc(l.span.label)} (${formatSpan(l.span)})` : formatSpan(l.span))
+    : l.timeType === 'sandbox' ? 'Across eras (sandbox), years not yet set' : 'Not dated';
+  const sources = l.sources.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(host(u))}</a>`).join(', ');
   return `<div class="pop-item">
     <div class="pop-title">${title}${h.game.year ? ` <span class="muted">(${h.game.year})</span>` : ''}</div>
-    <div><span class="dot" style="background:${KIND_COLOR[p.kind]}"></span>${KIND_LABEL[p.kind]}${p.levelName ? `: ${esc(p.levelName)}` : ''}</div>
-    <div>${where}${p.coarse ? ' <span class="muted">· approximate pin</span>' : ''}</div>
-    <div class="muted">Set in ${h.matched.map((s) => esc(s.label && !/^-?\d+$/.test(s.label) ? `${s.label} (${formatSpan(s)})` : formatSpan(s))).join(', ')}</div>
-    ${h.game.qid ? `<div class="muted"><a href="https://www.wikidata.org/wiki/${h.game.qid}" target="_blank" rel="noopener">Wikidata ${h.game.qid}</a></div>` : '<div class="muted">Hand-curated</div>'}
+    <div><span class="dot" style="background:${ROLE_COLOR[l.role]}"></span>${ROLE_LABEL[l.role]}${l.nameInGame ? `: ${esc(l.nameInGame)}` : ''}</div>
+    <div>${where}${l.approxPlace ? ' <span class="muted">· approximate location</span>' : ''}</div>
+    <div class="muted">${l.timeType === 'sandbox' ? when : `Set in ${when}`}${h.approxTime && l.span ? ' · broad period' : ''}</div>
+    <div class="muted">Source (${l.confidence} confidence): ${sources}</div>
   </div>`;
 }
 
@@ -77,8 +83,8 @@ export function mountMap(container: HTMLElement): AtlasMap {
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     map.on('load', () => {
       map.addSource('regions', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-      map.addLayer({ id: 'regions-fill', type: 'fill', source: 'regions', paint: { 'fill-color': KIND_COLOR.strategy_map, 'fill-opacity': 0.05 } });
-      map.addLayer({ id: 'regions-line', type: 'line', source: 'regions', paint: { 'line-color': KIND_COLOR.strategy_map, 'line-opacity': 0.5, 'line-dasharray': [2, 2] } });
+      map.addLayer({ id: 'regions-fill', type: 'fill', source: 'regions', paint: { 'fill-color': ROLE_COLOR.strategy, 'fill-opacity': 0.05 } });
+      map.addLayer({ id: 'regions-line', type: 'line', source: 'regions', paint: { 'line-color': ROLE_COLOR.strategy, 'line-opacity': 0.5, 'line-dasharray': [2, 2] } });
 
       map.addSource('pins', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 36, clusterMaxZoom: 12 });
       map.addLayer({
@@ -93,7 +99,7 @@ export function mountMap(container: HTMLElement): AtlasMap {
         layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12 },
         paint: { 'text-color': '#fff' },
       });
-      const color: maplibregl.ExpressionSpecification = ['match', ['get', 'kind'], ...Object.entries(KIND_COLOR).flat(), '#666'] as never;
+      const color: maplibregl.ExpressionSpecification = ['match', ['get', 'kind'], ...Object.entries(ROLE_COLOR).flat(), '#666'] as never;
       map.addLayer({
         id: 'pins', type: 'circle', source: 'pins', filter: ['!', ['has', 'point_count']],
         paint: {
@@ -129,16 +135,17 @@ export function mountMap(container: HTMLElement): AtlasMap {
   const toGeo = (hs: Hit[]) => ({
     pins: {
       type: 'FeatureCollection' as const,
-      features: hs.map((h, i) => ({
+      // Areas (bbox) are drawn as regions only: their centre is not a place, so no pin.
+      features: hs.flatMap((h, i) => (h.link.bbox ? [] : [{
         type: 'Feature' as const,
-        geometry: { type: 'Point' as const, coordinates: [h.placement.lon, h.placement.lat] },
-        properties: { i, kind: h.placement.kind, coarse: h.placement.coarse },
-      })),
+        geometry: { type: 'Point' as const, coordinates: [h.link.lon, h.link.lat] },
+        properties: { i, kind: h.link.role, coarse: h.link.approxPlace || h.approxTime },
+      }])),
     },
     regions: {
       type: 'FeatureCollection' as const,
-      features: hs.filter((h) => h.placement.bbox).map((h) => {
-        const [w, s, e, n] = h.placement.bbox!;
+      features: hs.filter((h) => h.link.bbox).map((h) => {
+        const [w, s, e, n] = h.link.bbox!;
         return {
           type: 'Feature' as const, properties: {},
           geometry: { type: 'Polygon' as const, coordinates: [[[w, s], [e, s], [e, n], [w, n], [w, s]]] },
@@ -160,8 +167,15 @@ export function mountMap(container: HTMLElement): AtlasMap {
     },
     focus(gameHits) {
       void ready.then(() => {
-        const pts = gameHits.map((h) => [h.placement.lon, h.placement.lat] as [number, number]);
-        if (pts.length === 1) map.flyTo({ center: pts[0], zoom: Math.max(map.getZoom(), gameHits[0].placement.coarse ? 3 : 8) });
+        const area = gameHits.find((h) => h.link.bbox);
+        if (area) {
+          const [w, so, e, n] = area.link.bbox!;
+          map.fitBounds([[w, so], [e, n]], { padding: 20 });
+          showPopup([area.link.lon, area.link.lat], [area]);
+          return;
+        }
+        const pts = gameHits.map((h) => [h.link.lon, h.link.lat] as [number, number]);
+        if (pts.length === 1) map.flyTo({ center: pts[0], zoom: Math.max(map.getZoom(), gameHits[0].link.approxPlace ? 3 : 8) });
         else {
           const b = new maplibregl.LngLatBounds(pts[0], pts[0]);
           pts.forEach((p) => b.extend(p));
