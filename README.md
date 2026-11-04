@@ -28,3 +28,7 @@ Years are integers; negative means BCE. A game matches the timeline if any of it
 Known v0.1 limits: Wikidata games all count as "Game setting" (sports games included), and Wikidata does not say which period belongs to which location.
 
 The current view is stored in the URL hash, so views can be shared as links.
+
+## Deploy
+
+Hosted on Netlify via `netlify.toml`: pushes to `main` deploy to production, pull requests get deploy previews. The build runs the tests first.
