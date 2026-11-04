@@ -48,7 +48,7 @@ Each link has exactly one role.
 **Venues in sports and racing games:**
 
 - Every licensed real venue in the game gets its own `arena` link, at the venue itself (type `landmark`), never at its city.
-- Generic, fictional or unlicensed stadiums get no link.
+- **Only licensed venues are included.** A licensed venue is a real stadium, arena, circuit or track that the game shows under its real name, under licence. Generic venues are left out entirely, with no link of any kind. That covers fictional stadiums, and real ones shown under a made-up name because the game lacks the licence. When a source doesn't make clear whether a venue is licensed, it stays out until one does.
 - The venue list needs a source: the game's own list (Wikipedia, official site, or a fan wiki at `low`), or a source for "the game has the tournament's venues" plus one for which venues those were.
 - Venues change names. The place row uses the venue's current name; the link's `name_in_game` holds the name the game uses (place Johan Cruijff ArenA, shown in an older game as "Amsterdam ArenA").
 - Time is the season or tournament the game depicts (2010 for the 2010 World Cup game). If the game names no season, the link is `undated` and flagged `needs-time`.
