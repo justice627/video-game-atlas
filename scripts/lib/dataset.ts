@@ -1,122 +1,82 @@
-import { readFileSync } from 'node:fs';
-import yaml from 'js-yaml';
+// Builds public/atlas.json from the canonical tables and validates them.
 import type { Atlas, Game, Kind, Placement, Span } from '../../src/types.ts';
 import { KINDS } from '../../src/types.ts';
-import { periodToSpan, type PeriodInput } from './periods.ts';
+import { STATUSES, type Tables } from './tables.ts';
 
-export const TARGET_GAMES = 400;
+type Row = { _row?: number };
+const at = (sheet: string, r: Row) => `${sheet} row ${r._row ?? '?'}`;
+const isInt = (n: unknown) => typeof n === 'number' && Number.isInteger(n);
 
-/** Wikidata P31 classes whose coordinates are only a rough centroid. */
-const COARSE_TYPES = new Set([
-  'Q6256', 'Q3624078', 'Q3024240', 'Q5107', 'Q48349', 'Q3336843', 'Q35657', 'Q107390',
-  'Q82794', 'Q1620908', 'Q7275', 'Q10864048', 'Q2418896', 'Q855697', 'Q15642541', 'Q1250464',
-]);
-
-interface SnapGame {
-  qid: string; title: string; year?: number; enwiki?: string;
-  places: { qid: string; label: string; lat: number; lon: number; types: string[] }[];
-  periods: (PeriodInput & { qid: string })[];
-}
-interface Snapshot { fetched: string; games: SnapGame[] }
-interface PeriodOverride { label: string; from: number | 'release'; to: number | 'release' }
-interface Overrides {
-  periods: Record<string, PeriodOverride>;
-  games: Record<string, { drop?: boolean; spans?: [number, number][]; title?: string }>;
-}
-interface CuratedPlacement extends Omit<Placement, 'coarse' | 'spans'> { coarse?: boolean; spans?: [number, number][] }
-interface CuratedGame {
-  id: string; title: string; wiki?: string; year?: number;
-  spans: [number, number][]; placements: CuratedPlacement[];
+export function parseBbox(s: string): [number, number, number, number] | null {
+  const n = s.split(',').map((x) => Number(x.trim()));
+  return n.length === 4 && n.every(Number.isFinite) && n[0] < n[2] && n[1] < n[3] ? (n as [number, number, number, number]) : null;
 }
 
-const read = (rel: string) => readFileSync(new URL(`../../data/${rel}`, import.meta.url), 'utf8');
-const wikiUrl = (title: string) => `https://en.wikipedia.org/wiki/${encodeURIComponent(title.replace(/ /g, '_'))}`;
-const toSpans = (xs: [number, number][]): Span[] => xs.map(([from, to]) => ({ from, to }));
-const slug = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '');
-
-export interface BuildReport { dropped: { qid: string; title: string; reason: string }[] }
-
-export function buildAtlas(): { atlas: Atlas; report: BuildReport } {
-  const snap = JSON.parse(read('wikidata-snapshot.json')) as Snapshot;
-  const ov = yaml.load(read('overrides.yaml')) as Overrides;
-  const curated = yaml.load(read('curated.yaml')) as CuratedGame[];
-  const report: BuildReport = { dropped: [] };
-
-  const fromWikidata: Game[] = [];
-  for (const g of snap.games) {
-    const patch = ov.games?.[g.qid];
-    if (patch?.drop) { report.dropped.push({ qid: g.qid, title: g.title, reason: 'override: drop' }); continue; }
-    let spans: Span[] = [];
-    if (patch?.spans) spans = toSpans(patch.spans);
-    else {
-      for (const p of g.periods) {
-        const o = ov.periods?.[p.qid];
-        if (o) {
-          const r = (v: number | 'release') => (v === 'release' ? g.year : v);
-          const from = r(o.from), to = r(o.to);
-          if (from !== undefined && to !== undefined) spans.push({ from, to, label: o.label });
-          continue;
-        }
-        const s = periodToSpan(p);
-        if (s) spans.push(s);
-      }
-    }
-    if (!spans.length) { report.dropped.push({ qid: g.qid, title: g.title, reason: 'no resolvable period' }); continue; }
-    fromWikidata.push({
-      id: g.qid, qid: g.qid, title: patch?.title ?? g.title, year: g.year, source: 'wikidata',
-      wikipedia: g.enwiki, spans,
-      placements: g.places.map((p) => ({
-        place: p.label, qid: p.qid, lat: p.lat, lon: p.lon, kind: 'setting' as Kind,
-        coarse: p.types.some((t) => COARSE_TYPES.has(t)),
-      })),
-    });
-  }
-
-  const fromCurated: Game[] = curated.map((c) => ({
-    id: `c-${c.id}`, title: c.title, year: c.year, source: 'curated',
-    wikipedia: wikiUrl(c.wiki ?? c.title), spans: toSpans(c.spans),
-    placements: c.placements.map(({ spans, coarse, ...p }) => ({
-      ...p, coarse: coarse ?? false, ...(spans ? { spans: toSpans(spans) } : {}),
-    })),
-  }));
-
-  const games = [...fromWikidata, ...fromCurated].sort((a, b) => a.title.localeCompare(b.title));
-  return {
-    atlas: { built: new Date().toISOString().slice(0, 10), wikidataFetched: snap.fetched, games },
-    report,
-  };
-}
-
-/** Returns a list of problems; empty means valid. */
-export function validate(atlas: Atlas): string[] {
+/** Problems that make the data unusable. Empty means valid. */
+export function validate(t: Tables): string[] {
   const errs: string[] = [];
-  const { games } = atlas;
-  if (games.length !== TARGET_GAMES) errs.push(`expected ${TARGET_GAMES} games, got ${games.length}`);
-  const ids = new Set<string>();
-  const titles = new Map<string, string>();
-  const kinds = new Set<Kind>();
-  const checkSpan = (where: string, s: Span) => {
-    if (!Number.isInteger(s.from) || !Number.isInteger(s.to)) errs.push(`${where}: non-integer span`);
-    if (s.from > s.to) errs.push(`${where}: span from > to (${s.from} > ${s.to})`);
-  };
-  for (const g of games) {
-    if (ids.has(g.id)) errs.push(`duplicate id ${g.id}`);
-    ids.add(g.id);
-    const t = slug(g.title);
-    if (titles.has(t)) errs.push(`duplicate title "${g.title}" (${titles.get(t)} and ${g.id})`);
-    titles.set(t, g.id);
-    if (!g.spans.length) errs.push(`${g.id}: no spans`);
-    g.spans.forEach((s) => checkSpan(g.id, s));
-    if (!g.placements.length) errs.push(`${g.id}: no placements`);
-    for (const p of g.placements) {
-      kinds.add(p.kind);
-      if (!KINDS.includes(p.kind)) errs.push(`${g.id}/${p.place}: bad kind ${p.kind}`);
-      if (!(p.lat >= -90 && p.lat <= 90 && p.lon >= -180 && p.lon <= 180)) errs.push(`${g.id}/${p.place}: bad coords`);
-      p.spans?.forEach((s) => checkSpan(`${g.id}/${p.place}`, s));
-      if (p.kind === 'inspiration' && !p.fictionalName) errs.push(`${g.id}/${p.place}: inspiration without fictionalName`);
-      if (p.bbox && !(p.bbox[0] < p.bbox[2] && p.bbox[1] < p.bbox[3])) errs.push(`${g.id}/${p.place}: bad bbox`);
-    }
+  const ids = new Map<string, string>();
+  for (const g of t.games as (Tables['games'][number] & Row)[]) {
+    if (!g.id) { errs.push(`${at('Games', g)}: id is empty`); continue; }
+    if (ids.has(g.id)) errs.push(`${at('Games', g)}: id ${g.id} also used on ${ids.get(g.id)}`);
+    ids.set(g.id, at('Games', g));
+    if (!STATUSES.includes(g.status)) errs.push(`${at('Games', g)}: status "${g.status ?? ''}" must be one of ${STATUSES.join(', ')}`);
+    if (!g.title) errs.push(`${at('Games', g)}: title is empty`);
+    if (g.source !== 'wikidata' && g.source !== 'curated') errs.push(`${at('Games', g)}: source must be wikidata or curated`);
+    if (g.release_year !== undefined && !isInt(g.release_year)) errs.push(`${at('Games', g)}: release_year must be a whole number`);
   }
-  for (const k of KINDS) if (!kinds.has(k)) errs.push(`no placement of kind ${k}`);
+  const live = new Set(t.games.filter((g) => g.status !== 'exclude').map((g) => g.id));
+  const hasPeriod = new Set<string>(), hasPlace = new Set<string>(), placeNeedsPeriod = new Set<string>();
+
+  for (const p of t.periods as (Tables['periods'][number] & Row)[]) {
+    if (!ids.has(p.game_id)) errs.push(`${at('Periods', p)}: game_id "${p.game_id ?? ''}" is not on the Games sheet`);
+    if (!isInt(p.from) || !isInt(p.to)) errs.push(`${at('Periods', p)}: from and to must be whole years`);
+    else if (p.from > p.to) errs.push(`${at('Periods', p)}: from (${p.from}) is after to (${p.to})`);
+    hasPeriod.add(p.game_id);
+  }
+  for (const p of t.placements as (Tables['placements'][number] & Row)[]) {
+    const w = at('Placements', p);
+    if (!ids.has(p.game_id)) errs.push(`${w}: game_id "${p.game_id ?? ''}" is not on the Games sheet`);
+    if (!p.place) errs.push(`${w}: place is empty`);
+    if (!(typeof p.lat === 'number' && p.lat >= -90 && p.lat <= 90)) errs.push(`${w}: lat must be between -90 and 90`);
+    if (!(typeof p.lon === 'number' && p.lon >= -180 && p.lon <= 180)) errs.push(`${w}: lon must be between -180 and 180`);
+    if (!KINDS.includes(p.kind as Kind)) errs.push(`${w}: kind "${p.kind ?? ''}" must be one of ${KINDS.join(', ')}`);
+    if (p.coarse !== 'yes' && p.coarse !== 'no') errs.push(`${w}: coarse must be yes or no`);
+    if (p.kind === 'inspiration' && !p.fictional_name) errs.push(`${w}: kind inspiration needs a fictional_name`);
+    if (p.bbox && !parseBbox(p.bbox)) errs.push(`${w}: bbox must be west,south,east,north with west<east and south<north`);
+    const own = p.from !== undefined || p.to !== undefined;
+    if (own && (!isInt(p.from) || !isInt(p.to) || p.from! > p.to!)) errs.push(`${w}: from/to must both be whole years, from not after to`);
+    if (!own) placeNeedsPeriod.add(p.game_id);
+    hasPlace.add(p.game_id);
+  }
+  for (const id of live) {
+    if (!hasPlace.has(id)) errs.push(`${ids.get(id)}: game ${id} has no placements (add one or set status to exclude)`);
+    if (placeNeedsPeriod.has(id) && !hasPeriod.has(id)) errs.push(`${ids.get(id)}: game ${id} has placements without years and no periods`);
+  }
   return errs;
+}
+
+/** Assumes validate() returned no errors. Excluded games are left out. */
+export function buildAtlas(t: Tables, wikidataFetched: string): Atlas {
+  const periods = new Map<string, Span[]>();
+  for (const p of t.periods) periods.set(p.game_id, [...(periods.get(p.game_id) ?? []), { from: p.from, to: p.to, ...(p.label ? { label: p.label } : {}) }]);
+  const places = new Map<string, Placement[]>();
+  for (const p of t.placements) {
+    const pl: Placement = {
+      place: p.place, lat: p.lat, lon: p.lon, kind: p.kind as Kind, coarse: p.coarse === 'yes',
+      ...(p.place_qid ? { qid: p.place_qid } : {}),
+      ...(p.fictional_name ? { fictionalName: p.fictional_name } : {}),
+      ...(p.level_name ? { levelName: p.level_name } : {}),
+      ...(p.bbox ? { bbox: parseBbox(p.bbox)! } : {}),
+      ...(p.from !== undefined ? { spans: [{ from: p.from, to: p.to! }] } : {}),
+    };
+    places.set(p.game_id, [...(places.get(p.game_id) ?? []), pl]);
+  }
+  const games: Game[] = t.games.filter((g) => g.status !== 'exclude').map((g) => ({
+    id: g.id, title: g.title, source: g.source, spans: periods.get(g.id) ?? [], placements: places.get(g.id) ?? [],
+    ...(g.qid ? { qid: g.qid } : {}), ...(g.release_year ? { year: g.release_year } : {}),
+    ...(g.wikipedia ? { wikipedia: g.wikipedia } : {}),
+  }));
+  games.sort((a, b) => a.title.localeCompare(b.title));
+  return { built: new Date().toISOString().slice(0, 10), wikidataFetched, games };
 }

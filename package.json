@@ -9,13 +9,15 @@
     "preview": "vite preview",
     "fetch:wikidata": "tsx scripts/fetch-wikidata.ts",
     "build:data": "tsx scripts/build-data.ts",
-    "test": "vitest run"
+    "test": "vitest run",
+    "data:export": "tsx scripts/data-export.ts",
+    "data:import": "tsx scripts/data-import.ts",
+    "sync:wikidata": "tsx scripts/sync-wikidata.ts"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.9.0",
-    "js-yaml": "^4.1.0",
-    "tsx": "^4.19.2",
+    "exceljs": "^4.4.0",
+    "tsx": "^4.20.6",
     "typescript": "^5.6.3",
     "vite": "^5.4.10",
     "vitest": "^2.1.4"
