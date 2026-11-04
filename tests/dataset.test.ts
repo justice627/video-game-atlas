@@ -13,7 +13,7 @@ describe('data/*.csv against docs/data-rules.md', () => {
 
   it('ships only series that verified games use', () => {
     const atlas = buildAtlas(tables);
-    expect(atlas.series.map((s) => s.id).sort()).toEqual(['assassins-creed', 'civilization', 'grand-theft-auto', 'hitman']);
+    expect(atlas.series.map((s) => s.id).sort()).toEqual(['assassins-creed', 'civilization', 'fifa', 'grand-theft-auto', 'hitman']);
   });
 
   it('shows only verified links', () => {
