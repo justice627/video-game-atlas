@@ -5,7 +5,7 @@ import { buildAtlas, validate } from './lib/dataset.ts';
 const tables = readTables();
 const errs = validate(tables);
 if (errs.length) {
-  console.error(`Data has ${errs.length} problem(s). Row numbers match data/*.csv lines and atlas.xlsx rows:\n  ${errs.join('\n  ')}`);
+  console.error(`Data has ${errs.length} problem(s). Row numbers match data/*.csv lines (and atlas.xlsx rows, if exported):\n  ${errs.join('\n  ')}`);
   process.exit(1);
 }
 const atlas = buildAtlas(tables);

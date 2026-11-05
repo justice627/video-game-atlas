@@ -1,0 +1,33 @@
+[
+  {
+    "id": "gta-vice-city",
+    "title": "Grand Theft Auto: Vice City",
+    "links": [
+      {
+        "place": "Miami",
+        "placeType": "city",
+        "lat": 25.774166666667,
+        "lon": -80.193611111111,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q8652",
+        "fictionalName": "Vice City",
+        "span": {
+          "from": 1986,
+          "to": 1986
+        },
+        "note": "Wikipedia: \"Set in 1986 within the fictional Vice City (based on Miami)\""
+      }
+    ],
+    "series": "grand-theft-auto",
+    "wikidata": "Q94671",
+    "year": 2002,
+    "wikipedia": "https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City"
+  }
+]

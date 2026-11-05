@@ -1,6 +1,6 @@
 # Plan: a self-running, self-checking research pipeline
 
-Status: proposal, 2026-11-05. Merging this PR approves the plan; implementation starts after that, one PR per phase. The design comes from the task brief; this document records what I found, where I changed or tightened the design and why, and the decisions that are still yours.
+Status: approved 2026-11-05 (PR 6). All recommendations in section 7 accepted (D1–D8). Merging approved the plan; implementation starts after that, one PR per phase. The design comes from the task brief; this document records what I found, where I changed or tightened the design and why, and the decisions that are still yours.
 
 ## 1. What I checked before planning
 

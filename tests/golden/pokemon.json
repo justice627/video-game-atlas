@@ -1,0 +1,473 @@
+[
+  {
+    "id": "pokemon-black-2-and-white-2",
+    "title": "Pokémon Black 2 and White 2",
+    "links": [
+      {
+        "place": "New York City",
+        "placeType": "city",
+        "lat": 40.712777777778,
+        "lon": -74.006111111111,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Black_2_and_White_2",
+          "https://www.pokemon.com/us/pokemon-video-games/pokemon-black-version-2-and-pokemon-white-version-2"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q60",
+        "fictionalName": "Unova",
+        "note": "\"set two years after the events of Black and White\"; \"Unova's design is modeled after New York City\" Two years after Black and White (pokemon.com). Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q619694",
+    "year": 2012,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Black_2_and_White_2"
+  },
+  {
+    "id": "pokemon-black-and-white",
+    "title": "Pokémon Black and White",
+    "links": [
+      {
+        "place": "New York City",
+        "placeType": "city",
+        "lat": 40.712777777778,
+        "lon": -74.006111111111,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Black_and_White"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q60",
+        "fictionalName": "Unova",
+        "note": "\"Unova is modeled after New York City, an idea developed by game director Junichi Masuda\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q816034",
+    "year": 2010,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Black_and_White"
+  },
+  {
+    "id": "pokemon-diamond-and-pearl",
+    "title": "Pokémon Diamond and Pearl",
+    "links": [
+      {
+        "place": "Hokkaidō",
+        "placeType": "region",
+        "lat": 43.460555555556,
+        "lon": 142.79222222222,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Diamond_and_Pearl"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q35581",
+        "fictionalName": "Sinnoh",
+        "note": "\"the fictional region of Sinnoh, an island based on the Japanese island of Hokkaido\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q645494",
+    "year": 2006,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Diamond_and_Pearl"
+  },
+  {
+    "id": "pokemon-gold-and-silver",
+    "title": "Pokémon Gold and Silver",
+    "links": [
+      {
+        "place": "Kansai region",
+        "placeType": "region",
+        "lat": 35,
+        "lon": 135,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Gold_and_Silver",
+          "https://github.com/pret/pokecrystal/blob/master/maps/SlowpokeWellB1F.asm"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q164256",
+        "fictionalName": "Johto",
+        "note": "\"The design of Johto was inspired by Japan's Kansai and Tōkai regions\" Three years after Red and Blue (game text: \"TEAM ROCKET was broken up three years ago\"). Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      },
+      {
+        "place": "Tōkai region",
+        "placeType": "region",
+        "lat": 35.26666667,
+        "lon": 137.05,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Gold_and_Silver",
+          "https://github.com/pret/pokecrystal/blob/master/maps/SlowpokeWellB1F.asm"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q398989",
+        "fictionalName": "Johto",
+        "note": "\"The design of Johto was inspired by Japan's Kansai and Tōkai regions\" Three years after Red and Blue (game text: \"TEAM ROCKET was broken up three years ago\"). Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      },
+      {
+        "place": "Kantō region",
+        "placeType": "region",
+        "lat": 36.166666666667,
+        "lon": 139.78333333333,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Gold_and_Silver",
+          "https://github.com/pret/pokecrystal/blob/master/maps/SlowpokeWellB1F.asm"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q132480",
+        "fictionalName": "Kanto",
+        "note": "The player \"can then travel to the Kanto Region from the previous games\", \"three years after the conclusion of the previous games\". Three years after Red and Blue (game text: \"TEAM ROCKET was broken up three years ago\"). Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q837346",
+    "year": 1999,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Gold_and_Silver"
+  },
+  {
+    "id": "pokemon-legends-arceus",
+    "title": "Pokémon Legends: Arceus",
+    "links": [
+      {
+        "place": "Hokkaidō",
+        "placeType": "region",
+        "lat": 43.460555555556,
+        "lon": 142.79222222222,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "era",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Legends:_Arceus"
+        ],
+        "confidence": "low",
+        "flags": [
+          "inferred-time"
+        ],
+        "placeWikidata": "Q35581",
+        "fictionalName": "Hisui",
+        "span": {
+          "from": 1869,
+          "to": 1882,
+          "label": "Hokkaido Development Commission"
+        },
+        "note": "\"the Hisui region, which is based on the island of Hokkaido during early Japanese colonization\"; set \"centuries before\" Diamond and Pearl Official text says only \"an age long ago\". The real model is Hokkaido's colonization (Development Commission 1869–1882), which dates the inspiration, not the game. Dating: see docs/research/pokemon-timeline.md. Time: Dates the real-world model, not the game: Hokkaido \"during early Japanese colonization\", taken as the Development Commission years 1869–1882"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q105688771",
+    "year": 2022,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Legends:_Arceus"
+  },
+  {
+    "id": "pokemon-legends-z-a",
+    "title": "Pokémon Legends: Z-A",
+    "links": [
+      {
+        "place": "Paris",
+        "placeType": "city",
+        "lat": 48.856666666667,
+        "lon": 2.3522222222222,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Legends:_Z-A"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q90",
+        "fictionalName": "Lumiose City",
+        "note": "\"takes place entirely within Lumiose City\"; \"Lumiose City, based on Paris\"; five years after X and Y Five years after X and Y (Wikipedia, citing IGN). Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q124672125",
+    "year": 2025,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Legends:_Z-A"
+  },
+  {
+    "id": "pokemon-red-and-blue",
+    "title": "Pokémon Red and Blue",
+    "links": [
+      {
+        "place": "Kantō region",
+        "placeType": "region",
+        "lat": 36.166666666667,
+        "lon": 139.78333333333,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Red,_Blue,_and_Yellow"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q132480",
+        "fictionalName": "Kanto",
+        "note": "\"the region of Kanto, which is based on the real-life Kantō region in Japan\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q637137",
+    "year": 1996,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Red,_Blue,_and_Yellow"
+  },
+  {
+    "id": "pokemon-ruby-and-sapphire",
+    "title": "Pokémon Ruby and Sapphire",
+    "links": [
+      {
+        "place": "Kyushu",
+        "placeType": "region",
+        "lat": 33,
+        "lon": 131,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Ruby_and_Sapphire"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q13987",
+        "fictionalName": "Hoenn",
+        "note": "\"The design of Hoenn was based on the Japanese island and region of Kyushu\", rotated 90°. Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q721822",
+    "year": 2002,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Ruby_and_Sapphire"
+  },
+  {
+    "id": "pokemon-scarlet-and-violet",
+    "title": "Pokémon Scarlet and Violet",
+    "links": [
+      {
+        "place": "Iberian Peninsula",
+        "placeType": "region",
+        "lat": 40.24,
+        "lon": -4.2391666666667,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Scarlet_and_Violet"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q12837",
+        "fictionalName": "Paldea",
+        "note": "\"the Paldea Region, which is based on the Iberian Peninsula\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q111028839",
+    "year": 2022,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Scarlet_and_Violet"
+  },
+  {
+    "id": "pokemon-sun-and-moon",
+    "title": "Pokémon Sun and Moon",
+    "links": [
+      {
+        "place": "Hawaii",
+        "placeType": "region",
+        "lat": 21.5,
+        "lon": -158,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Sun_and_Moon"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q782",
+        "fictionalName": "Alola",
+        "note": "\"the fictional Alola Region (loosely based on Hawaii)\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q22954794",
+    "year": 2016,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Sun_and_Moon"
+  },
+  {
+    "id": "pokemon-sword-and-shield",
+    "title": "Pokémon Sword and Shield",
+    "links": [
+      {
+        "place": "United Kingdom",
+        "placeType": "country",
+        "lat": 54.6,
+        "lon": -2,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Sword_and_Shield"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q145",
+        "fictionalName": "Galar",
+        "note": "\"Galar, a fictional region inspired by the United Kingdom, with several of its landmarks resembling places such as Bath, Somerset and York\". Bath and York not linked: the source names no in-game place for them. Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q61897498",
+    "year": 2019,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_Sword_and_Shield"
+  },
+  {
+    "id": "pokemon-x-and-y",
+    "title": "Pokémon X and Y",
+    "links": [
+      {
+        "place": "France",
+        "placeType": "country",
+        "lat": 47,
+        "lon": 2,
+        "approxPlace": true,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_X_and_Y"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q142",
+        "fictionalName": "Kalos",
+        "note": "Kalos \"is heavily inspired by Metropolitan France\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      },
+      {
+        "place": "Paris",
+        "placeType": "city",
+        "lat": 48.856666666667,
+        "lon": 2.3522222222222,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_X_and_Y"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q90",
+        "fictionalName": "Lumiose City",
+        "note": "\"Lumiose City (the largest city in Kalos, inspired by Paris, France)\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      },
+      {
+        "place": "Eiffel Tower",
+        "placeType": "landmark",
+        "lat": 48.858296,
+        "lon": 2.294479,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_X_and_Y"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q243",
+        "fictionalName": "Prism Tower",
+        "note": "Real-world inspirations \"including Prism Tower (Eiffel Tower)\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      },
+      {
+        "place": "Louvre Museum",
+        "placeType": "landmark",
+        "lat": 48.861111111111,
+        "lon": 2.3358333333333,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_X_and_Y"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q19675",
+        "fictionalName": "Lumiose Art Museum",
+        "note": "\"the Lumiose Art Museum (the Louvre)\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      },
+      {
+        "place": "Carnac stones",
+        "placeType": "landmark",
+        "lat": 47.593333333333,
+        "lon": -3.0797222222222,
+        "approxPlace": false,
+        "role": "inspiration",
+        "timeType": "undated",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Pok%C3%A9mon_X_and_Y"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q833850",
+        "fictionalName": "Geosenge Town stones",
+        "note": "\"the stones outside Geosenge Town (Carnac stones)\". Dating: see docs/research/pokemon-timeline.md. Time: undated by choice; the research report rejects release-year dating, so it shows under \"All time\" or the undated switch"
+      }
+    ],
+    "series": "pokemon",
+    "wikidata": "Q2769164",
+    "year": 2013,
+    "wikipedia": "https://en.wikipedia.org/wiki/Pok%C3%A9mon_X_and_Y"
+  }
+]

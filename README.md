@@ -30,7 +30,7 @@ Plain CSV tables in `data/` are the source of truth, shaped for a later move to 
 | `links.csv` | claim that a game uses a place, in a role, at a time, with sources, confidence and status |
 | `eras.csv` | named period with years and a source |
 | `candidates.csv` | game not yet researched, with Wikidata's claims as unverified leads |
-| `atlas.xlsx` | Excel editing view of all of the above, generated |
+| `atlas.xlsx` | Excel editing view of all of the above, generated locally by `data:export` and not committed |
 
 Only links with status `verified` reach the map. Venues of sports and racing games, strategy maps and sandbox games are hidden by default and switched on in the panel; "Group games by series" collapses a series into one pin per place. The build checks every rule it can (sources present, inspiration has a fictional name, undated links flagged `needs-time`, and so on) and names the sheet and row of each problem.
 
@@ -42,8 +42,14 @@ npm run place:lookup -- Q91228            # its coordinates and type, for places
 npm run fetch:wikidata && npm run sync:wikidata   # refresh the snapshot, add new candidates
 ```
 
-A test fails if `atlas.xlsx` and the CSV tables disagree, so run `data:import` after editing the workbook.
+The workbook is a local editing view, ignored by git. Export, edit, then run `data:import` to write the edits back to the CSV files, which are what you commit.
+
+The worked examples in the data rules, plus the Pokémon chain, are golden tests: `tests/golden/*.json` holds their exact built output. After a deliberate rule or build change, run `npm run golden:update` and say in the PR which ones moved.
 
 ## Deploy
 
-Hosted on Netlify via `netlify.toml`: pushes to `main` deploy to production, pull requests get deploy previews. The build runs the tests first.
+Hosted on Netlify via `netlify.toml`: pull requests get deploy previews, and the build runs the tests first. A merge to `main` deploys to production unless it changes only data, docs or review files (`scripts/netlify-ignore.sh`); those reach production through the scheduled data deploy.
+
+## Licence
+
+Code: MIT ([LICENSE](LICENSE)). Data in `data/`: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Quotes and evidence excerpts come from the sources named next to them and keep those sources' terms; Wikipedia text is CC BY-SA, and each record keeps its source URL. Wikidata is CC0.

@@ -1,0 +1,36 @@
+[
+  {
+    "id": "civilization-vi",
+    "title": "Civilization VI",
+    "links": [
+      {
+        "place": "The world",
+        "placeType": "region",
+        "lat": 7.5,
+        "lon": 0,
+        "approxPlace": true,
+        "role": "strategy",
+        "timeType": "sandbox",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Civilization_VI"
+        ],
+        "confidence": "medium",
+        "flags": [
+          "needs-time"
+        ],
+        "placeWikidata": "Q2",
+        "bbox": [
+          -180,
+          -60,
+          180,
+          75
+        ],
+        "note": "Wikipedia: \"between ancient times and the near future\"; needs era-list entries for both ends"
+      }
+    ],
+    "series": "civilization",
+    "wikidata": "Q24050047",
+    "year": 2016,
+    "wikipedia": "https://en.wikipedia.org/wiki/Civilization_VI"
+  }
+]

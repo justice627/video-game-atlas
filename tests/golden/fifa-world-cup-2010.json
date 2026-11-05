@@ -1,0 +1,222 @@
+[
+  {
+    "id": "fifa-world-cup-2010",
+    "title": "2010 FIFA World Cup South Africa",
+    "links": [
+      {
+        "place": "FNB Stadium",
+        "placeType": "landmark",
+        "lat": -26.234806,
+        "lon": 27.982378,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q163521",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Ellis Park Stadium",
+        "placeType": "landmark",
+        "lat": -26.1975,
+        "lon": 28.060833333333,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q182081",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Cape Town Stadium",
+        "placeType": "landmark",
+        "lat": -33.903461111111,
+        "lon": 18.411152777778,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q173559",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Nelson Mandela Bay Stadium",
+        "placeType": "landmark",
+        "lat": -33.937778,
+        "lon": 25.598889,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q181445",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Moses Mabhida Stadium",
+        "placeType": "landmark",
+        "lat": -29.829,
+        "lon": 31.0303,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q175289",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Loftus Versfeld Stadium",
+        "placeType": "landmark",
+        "lat": -25.753189,
+        "lon": 28.223014,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q181398",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Free State Stadium",
+        "placeType": "landmark",
+        "lat": -29.117222222222,
+        "lon": 26.208888888889,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q181439",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Royal Bafokeng Stadium",
+        "placeType": "landmark",
+        "lat": -25.578611111111,
+        "lon": 27.160833333333,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q189337",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Peter Mokaba Stadium",
+        "placeType": "landmark",
+        "lat": -23.924689,
+        "lon": 29.468765,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q187042",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      },
+      {
+        "place": "Mbombela Stadium",
+        "placeType": "landmark",
+        "lat": -25.461888888889,
+        "lon": 30.929777777778,
+        "approxPlace": false,
+        "role": "arena",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
+          "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup#Venues"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q187087",
+        "span": {
+          "from": 2010,
+          "to": 2010
+        },
+        "note": "Game has all 10 tournament venues (first source); venue list from the tournament article (second source)"
+      }
+    ],
+    "series": "fifa-world-cup",
+    "wikidata": "Q586736",
+    "year": 2010,
+    "wikipedia": "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)"
+  }
+]

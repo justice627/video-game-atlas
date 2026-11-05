@@ -1,0 +1,112 @@
+[
+  {
+    "id": "assassins-creed-ii",
+    "title": "Assassin's Creed II",
+    "links": [
+      {
+        "place": "Florence",
+        "placeType": "city",
+        "lat": 43.771388888889,
+        "lon": 11.254166666667,
+        "approxPlace": false,
+        "role": "setting",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q2044",
+        "span": {
+          "from": 1476,
+          "to": 1499
+        },
+        "note": "Wikipedia: main narrative in Italy from 1476 to 1499"
+      },
+      {
+        "place": "Venice",
+        "placeType": "city",
+        "lat": 45.439722222222,
+        "lon": 12.331944444444,
+        "approxPlace": false,
+        "role": "setting",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q641",
+        "span": {
+          "from": 1476,
+          "to": 1499
+        },
+        "note": "Wikipedia: main narrative in Italy from 1476 to 1499"
+      },
+      {
+        "place": "Monteriggioni",
+        "placeType": "city",
+        "lat": 43.36698535,
+        "lon": 11.21803615,
+        "approxPlace": false,
+        "role": "setting",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q91228",
+        "span": {
+          "from": 1476,
+          "to": 1499
+        },
+        "note": "Wikipedia: main narrative in Italy from 1476 to 1499"
+      },
+      {
+        "place": "San Gimignano",
+        "placeType": "city",
+        "lat": 43.467719,
+        "lon": 11.043221,
+        "approxPlace": false,
+        "role": "setting",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q91413",
+        "span": {
+          "from": 1476,
+          "to": 1499
+        },
+        "note": "Wikipedia: main narrative in Italy from 1476 to 1499"
+      },
+      {
+        "place": "Forlì",
+        "placeType": "city",
+        "lat": 44.222777777778,
+        "lon": 12.041388888889,
+        "approxPlace": false,
+        "role": "setting",
+        "timeType": "fixed",
+        "sources": [
+          "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
+        ],
+        "confidence": "medium",
+        "flags": [],
+        "placeWikidata": "Q13367",
+        "span": {
+          "from": 1476,
+          "to": 1499
+        },
+        "note": "Wikipedia: main narrative in Italy from 1476 to 1499"
+      }
+    ],
+    "series": "assassins-creed",
+    "wikidata": "Q211735",
+    "year": 2009,
+    "wikipedia": "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
+  }
+]
