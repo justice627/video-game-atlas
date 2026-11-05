@@ -27,6 +27,10 @@ npm run golden:update     # after a deliberate rule change; say in the PR which 
 npm run data:export       # local Excel editing view (gitignored); data:import writes it back
 ```
 
+## Hook
+
+Editing any `data/*.csv` runs `scripts/hooks/check-data.sh` (`.claude/settings.json`): full validation plus an offline quote check of the changed rows. If it reports problems, fix them before doing anything else.
+
 ## Style
 
 Small TypeScript scripts run with `tsx`; no new runtime dependencies without a reason in the PR. American English in docs.

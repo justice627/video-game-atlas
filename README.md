@@ -54,6 +54,10 @@ The workbook is a local editing view, ignored by git. Export, edit, then run `da
 
 The worked examples in the data rules, plus the Pokémon chain, are golden tests: `tests/golden/*.json` holds their exact built output. After a deliberate rule or build change, run `npm run golden:update` and say in the PR which ones moved.
 
+## Claude Code
+
+`CLAUDE.md` holds the working rules. `.claude/settings.json` adds a hook: after any edit to `data/*.csv`, it validates the tables and checks the changed rows' quotes against `data/evidence/` (no network), and sends row-level problems back to Claude.
+
 ## Deploy
 
 Hosted on Netlify via `netlify.toml`: pull requests get deploy previews, and the build runs the tests first. A merge to `main` deploys to production unless it changes only data, docs or review files (`scripts/netlify-ignore.sh`); those reach production through the scheduled data deploy.
