@@ -63,7 +63,7 @@ Time lives on the link, never on the place: Florence has no era, Assassin's Cree
 | `fixed` | A source gives a year or a short dated range | The years stated: 1986, or 1476–1499 |
 | `era` | Set in a named period without a year (Edo period, ancient Greece) | The era's bounds, from the era list |
 | `sandbox` | The player moves through time (Civilization, Europa Universalis) | The start and end of playable time, from the era list or the game's own dates |
-| `undated` | No source gives a time. This includes games set in their own present day with no stated year | None. Flagged `needs-time` for research; kept in the data, off the timeline |
+| `undated` | No source gives a time, and neither the present-day rule nor a chain applies | None. Flagged `needs-time` for research; shown only under "All time" or with the undated switch |
 
 Further rules for time:
 
@@ -71,8 +71,11 @@ Further rules for time:
 - **Use the range the source gives.** Don't narrow a sourced range to one year, and don't widen it to an era.
 - **Eras come from one shared list.** Each list entry has a name, years and a source (PeriodO where it has the period). Add entries only when a game needs them.
 - **Years from a chain of sources.** A year may be worked out from sourced relative statements, within a game or across a series. For example, Hitman (2016) has a prologue "In 1999" and its main story "Twenty years later", Hitman 2 is set "following the events of Hitman", and Hitman 3 during and after Hitman 2. Such links are flagged `derived-time`, and the note spells out the chain with a source for each step. Every interval in the chain must be stated ("twenty years later", "two years after"); in that case the link keeps its source's confidence. If any step only says "following" or "after", without saying how long, the link is `low` and its range allows for the gap.
-- **Present day is not a year.** A game set in its own present with no year stated is `undated`, not its release year. Research may find the year later.
-- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. So are `arena` links, the venues of sports and racing games: they're numerous and would crowd out story settings. `undated` links never appear on the timeline. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
+- **Present-day rule.** A game set in its own present with no year stated is dated to its release year, `fixed`, flagged `inferred-time`, at `low` confidence, the same way as the season rule. It applies only when the game shows a contemporary world: a source calls it modern-day, present-day or contemporary, or the game shows no other period. A sourced year always replaces it. Within a series, anchor the earliest such game and chain the rest by their stated intervals (flag `inferred-time derived-time`); a stated interval overrides a later game's release year. **Exception:** when a research report in `docs/research/` finds that the series' own sources reject release-year dating, the rule does not apply and the series stays `undated` unless the report supports a dating (Pokémon: only Legends: Arceus, through its real-world model).
+- **A chain needs a start.** Sourced intervals between games (Gold and Silver are "three years after" Red and Blue) give no year until one game in the chain has a year, sourced or from the present-day rule. The note always records the interval.
+- **A real-world model is a weak date.** When a fictional place is modelled on a real place *at a certain time* (Hisui is Hokkaido "during early Japanese colonization"), that period dates the inspiration, not the game. Use it only when nothing better exists: `era` (or `fixed` with the period's years), flagged `inferred-time`, at `low`, with the note saying it dates the model.
+- **What stays undated.** Games with no contemporary world and no period at all (Super Mario Odyssey's kingdoms), and prequels or sequels whose only link to a dated game is an unbounded "before" or "after" with nothing to close the range.
+- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. So are `arena` links, the venues of sports and racing games: they're numerous and would crowd out story settings. `undated` links have no time to match, so they appear only when the range is "All time" (the default) or the "Show undated games" switch is on; the list then marks them "Undated" and draws their pins as approximate. In any narrower window without the switch, the panel names them in a note instead. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
 
 ## 5. Series
 
@@ -102,6 +105,8 @@ Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 3. **`verified`:** you checked the links against the sources. The only status shown on the map.
 4. **`excluded`:** kept for the record, with a reason. Not shown.
 
+**Research reports.** When a question needs more than a game's own article (dating a whole series, settling conflicting sources), write it up as a report in `docs/research/`, named after the topic. The report gives one proposed row per game in the rules' terms (time type, years, flags, confidence) with a source and quote for each claim, and lists what was rejected and why. Links that rely on a report name it in their note. A report proposes; the links still go through `draft` and `verified` as usual.
+
 A game is done when it has at least one link with a role, a place carrying an ID and coordinates, a time type, a source and a confidence, and you have verified it. A verified link can still carry a flag such as `needs-time`: it is correct, just incomplete.
 
 ## Worked examples
@@ -118,4 +123,4 @@ All five checked against their Wikipedia articles on 2026-11-04.
 
 **Civilization VI.** One link: the world, `strategy`, `sandbox`. Wikipedia says players develop their civilization "between ancient times and the near future" ([source](https://en.wikipedia.org/wiki/Civilization_VI)). That gives the eras but not the years, so the link needs "ancient times" and "near future" entries on the era list. v0.1 used an unsourced 4000 BCE–2100. Because it's `strategy` and `sandbox`, it stays off the map unless you switch those games on.
 
-**What the examples changed:** the present-day rule and the `needs-time` flag (from Hitman 3) and the frame-story rule (from Assassin's Creed II) were added after testing. FIFA showed that one link can need two sources, one for "the game has the venues" and one for which venues those are. All five games are now fully described except three items: the Civilization VI era bounds, the FIFA stadium list and Hitman 3's year.
+**What the examples changed:** the `needs-time` flag (from Hitman 3) and the frame-story rule (from Assassin's Creed II) were added after testing. FIFA showed that one link can need two sources, one for "the game has the venues" and one for which venues those are. All five games are now fully described except three items: the Civilization VI era bounds, the FIFA stadium list and Hitman 3's year.

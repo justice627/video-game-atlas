@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { MIN_YEAR, MAX_YEAR } from '../src/timeline.ts';
 import { visiblePlacements, byGame, undatedGames, groupEntries, type Filters } from '../src/filter.ts';
 import type { Game, Link } from '../src/types.ts';
 
@@ -15,7 +16,7 @@ const civ: Game = { id: 'civ', title: 'Civilization VI', links: [
 ] };
 const country: Game = { id: 'c', title: 'Country game', links: [link({ place: 'Italy', placeType: 'country', approxPlace: true, span: { from: 1500, to: 1500 } })] };
 const all = [ac2, hitman, civ, country];
-const base: Filters = { range: { from: 1400, to: 1600 }, roles: new Set(['setting', 'level', 'arena', 'inspiration']), showCoarse: true, showStrategy: false };
+const base: Filters = { range: { from: 1400, to: 1600 }, roles: new Set(['setting', 'level', 'arena', 'inspiration']), showCoarse: true, showStrategy: false, showUndated: false };
 const titles = (f: Partial<Filters>) => [...byGame(visiblePlacements(all, { ...base, ...f })).keys()].map((g) => g.title);
 
 describe('filter (docs/data-rules.md section 4)', () => {
@@ -23,8 +24,13 @@ describe('filter (docs/data-rules.md section 4)', () => {
     expect(titles({ range: { from: 1490, to: 1490 } })).toContain("Assassin's Creed II");
     expect(titles({ range: { from: 1700, to: 1800 } })).not.toContain("Assassin's Creed II");
   });
-  it('never puts undated links on the timeline', () => {
+  it('shows undated links only under "All time" or with their switch on', () => {
     expect(titles({ range: { from: -1e9, to: 1e5 } })).not.toContain('Hitman 3');
+    expect(titles({ range: { from: MIN_YEAR, to: MAX_YEAR } })).toContain('Hitman 3');
+    expect(titles({ showUndated: true })).toContain('Hitman 3');
+    const [h] = visiblePlacements([hitman], { ...base, showUndated: true });
+    expect(h.matched).toBeUndefined();
+    expect(h.approxTime).toBe(true);
     expect(undatedGames(all).map((g) => g.title)).toEqual(['Hitman 3']);
   });
   it('hides strategy and sandbox until switched on', () => {

@@ -89,7 +89,6 @@ Q17457242,F1 2014,Q17457242,2014,https://en.wikipedia.org/wiki/F1_2014_(video_ga
 c-f1-23,F1 23,,2023,https://en.wikipedia.org/wiki/F1_23,v0.1 curation (unverified),Circuit de Monaco {arena}; Silverstone {arena}; Las Vegas Strip Circuit {arena}; Interlagos {arena}; Jeddah Corniche Circuit {arena}; Circuit Zandvoort {arena},(2023),curated:UNVERIFIED,Only some circuits named in the article
 Q104864995,Faith: The Unholy Trinity,Q104864995,2022,https://en.wikipedia.org/wiki/Faith:_The_Unholy_Trinity,wikidata,Sterling Q2446103 {setting}; New Haven Q49145 {setting},1980s (1980–1989),,
 Q2103667,Falklands '82,Q2103667,1986,https://en.wikipedia.org/wiki/Falklands_%2782,wikidata,Falkland Islands Q9648 {setting},1982 (1982),,
-Q60102,Fallout,Q60102,1997,https://en.wikipedia.org/wiki/Fallout_(video_game),wikidata,United States Q30 {setting},post-apocalypse (2030–3000),generic-period span>500y only-coarse-pins,
 Q176336,Far Cry 2,Q176336,2008,https://en.wikipedia.org/wiki/Far_Cry_2,wikidata,Central Africa Q27433 {setting},2008 (2008),only-coarse-pins,
 Q21072291,Far Cry Primal,Q21072291,2016,https://en.wikipedia.org/wiki/Far_Cry_Primal,wikidata,Europe Q46 {setting},prehistory (3000000 BCE–3000 BCE),generic-period span>500y only-coarse-pins,
 Q2582942,Fate of Hellas,Q2582942,2008,https://en.wikipedia.org/wiki/Fate_of_Hellas,wikidata,Greece Q41 {setting},ancient history (4000 BCE–500),generic-period span>500y only-coarse-pins modern-state-for-historical-setting,
@@ -336,8 +335,6 @@ c-venba,Venba,,2023,https://en.wikipedia.org/wiki/Venba,v0.1 curation (unverifie
 c-victoria-3,Victoria 3,,2022,https://en.wikipedia.org/wiki/Victoria_3,v0.1 curation (unverified),The world {strategy_map},(1836–1936),only-coarse-pins,
 Q108874172,War on the Sea,Q108874172,2021,,wikidata,South Pacific Ocean Q12355425 {setting},Pacific War (1941–1945),only-coarse-pins,
 Q111226944,Warno,Q111226944,2024,https://en.wikipedia.org/wiki/Warno_(video_game),wikidata,Czechoslovakia Q33946 {setting}; inner German border Q700754 {setting},1989 (1989); April 1987 (1987); September 1989 (1989); Cold War (1945–1991),,
-Q1371726,Watch Dogs,Q1371726,2014,https://en.wikipedia.org/wiki/Watch_Dogs_(video_game),wikidata,Chicago Q1297 {setting},2013 (2013),,
-c-watch-dogs-legion,Watch Dogs: Legion,,2020,https://en.wikipedia.org/wiki/Watch_Dogs%3A_Legion,v0.1 curation (unverified),London {setting},(2030–2040),curated:WRONG,"Span 2030-2040; Wikipedia says the near future, suggested 2029 or 2030"
 Q7976281,Wayne Gretzky's 3D Hockey '98,Q7976281,1997,https://en.wikipedia.org/wiki/Wayne_Gretzky%27s_3D_Hockey_%2798,wikidata,"Washington, D.C. Q61 {setting}",1998 (1998),sports-as-setting,
 Q62711444,We. The Revolution,Q62711444,2019,,wikidata,France Q142 {setting},Reign of Terror (1793–1794),only-coarse-pins modern-state-for-historical-setting,
 Q123558791,Whack the Hamas,Q123558791,2014,,wikidata,Gaza Strip Q39760 {setting},2014 Gaza War (2014),only-coarse-pins,

@@ -9,13 +9,18 @@ test('default view lists exactly the games the filter logic selects, without err
   expect(errors).toEqual([]);
 });
 
-test('undated games are named in the panel but never on the timeline', async ({ page }) => {
+test('undated games show under All time, hide in a narrower window, and return with their switch', async ({ page }) => {
   const undated = undatedTitles(atlas());
   test.skip(!undated.length, 'no undated verified games in the data');
   await open(page);
-  const note = page.locator('#list .note');
-  for (const t of undated) await expect(note).toContainText(t);
+  expect(await listedTitles(page)).toEqual(expect.arrayContaining(undated));
+  await open(page, 'from=1900&to=2000');
   expect(await listedTitles(page)).not.toEqual(expect.arrayContaining([undated[0]]));
+  for (const t of undated) await expect(page.locator('#list .note')).toContainText(t);
+  await page.locator('#undated').check();
+  await expect(page).toHaveURL(/undated=1/);
+  expect(await listedTitles(page)).toEqual(expectedTitles(atlas(), filters({ range: { from: 1900, to: 2000 }, showUndated: true })));
+  expect(await listedTitles(page)).toEqual(expect.arrayContaining(undated));
 });
 
 test('strategy and sandbox games appear only with their switch on', async ({ page }) => {
