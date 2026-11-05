@@ -102,7 +102,7 @@ As in the brief, with these details:
 
 `scripts/verify-sources.ts` as in the brief. Fetch order: MediaWiki `action=query&prop=extracts&explaintext` (Wikipedia, Fandom wikis that have TextExtracts), then `action=parse` stripped to text, then plain HTML stripped with a small tag stripper (no new dependency). One request per host per 2 seconds; `User-Agent: video-game-atlas-research/1.0 (+https://github.com/justice627/video-game-atlas)`. A 403, 429, login wall or bot challenge is recorded as `blocked-source` with the URL and what to look for, and the run continues. Never retried with another user agent, a proxy or a headless browser.
 
-Evidence records (`data/evidence/<sha256 of url+quote>.json`) keep URL, accessed date, content hash and up to 600 characters of context per quote (decision D7 for non-CC sources). Full pages go to `.cache/sources/` (gitignored).
+The fetcher reads its settings per domain from the source bank, `data/sources.csv` (tier, access method, API path, status, rate, licence), added in phase 3 after the source research of 2026-11-05. Evidence records (`data/evidence/<sha256 of url+quote>.json`) keep URL, accessed date, content hash and up to 600 characters of context per quote (decision D7 for non-CC sources). Full pages go to `.cache/sources/` (gitignored).
 
 ### 4.7 Chronology and derived years
 

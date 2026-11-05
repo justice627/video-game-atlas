@@ -1,0 +1,24 @@
+domain,name,tier,access,api,status,rate_ms,licence,note
+wikipedia.org,Wikipedia (all languages),medium,mediawiki,/w/api.php,ok,1000,CC BY-SA 4.0,"Rules section 6. Wikimedia allows 200 requests/min for a compliant user agent (2026); we stay at 1/s"
+wikidata.org,Wikidata,low,none,,ok,1000,CC0,"IDs and coordinates, not claims. Statements aren't quotable text"
+store.steampowered.com,Steam store,high,steam,,ok,2000,Publisher text,"Store descriptions are written by the publisher. The appdetails endpoint is unofficial; community-reported limit about 200 per 5 minutes"
+ea.com,Electronic Arts,high,html,,ok,2000,Publisher text,Official publisher pages
+pokemon.com,The Pokémon Company,high,html,,blocked,2000,Publisher text,"Official site. Returned 403 to the project user agent (2026-11-05); quotes come from you via the review queue"
+blog.scssoft.com,SCS Software blog,high,html,,ok,2000,Developer text,Official developer blog
+goal.com,Goal,medium,html,,ok,2000,Press,Sports press; used for stadium lists
+mein-mmo.de,Mein-MMO,medium,html,,ok,2000,Press,German games press; used for FIFA venue lists
+eurogamer.net,Eurogamer,medium,html,,needs-review,2000,Press,Reputable games press; not yet tried
+polygon.com,Polygon,medium,html,,needs-review,2000,Press,Reputable games press; not yet tried
+gamespot.com,GameSpot,medium,html,,needs-review,2000,Press,Reputable games press; not yet tried
+pcgamer.com,PC Gamer,medium,html,,needs-review,2000,Press,Reputable games press; not yet tried
+rockpapershotgun.com,Rock Paper Shotgun,medium,html,,needs-review,2000,Press,Reputable games press; not yet tried
+nintendolife.com,Nintendo Life,medium,html,,needs-review,2000,Press,Reputable games press; not yet tried
+ign.com,IGN,medium,html,,blocked,2000,Press,Refuses automated fetching. Quotes come from you via the review queue
+github.com,GitHub,low,html,,ok,2000,Varies,"Fan disassemblies (pret) reproduce game text; rated low as fan work"
+mariowiki.com,Super Mario Wiki,low,mediawiki,/api.php,ok,2000,CC BY-SA 3.0,Fan wiki
+fandom.com,Fandom wikis,low,mediawiki,/api.php,needs-review,2000,CC BY-SA 3.0,"API answers on many wikis but undocumented; some wikis refuse automated fetches"
+uncharted.fandom.com,Uncharted Wiki (Fandom),low,mediawiki,/api.php,blocked,2000,CC BY-SA 3.0,Refused automated fetches (2026-11)
+bulbapedia.bulbagarden.net,Bulbapedia,low,mediawiki,/w/api.php,blocked,2000,CC BY-NC-SA 2.5,Refuses automated fetching
+strategywiki.org,StrategyWiki,low,mediawiki,/w/api.php,needs-review,2000,CC BY-SA 4.0,Level and mission lists
+giantbomb.com,Giant Bomb,low,none,,needs-review,18000,Terms unchecked,"API has a locations resource; needs a key and a terms check. 200 requests per resource per hour"
+mobygames.com,MobyGames,low,none,,paid,10000,Terms unchecked,API reported paid since 2024

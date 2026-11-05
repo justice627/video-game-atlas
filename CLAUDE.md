@@ -21,6 +21,8 @@ A world map and timeline of video games set in real places. Static site (Vite + 
 npm test                  # unit tests, including validation and golden examples
 npm run build:data        # validate and build public/atlas.json
 npm run test:e2e          # browser tests against the production build
+npm run verify:sources -- --offline        # quotes vs committed evidence (no network)
+npm run verify:sources -- --fetch          # fetch sources for quotes without evidence; blocked ones are logged
 npm run golden:update     # after a deliberate rule change; say in the PR which golden files moved
 npm run data:export       # local Excel editing view (gitignored); data:import writes it back
 ```
