@@ -1,0 +1,20 @@
+from,to,relation,interval_years,source,quote,accessed,note
+year:1999,hitman-2016,after,20,https://en.wikipedia.org/wiki/Hitman_(2016_video_game),In 1999 … Twenty years later,2026-11-05,Prologue in 1999; main story twenty years later
+hitman-2016,hitman-2,after,,https://en.wikipedia.org/wiki/Hitman_2_(2018_video_game),Following the events of Hitman,2026-11-05,No interval stated
+hitman-2,hitman-3,during,,https://en.wikipedia.org/wiki/Hitman_3,during the events of Hitman 2,2026-11-05,Hitman 3 continues during Hitman 2
+the-last-of-us/austin,the-last-of-us/boston,after,20,https://en.wikipedia.org/wiki/The_Last_of_Us_(video_game),Twenty years later,2026-11-05,
+the-last-of-us/austin,the-last-of-us/massachusetts-state-house,after,20,https://en.wikipedia.org/wiki/The_Last_of_Us_(video_game),Twenty years later,2026-11-05,
+the-last-of-us/austin,the-last-of-us/lincoln,after,20,https://en.wikipedia.org/wiki/The_Last_of_Us_(video_game),Twenty years later,2026-11-05,
+the-last-of-us/austin,the-last-of-us/pittsburgh,after,20,https://en.wikipedia.org/wiki/The_Last_of_Us_(video_game),Twenty years later,2026-11-05,
+the-last-of-us/austin,the-last-of-us/jackson,after,20,https://en.wikipedia.org/wiki/The_Last_of_Us_(video_game),Twenty years later,2026-11-05,
+the-last-of-us/salt-lake-city,the-last-of-us-part-ii,after,4,https://en.wikipedia.org/wiki/The_Last_of_Us_Part_II,four years after,2026-11-05,"Four years after the first game, which ends in Salt Lake City"
+the-last-of-us-part-ii/jackson,the-last-of-us-part-ii/salt-lake-city,before,2,https://en.wikipedia.org/wiki/The_Last_of_Us_Part_II,two years earlier,2026-11-05,Flashback
+the-last-of-us-part-ii/seattle,the-last-of-us-part-ii/santa-barbara,after,,https://en.wikipedia.org/wiki/The_Last_of_Us_Part_II,Several months later,2026-11-05,No interval in years
+uncharted-drakes-fortune/panama,uncharted-2,after,2,https://en.wikipedia.org/wiki/Uncharted_2:_Among_Thieves,two years,2026-11-05,
+uncharted-2,uncharted-3,after,2,https://en.wikipedia.org/wiki/Uncharted_3:_Drake's_Deception,two years,2026-11-05,
+uncharted-3,uncharted-3/cartagena,before,20,https://en.wikipedia.org/wiki/Uncharted_3:_Drake's_Deception,20 years earlier,2026-11-05,Flashback
+uncharted-3,uncharted-4,after,,https://en.wikipedia.org/wiki/Uncharted_4:_A_Thief's_End,several years after,2026-11-05,No interval stated
+uncharted-4,uncharted-4/panama,before,15,https://en.wikipedia.org/wiki/Uncharted_4:_A_Thief's_End,fifteen years,2026-11-05,"Flashback, fifteen years before the main story"
+pokemon-red-and-blue,pokemon-gold-and-silver,after,3,https://en.wikipedia.org/wiki/Pok%C3%A9mon_Gold_and_Silver,three years after the conclusion of the previous games,2026-11-05,Also in game text; see the research report
+pokemon-black-and-white,pokemon-black-2-and-white-2,after,2,https://www.pokemon.com/us/pokemon-video-games/pokemon-black-version-2-and-pokemon-white-version-2,Your journey takes place in the Unova region two years after the events of Pokémon Black Version and Pokémon White Version.,2026-11-05,
+pokemon-x-and-y,pokemon-legends-z-a,after,5,https://en.wikipedia.org/wiki/Pok%C3%A9mon_Legends:_Z-A,"The game takes place entirely in the Kalos region's Lumiose City, five years after the events of X and Y.",2026-11-05,
