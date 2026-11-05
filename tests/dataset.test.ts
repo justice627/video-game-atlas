@@ -37,7 +37,7 @@ describe('data/*.csv against docs/data-rules.md', () => {
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').fictional_name = undefined; }))
       .toContain(`Links row ${vc._row}: role inspiration needs a fictional_name`);
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').sources = undefined; })).toContain('at least one source URL is required');
-    expect(errorsAfter((t) => { link(t, 'hitman-3').flags = undefined; })).toContain('undated links must carry the needs-time flag');
+    expect(errorsAfter((t) => { link(t, 'uncharted-2').flags = undefined; })).toContain('undated links must carry the needs-time flag');
     expect(errorsAfter((t) => { link(t, 'assassins-creed-ii').time_type = 'era'; })).toContain('time_type era needs an era_id');
     expect(errorsAfter((t) => { t.places[0].wikidata = undefined; })).toContain('needs a wikidata or geonames id');
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').place_id = 'atlantis'; })).toContain('place_id "atlantis" is not on the Places sheet');
