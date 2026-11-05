@@ -30,9 +30,12 @@ Plain CSV tables in `data/` are the source of truth, shaped for a later move to 
 | `links.csv` | claim that a game uses a place, in a role, at a time, with sources, confidence and status |
 | `eras.csv` | named period with years and a source |
 | `candidates.csv` | game not yet researched, with Wikidata's claims as unverified leads |
+| `queue-in.csv` | game you want researched first |
+| `freeze.csv` | role or series that research skips (sports and venues, for now) |
+| `grandfathered.csv` | links verified before quotes were required; a fixed list |
 | `atlas.xlsx` | Excel editing view of all of the above, generated locally by `data:export` and not committed |
 
-Only links with status `verified` reach the map. Venues of sports and racing games, strategy maps and sandbox games are hidden by default and switched on in the panel; "Group games by series" collapses a series into one pin per place. The build checks every rule it can (sources present, inspiration has a fictional name, undated links flagged `needs-time`, and so on) and names the sheet and row of each problem.
+Links with status `verified` or `auto-verified` reach the map; auto-verified ones are marked. Venues of sports and racing games, strategy maps and sandbox games are hidden by default and switched on in the panel; "Group games by series" collapses a series into one pin per place. The build checks every rule it can (sources present, inspiration has a fictional name, undated links flagged `needs-time`, and so on) and names the sheet and row of each problem.
 
 ```bash
 npm run data:export                       # tables -> data/atlas.xlsx

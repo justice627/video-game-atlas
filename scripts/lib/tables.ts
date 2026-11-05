@@ -1,4 +1,4 @@
-// Canonical game data: three CSV tables in data/, joined on game_id.
+// Canonical game data: CSV tables in data/, joined on game_id.
 // They are the source of truth (diffable in git, shaped like future database tables).
 // data/atlas.xlsx is an editing view generated from them; see scripts/data-*.ts.
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -8,7 +8,14 @@ export const ROLES = ['setting', 'level', 'arena', 'inspiration', 'strategy'] as
 export const PLACE_TYPES = ['landmark', 'city', 'region', 'country'] as const;
 export const TIME_TYPES = ['fixed', 'era', 'sandbox', 'undated'] as const;
 export const CONFIDENCE = ['high', 'medium', 'low'] as const;
-export const STATUSES = ['draft', 'verified', 'excluded'] as const;
+export const STATUSES = ['draft', 'auto-verified', 'needs-human', 'verified', 'excluded'] as const;
+/** Statuses that reach the map. */
+export const SHOWN = ['verified', 'auto-verified'] as const;
+export const FLAGS = ['needs-time', 'inferred-time', 'derived-time', 'contested', 'real-world-model', 'needs-review'] as const;
+export const FREEZE_KINDS = ['role', 'series'] as const;
+/** Separates quotes in links.quote (one per source, same order) and elided parts within one quote. */
+export const QUOTE_SEP = ' | ';
+export const ELISION = ' … ';
 
 export interface SeriesRow { id: string; name: string; wikidata?: string; note?: string }
 export interface GameRow { id: string; title: string; series_id?: string; wikidata?: string; release_year?: number; wikipedia?: string; note?: string }
@@ -17,16 +24,22 @@ export interface PlaceRow {
   lat?: number; lon?: number; bbox?: string; note?: string;
 }
 export interface LinkRow {
-  game_id: string; place_id: string; role: string; fictional_name?: string; name_in_game?: string;
+  id: string; game_id: string; place_id: string; role: string; fictional_name?: string; name_in_game?: string;
   time_type: string; from?: number; to?: number; era_id?: string; sources?: string;
-  confidence?: string; status: string; flags?: string; note?: string;
+  quote?: string; accessed?: string; confidence?: string; status: string; flags?: string; note?: string;
 }
 export interface EraRow { id: string; name: string; from: number; to: number; source?: string; note?: string }
 export interface CandidateRow {
   id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string;
   lead_source?: string; lead_places?: string; lead_periods?: string; flags?: string; note?: string;
 }
-export interface Tables { series: SeriesRow[]; games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[] }
+export interface QueueInRow { title: string; wikidata?: string; wikipedia?: string; note?: string; added?: string }
+export interface FreezeRow { kind: string; value: string; note?: string }
+export interface GrandfatheredRow { link_id: string; note?: string }
+export interface Tables {
+  series: SeriesRow[]; games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[];
+  queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[];
+}
 
 export interface Col { key: string; width: number; help: string; list?: readonly string[]; numeric?: boolean }
 export interface TableDef { name: string; file: string; key: keyof Tables; cols: Col[] }
@@ -61,6 +74,7 @@ export const TABLES: TableDef[] = [
     { key: 'note', width: 40, help: 'Free text.' },
   ] },
   { name: 'Links', file: 'links.csv', key: 'links', cols: [
+    { key: 'id', width: 26, help: 'Stable link id, game_id/place_id (plus /2, /3 for repeats). Never reused or changed: queue rows, audits and evidence refer to it.' },
     { key: 'game_id', width: 22, help: 'Game id from the Games sheet.' },
     { key: 'place_id', width: 22, help: 'Place id from the Places sheet.' },
     { key: 'role', width: 11, help: 'How the game uses the place (rules section 3).', list: ROLES },
@@ -70,10 +84,12 @@ export const TABLES: TableDef[] = [
     { key: 'from', width: 8, help: 'First year (fixed, or sandbox with known dates). Negative = BCE.', numeric: true },
     { key: 'to', width: 8, help: 'Last year.', numeric: true },
     { key: 'era_id', width: 14, help: 'For time_type era (or sandbox): id from the Eras sheet.' },
-    { key: 'sources', width: 50, help: 'One or more URLs, separated by spaces, supporting place, role and time.' },
+    { key: 'sources', width: 50, help: 'One or more URLs, separated by spaces, supporting place, role and time. A URL may repeat, once per quote.' },
+    { key: 'quote', width: 50, help: 'The supporting sentence(s) from each source, " | "-separated in the same order as sources. " … " marks an elision within one quote.' },
+    { key: 'accessed', width: 11, help: 'ISO date (YYYY-MM-DD) the quotes were checked against the sources. Required with quote.' },
     { key: 'confidence', width: 10, help: 'Of the best source (rules section 6).', list: CONFIDENCE },
-    { key: 'status', width: 9, help: 'Only verified links appear on the map.', list: STATUSES },
-    { key: 'flags', width: 14, help: 'Space separated, e.g. needs-time.' },
+    { key: 'status', width: 12, help: 'verified (checked by hand) and auto-verified (passed the gate) appear on the map.', list: STATUSES },
+    { key: 'flags', width: 14, help: `Space separated: ${FLAGS.join(', ')}.` },
     { key: 'note', width: 50, help: 'Quote from the source, reasoning, or the reason for excluded.' },
   ] },
   { name: 'Eras', file: 'eras.csv', key: 'eras', cols: [
@@ -94,6 +110,22 @@ export const TABLES: TableDef[] = [
     { key: 'lead_places', width: 50, help: 'Unverified places from Wikidata or v0.1.' },
     { key: 'lead_periods', width: 36, help: 'Unverified periods from Wikidata or v0.1.' },
     { key: 'flags', width: 30, help: 'Problems found in the v0.1 review.' },
+    { key: 'note', width: 30, help: 'Free text.' },
+  ] },
+  { name: 'Queue in', file: 'queue-in.csv', key: 'queueIn', cols: [
+    { key: 'title', width: 36, help: 'A game to research before anything else. Research runs take these first, top to bottom.' },
+    { key: 'wikidata', width: 12, help: 'Wikidata item, if known.' },
+    { key: 'wikipedia', width: 36, help: 'Wikipedia URL, if known.' },
+    { key: 'note', width: 40, help: 'What you want looked at.' },
+    { key: 'added', width: 11, help: 'ISO date.' },
+  ] },
+  { name: 'Freeze', file: 'freeze.csv', key: 'freeze', cols: [
+    { key: 'kind', width: 8, help: 'What is frozen: a role or a series. Research runs skip frozen games and the gate leaves their drafts alone.', list: FREEZE_KINDS },
+    { key: 'value', width: 20, help: 'The role name or series id.' },
+    { key: 'note', width: 40, help: 'Why, and since when.' },
+  ] },
+  { name: 'Grandfathered', file: 'grandfathered.csv', key: 'grandfathered', cols: [
+    { key: 'link_id', width: 30, help: 'A link verified before quotes were required (2026-11). It may stay verified without a quote. Fixed list: never add rows.' },
     { key: 'note', width: 30, help: 'Free text.' },
   ] },
 ];

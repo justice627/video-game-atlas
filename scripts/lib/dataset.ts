@@ -1,6 +1,6 @@
-// Validates the tables against docs/data-rules.md and builds public/atlas.json from verified links.
+// Validates the tables against docs/data-rules.md and builds public/atlas.json from verified and auto-verified links.
 import type { Atlas, Game, Link, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
-import { CONFIDENCE, PLACE_TYPES, ROLES, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
+import { CONFIDENCE, FLAGS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
 
 type Row = { _row?: number };
 const at = (sheet: string, r: Row) => `${sheet} row ${r._row ?? '?'}`;
@@ -8,6 +8,10 @@ const isInt = (n: unknown): n is number => typeof n === 'number' && Number.isInt
 const flagsOf = (s?: string) => (s ?? '').split(/\s+/).filter(Boolean);
 const urls = (s?: string) => (s ?? '').split(/\s+/).filter(Boolean);
 const has = (list: readonly string[], v: unknown) => typeof v === 'string' && list.includes(v);
+export const quotesOf = (s?: string) => (s ?? '').split(QUOTE_SEP).map((q) => q.trim());
+const isoDate = (s: string) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(Date.parse(s)) && new Date(s).toISOString().startsWith(s);
+/** Flags that keep a link from auto-verifying (gate check 5); a human must decide. */
+export const NEEDS_JUDGMENT = ['contested', 'real-world-model', 'needs-review'] as const;
 
 export function parseBbox(s: string): [number, number, number, number] | null {
   const n = s.split(',').map((x) => Number(x.trim()));
@@ -74,9 +78,26 @@ export function validate(t: Tables): string[] {
     if (!isInt(e.from) || !isInt(e.to) || e.from > e.to) errs.push(`${at('Eras', e)}: from/to must be whole years, from not after to`);
     if (!e.source) errs.push(`${at('Eras', e)}: source is required`);
   }
+  const grandfathered = new Set(t.grandfathered.map((g) => g.link_id));
+  const links = unique('Links', t.links as (Tables['links'][number] & Row)[]);
+  for (const g of t.grandfathered as (Tables['grandfathered'][number] & Row)[]) {
+    const l = links.get(g.link_id);
+    if (!l) errs.push(`${at('Grandfathered', g)}: link "${g.link_id}" is not on the Links sheet`);
+  }
+  for (const f of t.freeze as (Tables['freeze'][number] & Row)[]) {
+    if (!has(FREEZE_KINDS, f.kind)) errs.push(`${at('Freeze', f)}: kind "${f.kind ?? ''}" must be one of ${FREEZE_KINDS.join(', ')}`);
+    else if (f.kind === 'role' && !has(ROLES, f.value)) errs.push(`${at('Freeze', f)}: "${f.value}" is not a role`);
+    else if (f.kind === 'series' && !series.has(f.value)) errs.push(`${at('Freeze', f)}: series "${f.value}" is not on the Series sheet`);
+  }
+  for (const q of t.queueIn as (Tables['queueIn'][number] & Row)[]) {
+    if (!q.title) errs.push(`${at('Queue in', q)}: title is empty`);
+    if (q.wikidata && !/^Q\d+$/.test(q.wikidata)) errs.push(`${at('Queue in', q)}: wikidata must look like Q123`);
+    if (q.added && !isoDate(q.added)) errs.push(`${at('Queue in', q)}: added must be a date like 2026-11-05`);
+  }
   for (const l of t.links as (Tables['links'][number] & Row)[]) {
     const w = at('Links', l);
     const flags = flagsOf(l.flags);
+    for (const f of flags) if (!has(FLAGS, f)) errs.push(`${w}: flag "${f}" must be one of ${FLAGS.join(', ')}`);
     const years = l.from !== undefined || l.to !== undefined;
     const yearsOk = isInt(l.from) && isInt(l.to) && l.from <= l.to;
     if (!games.has(l.game_id)) errs.push(`${w}: game_id "${l.game_id ?? ''}" is not on the Games sheet`);
@@ -89,6 +110,25 @@ export function validate(t: Tables): string[] {
     if (!urls(l.sources).length) errs.push(`${w}: at least one source URL is required`);
     for (const u of urls(l.sources)) if (!/^https?:\/\//.test(u)) errs.push(`${w}: source "${u}" is not a URL`);
     if (!has(CONFIDENCE, l.confidence)) errs.push(`${w}: confidence "${l.confidence ?? ''}" must be one of ${CONFIDENCE.join(', ')}`);
+    // Quotes: one per source, same order, with the date they were checked (rules section 6).
+    const nSources = urls(l.sources).length;
+    if (l.quote !== undefined) {
+      const qs = quotesOf(l.quote);
+      if (qs.length !== nSources) errs.push(`${w}: ${qs.length} quote(s) for ${nSources} source(s); give one quote per source, separated by "${QUOTE_SEP.trim()}"`);
+      if (qs.some((q) => !q)) errs.push(`${w}: a quote is empty`);
+      if (!l.accessed) errs.push(`${w}: quote needs the accessed date`);
+    }
+    if (l.accessed !== undefined && !isoDate(l.accessed)) errs.push(`${w}: accessed must be a date like 2026-11-05`);
+    else if (l.accessed && l.accessed > new Date().toISOString().slice(0, 10)) errs.push(`${w}: accessed is in the future`);
+    if (l.accessed && l.quote === undefined) errs.push(`${w}: accessed is set but there is no quote`);
+    if (l.status === 'auto-verified' && !l.quote) errs.push(`${w}: auto-verified links need a quote for every source`);
+    if (l.status === 'verified' && !l.quote && !grandfathered.has(l.id)) errs.push(`${w}: verified links need a quote for every source (only links on the Grandfathered sheet are exempt)`);
+    if (l.status === 'auto-verified') for (const f of NEEDS_JUDGMENT) if (flags.includes(f)) errs.push(`${w}: flag ${f} needs a human; status cannot be auto-verified`);
+    // Rules sections 3 and 4.
+    if (flags.includes('inferred-time') && l.confidence !== 'low') errs.push(`${w}: inferred-time links are low confidence (season rule, present-day rule, real-world model)`);
+    if (flags.includes('real-world-model') && !flags.includes('inferred-time')) errs.push(`${w}: a real-world-model date is inferred; add the inferred-time flag`);
+    const place = places.get(l.place_id);
+    if (place?.type === 'country' && !l.note) errs.push(`${w}: country pins are a last resort; say in note that the source names nothing smaller`);
     if (l.era_id && !eras.has(l.era_id)) errs.push(`${w}: era_id "${l.era_id}" is not on the Eras sheet`);
     if (years && !yearsOk) errs.push(`${w}: from/to must both be whole years, from not after to`);
     switch (l.time_type) {
@@ -102,13 +142,13 @@ export function validate(t: Tables): string[] {
   return errs;
 }
 
-/** Verified links only, grouped by game. Assumes validate() returned no errors. */
+/** Links shown on the map (verified and auto-verified), grouped by game. Assumes validate() returned no errors. */
 export function buildAtlas(t: Tables): Atlas {
   const places = new Map(t.places.map((p) => [p.id, p]));
   const eras = new Map(t.eras.map((e) => [e.id, e]));
   const byGame = new Map<string, Link[]>();
   for (const l of t.links) {
-    if (l.status !== 'verified') continue;
+    if (!has(SHOWN, l.status)) continue;
     const p = places.get(l.place_id)!;
     const loc = locate(p.id, places)!;
     const era = l.era_id ? eras.get(l.era_id) : undefined;
@@ -124,6 +164,7 @@ export function buildAtlas(t: Tables): Atlas {
       ...(l.name_in_game ? { nameInGame: l.name_in_game } : {}),
       ...(span ? { span } : {}),
       ...(l.note ? { note: l.note } : {}),
+      ...(l.status === 'auto-verified' ? { auto: true } : {}),
     };
     byGame.set(l.game_id, [...(byGame.get(l.game_id) ?? []), link]);
   }

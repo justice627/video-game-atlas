@@ -12,4 +12,4 @@ const atlas = buildAtlas(tables);
 mkdirSync(new URL('../public', import.meta.url), { recursive: true });
 writeFileSync(new URL('../public/atlas.json', import.meta.url), JSON.stringify(atlas));
 const n = (s: string) => tables.links.filter((l) => l.status === s).length;
-console.log(`atlas.json: ${atlas.games.length} games, ${n('verified')} verified links (${n('draft')} draft, ${n('excluded')} excluded not shown); ${tables.candidates.length} candidates`);
+console.log(`atlas.json: ${atlas.games.length} games, ${n('verified')} verified and ${n('auto-verified')} auto-verified links (${n('draft')} draft, ${n('needs-human')} needs-human, ${n('excluded')} excluded not shown); ${tables.candidates.length} candidates`);

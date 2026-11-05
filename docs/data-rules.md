@@ -9,7 +9,7 @@ How a game gets into the atlas, and what a finished entry looks like. These rule
 | `series` | game series or franchise | id, name, Wikidata ID |
 | `games` | game | id, title, series, Wikidata ID, release year |
 | `places` | real-world place | id, name, Wikidata or GeoNames ID, coordinates, type, parent place |
-| `links` | game × place × time | game, place, role, time, level or landmark name, source, confidence, status, flags, note |
+| `links` | game × place × time | id, game, place, role, time, level or landmark name, sources, quotes, accessed date, confidence, status, flags, note |
 
 Almost all the work happens in `links`. Series, games and places are reference data, and a link is a claim: *this game uses this place, in this way, at this time, and here is the source.*
 
@@ -88,7 +88,7 @@ A series groups games that share a franchise, so overlapping places can be shown
 
 ## 6. Sources and confidence
 
-Every link needs at least one source URL that supports its place, role and time. The link's confidence is that of its best source:
+Every link needs at least one source URL that supports its place, role and time, and a quote from each source (section 7). The link's confidence is that of its best source:
 
 | Confidence | Source |
 | --- | --- |
@@ -101,13 +101,19 @@ Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 ## 7. Workflow
 
 1. **`candidate`:** a game someone or something suggested, for example from Wikidata or a theme idea. Candidates live in `data/candidates.csv`, with Wikidata's claims as unverified leads. Not shown.
-2. **`draft`:** researched, every link sourced. AI may draft at this stage. Not shown.
-3. **`verified`:** you checked the links against the sources. The only status shown on the map.
-4. **`excluded`:** kept for the record, with a reason. Not shown.
+2. **`draft`:** researched, every link sourced, with a quote per source. AI may draft at this stage. Not shown.
+3. **`auto-verified`:** passed every check of the automatic gate (`docs/plans/pipeline.md`, section 4.4): valid, every quote found in a snapshot of its source, a `medium` or better source (or a deterministic `inferred-time` rule with quoted inputs), no fact-checker objection, and no flag that needs judgment (`contested`, `real-world-model`, `needs-review`). Shown on the map, marked "auto". A sample is audited by hand.
+4. **`needs-human`:** failed or skipped a gate check that research can't fix. Not shown; waits in the review queue with the reason.
+5. **`verified`:** you checked the links against the sources. Shown. Never changed automatically: a proposed change goes to the review queue, and the link keeps its values until you approve.
+6. **`excluded`:** kept for the record, with a reason. Not shown.
+
+**Quotes.** Each source on a link has a quote: the sentence or sentences that support the claim, in `quote`, separated by ` | ` in the same order as `sources`. A source that supports two claims with separate sentences is listed twice. ` … ` marks an elision inside one quote. `accessed` is the date the quotes were checked. Links verified before 2026-11 may lack quotes; they're listed in `data/grandfathered.csv`, and that list never grows.
+
+**Ids.** Every link has a stable `id`, `game_id/place_id`, with `/2`, `/3` for a second or third link to the same place. Ids are never reused or changed.
 
 **Research reports.** When a question needs more than a game's own article (dating a whole series, settling conflicting sources), write it up as a report in `docs/research/`, named after the topic. The report gives one proposed row per game in the rules' terms (time type, years, flags, confidence) with a source and quote for each claim, and lists what was rejected and why. Links that rely on a report name it in their note. A report proposes; the links still go through `draft` and `verified` as usual.
 
-A game is done when it has at least one link with a role, a place carrying an ID and coordinates, a time type, a source and a confidence, and you have verified it. A verified link can still carry a flag such as `needs-time`: it is correct, just incomplete.
+A game is done when it has at least one link with a role, a place carrying an ID and coordinates, a time type, a source with its quote and a confidence, and it is verified or auto-verified. A verified link can still carry a flag such as `needs-time`: it is correct, just incomplete.
 
 ## Worked examples
 
