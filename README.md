@@ -13,7 +13,10 @@ npm install
 npm run dev        # builds public/atlas.json, starts Vite
 npm test
 npm run build      # data + typecheck + production build into dist/
+npm run test:e2e   # browser tests (Playwright) against the production build
 ```
+
+Browser tests live in `e2e/`. First time on a machine, install the browser with `npx playwright install chromium`. They compute expected results from `public/atlas.json` with the app's own filter code, so verifying more games never breaks them; series grouping is tested against a fixed fixture (`e2e/fixtures/series-atlas.json`). Map tiles are blocked during tests, so they need no network. GitHub Actions runs them on pushes to `main` and `local` and on pull requests (`.github/workflows/browser-tests.yml`); Netlify runs the unit tests on each deploy.
 
 ## Data
 

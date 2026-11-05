@@ -154,6 +154,8 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         map.on('mouseenter', l, () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', l, () => (map.getCanvas().style.cursor = ''));
       }
+      // Marks the map ready once its data has rendered; browser tests wait for this.
+      map.on('idle', () => { container.dataset.mapReady = '1'; });
       resolve();
     });
   }));

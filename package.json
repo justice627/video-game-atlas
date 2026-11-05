@@ -13,9 +13,11 @@
     "data:export": "tsx scripts/data-export.ts",
     "data:import": "tsx scripts/data-import.ts",
     "sync:wikidata": "tsx scripts/sync-wikidata.ts",
-    "place:lookup": "tsx scripts/place-lookup.ts"
+    "place:lookup": "tsx scripts/place-lookup.ts",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@types/geojson": "^7946.0.16",
     "@types/node": "^22.9.0",
     "exceljs": "^4.4.0",
