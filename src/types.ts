@@ -4,7 +4,7 @@ export const ROLES: Role[] = ['setting', 'level', 'arena', 'inspiration', 'strat
 export const ROLE_LABEL: Record<Role, string> = {
   setting: 'Setting',
   level: 'Level',
-  arena: 'Arena / circuit',
+  arena: 'Venues (sports, racing)',
   inspiration: 'Fictional inspiration',
   strategy: 'Strategy map',
 };
@@ -37,6 +37,7 @@ export interface Link {
   note?: string;
 }
 
-export interface Game { id: string; title: string; wikidata?: string; year?: number; wikipedia?: string; links: Link[] }
+export interface Series { id: string; name: string; wikidata?: string }
+export interface Game { id: string; title: string; series?: string; wikidata?: string; year?: number; wikipedia?: string; links: Link[] }
 
-export interface Atlas { built: string; games: Game[] }
+export interface Atlas { built: string; series: Series[]; games: Game[] }

@@ -1,5 +1,12 @@
-import maplibregl, { type GeoJSONSource, type MapGeoJSONFeature, type StyleSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { GeoJSONSource, MapGeoJSONFeature, StyleSpecification } from 'maplibre-gl';
+import type { Point } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// MapLibre 6 runs its tile parsing in a module worker that the app must point it to.
+// Vite copies the self-contained worker file into the build and gives back its URL.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+
+maplibregl.setWorkerUrl(workerUrl);
 import type { Hit } from './filter.ts';
 import type { Role } from './types.ts';
 import { ROLE_LABEL } from './types.ts';
@@ -57,26 +64,45 @@ function hitHtml(h: Hit): string {
   </div>`;
 }
 
+/** Several games at one place in one series: one popup block listing each game and the name it uses. */
+function groupHtml(group: Hit[], seriesName: (id: string) => string | undefined): string {
+  if (group.length === 1) return hitHtml(group[0]);
+  const first = group[0].link;
+  const series = group[0].game.series ? seriesName(group[0].game.series) : undefined;
+  const items = [...group].sort((a, b) => (a.game.year ?? 0) - (b.game.year ?? 0)).map((h) => {
+    const t = h.game.wikipedia ? `<a href="${esc(h.game.wikipedia)}" target="_blank" rel="noopener">${esc(h.game.title)}</a>` : esc(h.game.title);
+    const as = h.link.nameInGame && h.link.nameInGame !== first.place ? ` · as "${esc(h.link.nameInGame)}"` : '';
+    const when = h.link.span ? ` · ${formatSpan(h.link.span)}` : '';
+    return `<li>${t}${as}<span class="muted">${when}</span></li>`;
+  }).join('');
+  return `<div class="pop-item">
+    <div class="pop-title">${esc(series ?? group[0].game.title)} <span class="muted">(${group.length} games)</span></div>
+    <div><span class="dot" style="background:${ROLE_COLOR[first.role]}"></span>${ROLE_LABEL[first.role]}: ${esc(first.place)}</div>
+    <ul class="pop-list">${items}</ul>
+  </div>`;
+}
+
 export interface AtlasMap {
-  setHits(hits: Hit[]): void;
+  /** Each entry is drawn as one pin: a single hit, or a collapsed series group. */
+  setHits(entries: Hit[][]): void;
   focus(hits: Hit[]): void;
   ready: Promise<void>;
 }
 
-export function mountMap(container: HTMLElement): AtlasMap {
-  let hits: Hit[] = [];
+export function mountMap(container: HTMLElement, seriesName: (id: string) => string | undefined = () => undefined): AtlasMap {
+  let entries: Hit[][] = [];
   let popup: maplibregl.Popup | null = null;
   let map!: maplibregl.Map;
 
-  const showPopup = (lngLat: maplibregl.LngLatLike, list: Hit[]) => {
+  const showPopup = (lngLat: maplibregl.LngLatLike, groups: Hit[][]) => {
     popup?.remove();
-    const more = list.length > 30 ? `<div class="muted">…and ${list.length - 30} more</div>` : '';
-    popup = new maplibregl.Popup({ maxWidth: '320px', className: 'atlas-pop' })
+    const more = groups.length > 30 ? `<div class="muted">…and ${groups.length - 30} more</div>` : '';
+    popup = new maplibregl.Popup({ maxWidth: '340px', className: 'atlas-pop' })
       .setLngLat(lngLat)
-      .setHTML(`<div class="pop-scroll">${list.slice(0, 30).map(hitHtml).join('')}${more}</div>`)
+      .setHTML(`<div class="pop-scroll">${groups.slice(0, 30).map((g) => groupHtml(g, seriesName)).join('')}${more}</div>`)
       .addTo(map);
   };
-  const featureHits = (fs: MapGeoJSONFeature[]) => fs.map((f) => hits[f.properties!.i as number]).filter(Boolean);
+  const featureHits = (fs: MapGeoJSONFeature[]) => fs.map((f) => entries[f.properties!.i as number]).filter(Boolean);
 
   const ready = loadStyle().then((style) => new Promise<void>((resolve) => {
     map = new maplibregl.Map({ container, style, center: [15, 30], zoom: 1.4, attributionControl: { compact: true } });
@@ -118,25 +144,27 @@ export function mountMap(container: HTMLElement): AtlasMap {
         const src = map.getSource('pins') as GeoJSONSource;
         const id = f.properties!.cluster_id as number;
         const leaves = (await src.getClusterLeaves(id, 200, 0)) as MapGeoJSONFeature[];
-        const coords = leaves.map((l) => (l.geometry as GeoJSON.Point).coordinates);
+        const coords = leaves.map((l) => (l.geometry as Point).coordinates);
         const samePlace = coords.every((c) => Math.abs(c[0] - coords[0][0]) < 1e-3 && Math.abs(c[1] - coords[0][1]) < 1e-3);
         if (samePlace) return showPopup(coords[0] as [number, number], featureHits(leaves));
         const zoom = await src.getClusterExpansionZoom(id);
-        map.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom });
+        map.easeTo({ center: (f.geometry as Point).coordinates as [number, number], zoom });
       });
       for (const l of ['pins', 'clusters']) {
         map.on('mouseenter', l, () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', l, () => (map.getCanvas().style.cursor = ''));
       }
+      // Marks the map ready once its data has rendered; browser tests wait for this.
+      map.on('idle', () => { container.dataset.mapReady = '1'; });
       resolve();
     });
   }));
 
-  const toGeo = (hs: Hit[]) => ({
+  const toGeo = (es: Hit[][]) => ({
     pins: {
       type: 'FeatureCollection' as const,
       // Areas (bbox) are drawn as regions only: their centre is not a place, so no pin.
-      features: hs.flatMap((h, i) => (h.link.bbox ? [] : [{
+      features: es.map((e) => e[0]).flatMap((h, i) => (h.link.bbox ? [] : [{
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [h.link.lon, h.link.lat] },
         properties: { i, kind: h.link.role, coarse: h.link.approxPlace || h.approxTime },
@@ -144,7 +172,7 @@ export function mountMap(container: HTMLElement): AtlasMap {
     },
     regions: {
       type: 'FeatureCollection' as const,
-      features: hs.filter((h) => h.link.bbox).map((h) => {
+      features: es.map((e) => e[0]).filter((h) => h.link.bbox).map((h) => {
         const [w, s, e, n] = h.link.bbox!;
         return {
           type: 'Feature' as const, properties: {},
@@ -157,10 +185,10 @@ export function mountMap(container: HTMLElement): AtlasMap {
   return {
     ready,
     setHits(next) {
-      hits = next;
+      entries = next;
       popup?.remove();
       void ready.then(() => {
-        const g = toGeo(hits);
+        const g = toGeo(entries);
         (map.getSource('pins') as GeoJSONSource).setData(g.pins);
         (map.getSource('regions') as GeoJSONSource).setData(g.regions);
       });
@@ -171,7 +199,7 @@ export function mountMap(container: HTMLElement): AtlasMap {
         if (area) {
           const [w, so, e, n] = area.link.bbox!;
           map.fitBounds([[w, so], [e, n]], { padding: 20 });
-          showPopup([area.link.lon, area.link.lat], [area]);
+          showPopup([area.link.lon, area.link.lat], [[area]]);
           return;
         }
         const pts = gameHits.map((h) => [h.link.lon, h.link.lat] as [number, number]);
@@ -181,7 +209,9 @@ export function mountMap(container: HTMLElement): AtlasMap {
           pts.forEach((p) => b.extend(p));
           map.fitBounds(b, { padding: 60, maxZoom: 9 });
         }
-        showPopup(pts[0], [gameHits[0]]);
+        // Everything listed at the first place: one game's link, or a whole series there when collapsed.
+        const here = gameHits.filter((h) => h.link.lon === pts[0][0] && h.link.lat === pts[0][1]);
+        showPopup(pts[0], here.length > 1 && new Set(here.map((h) => h.game.id)).size > 1 ? [here] : here.map((h) => [h]));
       });
     },
   };

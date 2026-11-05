@@ -80,3 +80,9 @@ a { color: var(--accent); }
   .tl-value { min-width: 0; }
   .tl-ticks span:nth-child(5) { display: none; }
 }
+
+.list li.series > ul { list-style: none; margin: 0; padding: 0; }
+.list li.nested button { padding-left: 28px; background: color-mix(in srgb, var(--accent-soft) 35%, transparent); }
+.list li.series > button .li-title { color: var(--accent); }
+.pop-list { margin: 6px 0 0; padding-left: 16px; max-height: 180px; overflow-y: auto; }
+.pop-list li { margin: 2px 0; }

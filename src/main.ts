@@ -2,12 +2,15 @@ import './style.css';
 import type { Atlas, Role } from './types.ts';
 import { ROLES, ROLE_LABEL } from './types.ts';
 import { mountTimeline, MIN_YEAR, MAX_YEAR, type Range } from './timeline.ts';
-import { visiblePlacements, undatedGames, isStrategyLike, type Filters } from './filter.ts';
+import { visiblePlacements, undatedGames, isStrategyLike, groupEntries, type Filters } from './filter.ts';
 import { mountMap, ROLE_COLOR } from './map.ts';
 import { renderList } from './list.ts';
 
 /** Strategy is controlled by its own switch, not a chip. */
 const CHIP_ROLES: Role[] = ROLES.filter((r) => r !== 'strategy');
+/** Venues of sports and racing games are off until asked for (docs/data-rules.md, section 4). */
+const DEFAULT_ROLES: Role[] = CHIP_ROLES.filter((r) => r !== 'arena');
+const sameSet = (a: Set<Role>, b: Role[]) => a.size === b.length && b.every((r) => a.has(r));
 
 function readHash(): Filters {
   const q = new URLSearchParams(location.hash.slice(1));
@@ -15,14 +18,17 @@ function readHash(): Filters {
   const roles = q.get('roles')?.split(',').filter((k): k is Role => CHIP_ROLES.includes(k as Role));
   let range: Range = { from: num('from', MIN_YEAR), to: num('to', MAX_YEAR) };
   if (range.from > range.to) range = { from: range.to, to: range.from };
-  return { range, roles: new Set(roles?.length ? roles : CHIP_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1' };
+  return { range, roles: new Set(q.has('roles') ? roles : DEFAULT_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1' };
 }
+
+let collapse = new URLSearchParams(location.hash.slice(1)).get('series') === '1';
 
 function writeHash(f: Filters) {
   const q = new URLSearchParams();
+  if (collapse) q.set('series', '1');
   if (f.range.from !== MIN_YEAR) q.set('from', String(f.range.from));
   if (f.range.to !== MAX_YEAR) q.set('to', String(f.range.to));
-  if (f.roles.size !== CHIP_ROLES.length) q.set('roles', [...f.roles].join(','));
+  if (!sameSet(f.roles, DEFAULT_ROLES)) q.set('roles', [...f.roles].join(','));
   if (!f.showCoarse) q.set('coarse', '0');
   if (f.showStrategy) q.set('strategy', '1');
   history.replaceState(null, '', q.size ? `#${q}` : location.pathname + location.search);
@@ -33,7 +39,10 @@ async function main() {
   const filters = readHash();
   const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
 
-  const map = mountMap($('#map'));
+  const seriesById = new Map(atlas.series.map((s) => [s.id, s.name]));
+  const seriesName = (id: string) => seriesById.get(id);
+  const map = mountMap($('#map'), seriesName);
+  const group = $<HTMLInputElement>('#group');
   const chips = $('#kinds');
   chips.innerHTML = CHIP_ROLES.map((r) => `<button type="button" class="chip" data-kind="${r}">
       <span class="dot" style="background:${ROLE_COLOR[r]}"></span>${ROLE_LABEL[r]}<span class="chip-n"></span></button>`).join('');
@@ -50,9 +59,10 @@ async function main() {
     frame = requestAnimationFrame(() => {
       coarse.checked = filters.showCoarse;
       strategy.checked = filters.showStrategy;
+      group.checked = collapse;
       const hits = visiblePlacements(atlas.games, filters);
-      map.setHits(hits);
-      renderList($('#list'), $('#count'), hits, undated, (gh) => map.focus(gh));
+      map.setHits(groupEntries(hits, collapse));
+      renderList($('#list'), $('#count'), hits, undated, (gh) => map.focus(gh), { collapse, seriesName });
       // Per-role counts ignore the role filter itself, so you can see what turning one on would add.
       const all = visiblePlacements(atlas.games, { ...filters, roles: new Set(ROLES) });
       chips.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => {
@@ -65,7 +75,12 @@ async function main() {
   };
 
   const timeline = mountTimeline($('#timeline'), filters.range, (r) => { filters.range = r; update(); });
-  window.addEventListener('hashchange', () => { Object.assign(filters, readHash()); timeline.set(filters.range); update(); });
+  window.addEventListener('hashchange', () => {
+    Object.assign(filters, readHash());
+    collapse = new URLSearchParams(location.hash.slice(1)).get('series') === '1';
+    timeline.set(filters.range);
+    update();
+  });
   chips.addEventListener('click', (e) => {
     const c = (e.target as HTMLElement).closest<HTMLButtonElement>('.chip');
     if (!c) return;
@@ -75,6 +90,7 @@ async function main() {
   });
   coarse.addEventListener('change', () => { filters.showCoarse = coarse.checked; update(); });
   strategy.addEventListener('change', () => { filters.showStrategy = strategy.checked; update(); });
+  group.addEventListener('change', () => { collapse = group.checked; update(); });
   update();
 }
 
