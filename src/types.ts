@@ -34,6 +34,8 @@ export interface Link {
   sources: string[];
   confidence: Confidence;
   flags: string[];
+  /** Passed the automatic gate but not yet checked by hand. */
+  auto?: boolean;
   note?: string;
 }
 
