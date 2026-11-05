@@ -17,7 +17,7 @@ Status: proposal, 2026-11-05. Merging this PR approves the plan; implementation 
 
 - **gitleaks 8.21.2** over all refs (`git log --all`, 33 commits): **no findings.**
 - **Manual checks:** author and committer identities are GitHub noreply addresses and `noreply@anthropic.com` only. No other email addresses in any diff except an npm maintainer address inside `package-lock.json` (public package metadata). No home-directory paths, keys, tokens or passwords. Every historical `atlas.xlsx` has creator "video-game-atlas" and last-modified-by "Unknown": no names leak through workbook metadata.
-- **Content worth a look, not a scrub:** `docs/feasibility.md` mentions "ai-hub's `technical-exploration` … skills", which names a private repo. Harmless, but it now points readers at something they can't open. I'll reword it in phase 1 without naming the repository (section 9).
+- **Content worth a look, not a scrub:** `docs/feasibility.md` named a private repository; this PR rewords that line.
 - **Licensing gap:** the repo is public with no `LICENSE`, so legally nobody may reuse it. Decision D1.
 
 Nothing needs scrubbing from history.
@@ -118,7 +118,7 @@ Each phase is one PR, tests green, branch stacked on the previous one, base name
 - `netlify.toml`: fix the stale "exactly 400 games" comment; add `ignore = "bash scripts/netlify-ignore.sh"`.
 - `atlas.xlsx` out of git: `.gitignore`, `git rm --cached`, replace the workbook-matches-CSV test with a round-trip test in a temp dir (export, import, compare tables). README updated.
 - Golden tests (`tests/golden.test.ts`, fixtures in `tests/golden/`): Vice City, Assassin's Creed II, Hitman 3, 2010 FIFA World Cup, Civilization VI, Pokémon, Hitman chain. Each asserts the exact built links for that game. A rule-change PR template section asks which golden tests moved.
-- `docs/feasibility.md`: reword the ai-hub reference; `docs/credits.md` (section 9).
+- `docs/credits.md` (section 9).
 - `LICENSE` and data licence note, per D1.
 
 ### Phase 2: schema and migration
