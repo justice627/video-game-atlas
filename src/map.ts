@@ -8,6 +8,7 @@ import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
 
 maplibregl.setWorkerUrl(workerUrl);
 import type { Hit } from './filter.ts';
+import { distinctBoxes, withoutRelief } from './map-style.ts';
 import type { Role } from './types.ts';
 import { ROLE_LABEL } from './types.ts';
 import { formatSpan, formatYear } from './timeline.ts';
@@ -34,7 +35,7 @@ async function loadStyle(): Promise<string | StyleSpecification> {
     const t = setTimeout(() => ctl.abort(), 6000);
     const res = await fetch(STYLE_URL, { signal: ctl.signal });
     clearTimeout(t);
-    if (res.ok) return (await res.json()) as StyleSpecification;
+    if (res.ok) return withoutRelief((await res.json()) as StyleSpecification);
   } catch { /* offline or blocked: fall through */ }
   console.info('Basemap unavailable, using plain background.');
   return FALLBACK_STYLE;
@@ -123,7 +124,8 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
       });
       map.addLayer({
         id: 'cluster-count', type: 'symbol', source: 'pins', filter: ['has', 'point_count'],
-        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12 },
+        // Always drawn: a count hidden by label collision would pop in and out while zooming.
+        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-allow-overlap': true, 'text-ignore-placement': true },
         paint: { 'text-color': '#fff' },
       });
       const color: maplibregl.ExpressionSpecification = ['match', ['get', 'kind'], ...Object.entries(ROLE_COLOR).flat(), '#666'] as never;
@@ -173,13 +175,10 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
     },
     regions: {
       type: 'FeatureCollection' as const,
-      features: es.map((e) => e[0]).filter((h) => h.link.bbox).map((h) => {
-        const [w, s, e, n] = h.link.bbox!;
-        return {
-          type: 'Feature' as const, properties: {},
-          geometry: { type: 'Polygon' as const, coordinates: [[[w, s], [e, s], [e, n], [w, n], [w, s]]] },
-        };
-      }),
+      features: distinctBoxes(es).map(([w, s, e, n]) => ({
+        type: 'Feature' as const, properties: {},
+        geometry: { type: 'Polygon' as const, coordinates: [[[w, s], [e, s], [e, n], [w, n], [w, s]]] },
+      })),
     },
   });
 
