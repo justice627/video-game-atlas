@@ -33,12 +33,13 @@ export interface CandidateRow {
   id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string;
   lead_source?: string; lead_places?: string; lead_periods?: string; flags?: string; note?: string;
 }
+export interface ChronologyRow { from: string; to: string; relation: string; interval_years?: number; source?: string; quote?: string; accessed?: string; note?: string }
 export interface QueueInRow { title: string; wikidata?: string; wikipedia?: string; note?: string; added?: string }
 export interface FreezeRow { kind: string; value: string; note?: string }
 export interface GrandfatheredRow { link_id: string; note?: string }
 export interface Tables {
   series: SeriesRow[]; games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[];
-  queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[];
+  chronology: ChronologyRow[]; queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[];
 }
 
 export interface Col { key: string; width: number; help: string; list?: readonly string[]; numeric?: boolean }
@@ -110,6 +111,16 @@ export const TABLES: TableDef[] = [
     { key: 'lead_places', width: 50, help: 'Unverified places from Wikidata or v0.1.' },
     { key: 'lead_periods', width: 36, help: 'Unverified periods from Wikidata or v0.1.' },
     { key: 'flags', width: 30, help: 'Problems found in the v0.1 review.' },
+    { key: 'note', width: 30, help: 'Free text.' },
+  ] },
+  { name: 'Chronology', file: 'chronology.csv', key: 'chronology', cols: [
+    { key: 'from', width: 28, help: 'Where the chain starts: a link id (game/place), a game id (its main story), year:1999 or era:<era id>.' },
+    { key: 'to', width: 28, help: 'What it dates: a link id or a game id. A game id dates every derived-time link of that game without a row of its own.' },
+    { key: 'relation', width: 9, help: 'to is after, before or during from.', list: ['after', 'before', 'during'] },
+    { key: 'interval_years', width: 9, help: 'Years between them, only if the source states it. Empty for "following", "later", "after".', numeric: true },
+    { key: 'source', width: 40, help: 'One URL.' },
+    { key: 'quote', width: 40, help: 'The sentence that states the relation. With a year: anchor, the quote must contain the year.' },
+    { key: 'accessed', width: 11, help: 'ISO date the quote was checked.' },
     { key: 'note', width: 30, help: 'Free text.' },
   ] },
   { name: 'Queue in', file: 'queue-in.csv', key: 'queueIn', cols: [

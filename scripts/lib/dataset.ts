@@ -1,5 +1,6 @@
 // Validates the tables against docs/data-rules.md and builds public/atlas.json from verified and auto-verified links.
 import type { Atlas, Game, Link, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
+import { resolve, type Chronology } from './chronology.ts';
 import { CONFIDENCE, FLAGS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
 
 type Row = { _row?: number };
@@ -31,6 +32,14 @@ export function locate(placeId: string, places: Map<string, PlaceRow>): { lat: n
     inherited = true;
   }
   return null;
+}
+
+const fmt = (s: { lo: number; hi: number }) => `${Number.isFinite(s.lo) ? s.lo : '…'}–${Number.isFinite(s.hi) ? s.hi : '…'}`;
+/** Exact years for a derived-time link left without years, when its chain is fully stated. */
+function derivedYears(l: Tables['links'][number], chron: Chronology) {
+  if (!flagsOf(l.flags).includes('derived-time') || !chron.reached(l.id)) return undefined;
+  const s = chron.span(l.id);
+  return s && Number.isFinite(s.lo) && Number.isFinite(s.hi) ? { from: s.lo, to: s.hi } : undefined;
 }
 
 /** Problems with the data. Empty means valid. */
@@ -79,6 +88,8 @@ export function validate(t: Tables): string[] {
     if (!e.source) errs.push(`${at('Eras', e)}: source is required`);
   }
   const grandfathered = new Set(t.grandfathered.map((g) => g.link_id));
+  const chron = resolve(t);
+  errs.push(...chron.errors);
   const links = unique('Links', t.links as (Tables['links'][number] & Row)[]);
   for (const g of t.grandfathered as (Tables['grandfathered'][number] & Row)[]) {
     const l = links.get(g.link_id);
@@ -127,12 +138,21 @@ export function validate(t: Tables): string[] {
     // Rules sections 3 and 4.
     if (flags.includes('inferred-time') && l.confidence !== 'low') errs.push(`${w}: inferred-time links are low confidence (season rule, present-day rule, real-world model)`);
     if (flags.includes('real-world-model') && !flags.includes('inferred-time')) errs.push(`${w}: a real-world-model date is inferred; add the inferred-time flag`);
+    // Chains (section 4): derived years must come from chronology rows and agree with them.
+    const shown = has(SHOWN, l.status) || l.status === 'needs-human';
+    if (flags.includes('derived-time') && shown && !grandfathered.has(l.id)) {
+      if (!chron.reached(l.id)) errs.push(`${w}: derived-time links need a chronology row for the link or its game`);
+      else if (!chron.span(l.id)) errs.push(`${w}: the chain reaching this link has no dated anchor, so it gives no year; make the link undated`);
+    }
+    const s = chron.reached(l.id) ? chron.span(l.id) : undefined;
+    if (s && yearsOk && (l.from! < s.lo || l.to! > s.hi))
+      errs.push(`${w}: years ${l.from}–${l.to} fall outside what the chain allows (${fmt(s)})`);
     const place = places.get(l.place_id);
     if (place?.type === 'country' && !l.note) errs.push(`${w}: country pins are a last resort; say in note that the source names nothing smaller`);
     if (l.era_id && !eras.has(l.era_id)) errs.push(`${w}: era_id "${l.era_id}" is not on the Eras sheet`);
     if (years && !yearsOk) errs.push(`${w}: from/to must both be whole years, from not after to`);
     switch (l.time_type) {
-      case 'fixed': if (!yearsOk) errs.push(`${w}: time_type fixed needs from and to`); break;
+      case 'fixed': if (!yearsOk && !(years === false && derivedYears(l, chron))) errs.push(`${w}: time_type fixed needs from and to (or derived-time with a chain that gives exact years)`); break;
       case 'era': if (!l.era_id) errs.push(`${w}: time_type era needs an era_id`); if (years) errs.push(`${w}: time_type era takes its years from the era; leave from/to empty`); break;
       case 'sandbox': if (!yearsOk && !l.era_id && !flags.includes('needs-time')) errs.push(`${w}: time_type sandbox needs from/to, an era_id, or the needs-time flag`); break;
       case 'undated': if (years || l.era_id) errs.push(`${w}: time_type undated takes no years or era`); if (!flags.includes('needs-time')) errs.push(`${w}: undated links must carry the needs-time flag`); break;
@@ -147,12 +167,14 @@ export function buildAtlas(t: Tables): Atlas {
   const places = new Map(t.places.map((p) => [p.id, p]));
   const eras = new Map(t.eras.map((e) => [e.id, e]));
   const byGame = new Map<string, Link[]>();
+  const chron = resolve(t);
   for (const l of t.links) {
     if (!has(SHOWN, l.status)) continue;
     const p = places.get(l.place_id)!;
     const loc = locate(p.id, places)!;
     const era = l.era_id ? eras.get(l.era_id) : undefined;
-    const span = l.from !== undefined ? { from: l.from, to: l.to! } : era ? { from: era.from, to: era.to, label: era.name } : undefined;
+    const derived = l.from === undefined && l.time_type === 'fixed' ? derivedYears(l, chron) : undefined;
+    const span = l.from !== undefined ? { from: l.from, to: l.to! } : derived ? derived : era ? { from: era.from, to: era.to, label: era.name } : undefined;
     const link: Link = {
       place: p.name, placeType: p.type as PlaceType, lat: loc.lat, lon: loc.lon,
       approxPlace: loc.inherited || p.type === 'country' || p.type === 'region',

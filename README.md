@@ -30,6 +30,7 @@ Plain CSV tables in `data/` are the source of truth, shaped for a later move to 
 | `links.csv` | claim that a game uses a place, in a role, at a time, with sources, confidence and status |
 | `eras.csv` | named period with years and a source |
 | `candidates.csv` | game not yet researched, with Wikidata's claims as unverified leads |
+| `chronology.csv` | sourced relation between two links or games (after, before, during), used to work out `derived-time` years |
 | `queue-in.csv` | game you want researched first |
 | `freeze.csv` | role or series that research skips (sports and venues, for now) |
 | `grandfathered.csv` | links verified before quotes were required; a fixed list |
