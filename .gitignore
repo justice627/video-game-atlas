@@ -3,3 +3,6 @@ dist
 public/atlas.json
 test-results/
 playwright-report/
+data/atlas.xlsx
+~$*.xlsx
+.cache/

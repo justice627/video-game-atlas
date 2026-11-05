@@ -1,9 +1,12 @@
-# Netlify builds every push to the production branch (main) and every pull request
-# as a deploy preview. Tests run first; a failing test or an invalid dataset
-# (anything other than exactly 400 games) fails the deploy.
+# Netlify builds deploy previews for pull requests and production for main.
+# Tests run first: a failing test or invalid data (validate() in scripts/lib/dataset.ts)
+# fails the deploy. Production builds that change only data, docs or review files are
+# skipped by scripts/netlify-ignore.sh to save build credits; the scheduled data deploy
+# (Monday and Thursday, via a build hook) publishes them.
 [build]
   command = "npm test && npm run build"
   publish = "dist"
+  ignore = "bash scripts/netlify-ignore.sh"
 
 [build.environment]
   NODE_VERSION = "22"

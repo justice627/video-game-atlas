@@ -12,6 +12,7 @@
     "test": "vitest run",
     "data:export": "tsx scripts/data-export.ts",
     "data:import": "tsx scripts/data-import.ts",
+    "golden:update": "tsx scripts/golden-update.ts",
     "sync:wikidata": "tsx scripts/sync-wikidata.ts",
     "place:lookup": "tsx scripts/place-lookup.ts",
     "test:e2e": "playwright test"
