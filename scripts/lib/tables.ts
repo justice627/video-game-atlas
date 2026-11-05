@@ -34,13 +34,17 @@ export interface CandidateRow {
   id: string; title: string; wikidata?: string; release_year?: number; wikipedia?: string;
   lead_source?: string; lead_places?: string; lead_periods?: string; flags?: string; note?: string;
 }
+export const TIERS = ['high', 'medium', 'low'] as const;
+export const ACCESS = ['mediawiki', 'steam', 'html', 'none'] as const;
+export const SOURCE_STATUS = ['ok', 'needs-review', 'blocked', 'paid'] as const;
+export interface SourceRow { domain: string; name: string; tier: string; access: string; api?: string; status: string; rate_ms?: number; licence?: string; note?: string }
 export interface ChronologyRow { from: string; to: string; relation: string; interval_years?: number; source?: string; quote?: string; accessed?: string; note?: string }
 export interface QueueInRow { title: string; wikidata?: string; wikipedia?: string; note?: string; added?: string }
 export interface FreezeRow { kind: string; value: string; note?: string }
 export interface GrandfatheredRow { link_id: string; note?: string }
 export interface Tables {
   series: SeriesRow[]; games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[];
-  chronology: ChronologyRow[]; queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[];
+  chronology: ChronologyRow[]; sources: SourceRow[]; queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[];
 }
 
 export interface Col { key: string; width: number; help: string; list?: readonly string[]; numeric?: boolean }
@@ -124,6 +128,17 @@ export const TABLES: TableDef[] = [
     { key: 'quote', width: 40, help: 'The sentence that states the relation. With a year: anchor, the quote must contain the year.' },
     { key: 'accessed', width: 11, help: 'ISO date the quote was checked.' },
     { key: 'note', width: 30, help: 'Free text.' },
+  ] },
+  { name: 'Sources', file: 'sources.csv', key: 'sources', cols: [
+    { key: 'domain', width: 26, help: 'Host or parent domain (wikipedia.org covers every language). The most specific match wins.' },
+    { key: 'name', width: 24, help: 'Display name.' },
+    { key: 'tier', width: 8, help: 'Confidence a source here gives (rules section 6).', list: TIERS },
+    { key: 'access', width: 10, help: 'How verify-sources reads it: MediaWiki API, Steam appdetails, plain HTML, or none (not machine-checkable).', list: ACCESS },
+    { key: 'api', width: 12, help: 'MediaWiki API path on that host, e.g. /w/api.php.' },
+    { key: 'status', width: 12, help: 'ok: fetch it. needs-review: not yet tried or terms unchecked. blocked: refuses automated fetching; never work around it. paid.', list: SOURCE_STATUS },
+    { key: 'rate_ms', width: 8, help: 'Minimum milliseconds between requests to one host.', numeric: true },
+    { key: 'licence', width: 16, help: 'Licence of the text. CC-licensed text keeps 600 characters of evidence context, other text 300 (decision D7).' },
+    { key: 'note', width: 40, help: 'Free text: what it is good for, limits, history.' },
   ] },
   { name: 'Queue in', file: 'queue-in.csv', key: 'queueIn', cols: [
     { key: 'title', width: 36, help: 'A game to research before anything else. Research runs take these first, top to bottom.' },

@@ -107,6 +107,8 @@ Every link needs at least one source URL that supports its place, role and time,
 
 Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 
+**The source bank** (`data/sources.csv`) records each domain's tier from this table, how its text is read, and whether it can be fetched at all. Every source URL's domain must be in the bank, and a link's confidence can't be higher than the best tier among its sources. Add a domain to the bank, with its tier, before using it. A domain marked `blocked` refuses automated fetching: its quotes come from you through the review queue, never from a workaround.
+
 ## 7. Workflow
 
 1. **`candidate`:** a game someone or something suggested, for example from Wikidata or a theme idea. Candidates live in `data/candidates.csv`, with Wikidata's claims as unverified leads. Not shown.

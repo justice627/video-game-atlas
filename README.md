@@ -33,6 +33,8 @@ Plain CSV tables in `data/` are the source of truth, shaped for a later move to 
 | `chronology.csv` | sourced relation between two links or games (after, before, during), used to work out `derived-time` years |
 | `queue-in.csv` | game you want researched first |
 | `freeze.csv` | role or series that research skips (sports and venues, for now) |
+| `sources.csv` | source bank: each domain's confidence tier, how it is read, and whether it can be fetched |
+| `evidence/` | small records proving each quote was found in its source (URL, date, content hash, a few hundred characters of context) |
 | `grandfathered.csv` | links verified before quotes were required; a fixed list |
 | `atlas.xlsx` | Excel editing view of all of the above, generated locally by `data:export` and not committed |
 
@@ -41,6 +43,8 @@ Links with status `verified` or `auto-verified` reach the map; auto-verified one
 ```bash
 npm run data:export                       # tables -> data/atlas.xlsx
 npm run data:import                       # data/atlas.xlsx -> tables, after validation
+npm run verify:sources -- --offline      # every quote has evidence (no network)
+npm run verify:sources -- --fetch        # fetch sources for quotes without evidence
 npm run place:lookup -- "Monteriggioni"   # find a place's Wikidata id
 npm run place:lookup -- Q91228            # its coordinates and type, for places.csv
 npm run fetch:wikidata && npm run sync:wikidata   # refresh the snapshot, add new candidates

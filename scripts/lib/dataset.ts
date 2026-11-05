@@ -1,7 +1,8 @@
 // Validates the tables against docs/data-rules.md and builds public/atlas.json from verified and auto-verified links.
 import type { Atlas, Game, Link, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
 import { resolve, type Chronology } from './chronology.ts';
-import { CONFIDENCE, DEPICTIONS, FLAGS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
+import { bankFor } from './sources.ts';
+import { ACCESS, CONFIDENCE, DEPICTIONS, FLAGS, SOURCE_STATUS, TIERS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
 
 type Row = { _row?: number };
 const at = (sheet: string, r: Row) => `${sheet} row ${r._row ?? '?'}`;
@@ -34,6 +35,7 @@ export function locate(placeId: string, places: Map<string, PlaceRow>): { lat: n
   return null;
 }
 
+const RANK: Record<string, number> = { low: 0, medium: 1, high: 2 };
 const fmt = (s: { lo: number; hi: number }) => `${Number.isFinite(s.lo) ? s.lo : '…'}–${Number.isFinite(s.hi) ? s.hi : '…'}`;
 /** Exact years for a derived-time link left without years, when its chain is fully stated. */
 function derivedYears(l: Tables['links'][number], chron: Chronology) {
@@ -95,6 +97,19 @@ export function validate(t: Tables): string[] {
     const l = links.get(g.link_id);
     if (!l) errs.push(`${at('Grandfathered', g)}: link "${g.link_id}" is not on the Links sheet`);
   }
+  const bankSeen = new Set<string>();
+  for (const b of t.sources as (Tables['sources'][number] & Row)[]) {
+    const w = at('Sources', b);
+    if (!b.domain || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(b.domain) || b.domain.startsWith('www.')) errs.push(`${w}: domain "${b.domain ?? ''}" must be a bare host like wikipedia.org`);
+    else if (bankSeen.has(b.domain)) errs.push(`${w}: domain ${b.domain} is listed twice`);
+    bankSeen.add(b.domain);
+    if (!has(TIERS, b.tier)) errs.push(`${w}: tier "${b.tier ?? ''}" must be one of ${TIERS.join(', ')}`);
+    if (!has(ACCESS, b.access)) errs.push(`${w}: access "${b.access ?? ''}" must be one of ${ACCESS.join(', ')}`);
+    if (!has(SOURCE_STATUS, b.status)) errs.push(`${w}: status "${b.status ?? ''}" must be one of ${SOURCE_STATUS.join(', ')}`);
+    if (b.access === 'mediawiki' && !b.api) errs.push(`${w}: mediawiki access needs the api path`);
+  }
+  for (const c of t.chronology as (Tables['chronology'][number] & Row)[])
+    if (c.source && /^https?:\/\//.test(c.source) && !bankFor(c.source, t.sources)) errs.push(`${at('Chronology', c)}: source domain ${new URL(c.source).hostname} is not in the source bank`);
   for (const f of t.freeze as (Tables['freeze'][number] & Row)[]) {
     if (!has(FREEZE_KINDS, f.kind)) errs.push(`${at('Freeze', f)}: kind "${f.kind ?? ''}" must be one of ${FREEZE_KINDS.join(', ')}`);
     else if (f.kind === 'role' && !has(ROLES, f.value)) errs.push(`${at('Freeze', f)}: "${f.value}" is not a role`);
@@ -124,8 +139,16 @@ export function validate(t: Tables): string[] {
     if (l.status === 'excluded' && !l.note) errs.push(`${w}: excluded links need the reason in note`);
     if (l.status === 'excluded') continue; // kept for the record; nothing else to check
     if (!urls(l.sources).length) errs.push(`${w}: at least one source URL is required`);
-    for (const u of urls(l.sources)) if (!/^https?:\/\//.test(u)) errs.push(`${w}: source "${u}" is not a URL`);
+    for (const u of urls(l.sources)) {
+      if (!/^https?:\/\//.test(u)) errs.push(`${w}: source "${u}" is not a URL`);
+      else if (!bankFor(u, t.sources)) errs.push(`${w}: source domain ${new URL(u).hostname} is not in the source bank (data/sources.csv); add it with its tier first`);
+    }
     if (!has(CONFIDENCE, l.confidence)) errs.push(`${w}: confidence "${l.confidence ?? ''}" must be one of ${CONFIDENCE.join(', ')}`);
+    else {
+      // Rules section 6: a link's confidence is that of its best source, so it can't exceed the best tier.
+      const best = Math.max(-1, ...urls(l.sources).map((u) => { const b = /^https?:\/\//.test(u) ? bankFor(u, t.sources) : undefined; return b ? RANK[b.tier] ?? -1 : -1; }));
+      if (best >= 0 && RANK[l.confidence!] > best) errs.push(`${w}: confidence ${l.confidence} is higher than its best source (${TIERS.find((x) => RANK[x] === best)}, per data/sources.csv)`);
+    }
     // Quotes: one per source, same order, with the date they were checked (rules section 6).
     const nSources = urls(l.sources).length;
     if (l.quote !== undefined) {
