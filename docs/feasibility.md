@@ -1,6 +1,6 @@
 # Video Game Atlas: feasibility
 
-Probed on 2026-11-04. Method follows ai-hub's `technical-exploration` (smallest informative experiment first) and `compare-and-decide` skills.
+Probed on 2026-11-04, starting with the smallest informative experiment.
 
 ## Verdict
 
