@@ -42,3 +42,11 @@ export const listedCount = async (page: Page) => Number(await page.locator('#cou
 export async function listedTitles(page: Page): Promise<string[]> {
   return (await page.locator('#list .li-title').allInnerTexts()).map((t) => t.replace(/\s*\(\d{4}\)$/, '').trim()).sort();
 }
+/**
+ * Waits for the list to show exactly these titles. The page renders the list in the next
+ * animation frame after a filter change (src/main.ts, update()), while controls such as the
+ * timeline label update at once, so a single read right after a change can see the old list.
+ */
+export async function expectListed(page: Page, titles: string[]) {
+  await expect.poll(() => listedTitles(page)).toEqual(titles);
+}
