@@ -1,6 +1,6 @@
 import './style.css';
 import type { Atlas, Role } from './types.ts';
-import { ROLES, ROLE_LABEL } from './types.ts';
+import { ROLES, ROLE_LABEL, DEFAULT_ROLES } from './types.ts';
 import { mountTimeline, MIN_YEAR, MAX_YEAR, type Range } from './timeline.ts';
 import { visiblePlacements, undatedGames, undatedShown, isStrategyLike, groupEntries, type Filters } from './filter.ts';
 import { mountMap, ROLE_COLOR } from './map.ts';
@@ -8,14 +8,14 @@ import { renderList } from './list.ts';
 
 /** Strategy is controlled by its own switch, not a chip. */
 const CHIP_ROLES: Role[] = ROLES.filter((r) => r !== 'strategy');
-/** Venues of sports and racing games are off until asked for (docs/data-rules.md, section 4). */
-const DEFAULT_ROLES: Role[] = CHIP_ROLES.filter((r) => r !== 'arena');
+/** Role names in links shared before the 2026-11 taxonomy (setting, arena; inspiration is now a depiction). */
+const OLD_ROLES: Record<string, Role> = { setting: 'world', arena: 'venue' };
 const sameSet = (a: Set<Role>, b: Role[]) => a.size === b.length && b.every((r) => a.has(r));
 
 function readHash(): Filters {
   const q = new URLSearchParams(location.hash.slice(1));
   const num = (k: string, d: number) => (q.has(k) && Number.isFinite(Number(q.get(k))) ? Number(q.get(k)) : d);
-  const roles = q.get('roles')?.split(',').filter((k): k is Role => CHIP_ROLES.includes(k as Role));
+  const roles = [...new Set(q.get('roles')?.split(',').map((k) => OLD_ROLES[k] ?? k).filter((k): k is Role => CHIP_ROLES.includes(k as Role)))];
   let range: Range = { from: num('from', MIN_YEAR), to: num('to', MAX_YEAR) };
   if (range.from > range.to) range = { from: range.to, to: range.from };
   return { range, roles: new Set(q.has('roles') ? roles : DEFAULT_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1', showUndated: q.get('undated') === '1' };

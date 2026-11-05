@@ -35,7 +35,7 @@ describe('data/*.csv against docs/data-rules.md', () => {
   it('enforces the rules, naming the row', () => {
     const vc = link(tables, 'gta-vice-city');
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').fictional_name = undefined; }))
-      .toContain(`Links row ${vc._row}: role inspiration needs a fictional_name`);
+      .toContain(`Links row ${vc._row}: depiction fictionalized needs a fictional_name`);
     expect(errorsAfter((t) => { link(t, 'gta-vice-city').sources = undefined; })).toContain('at least one source URL is required');
     expect(errorsAfter((t) => { link(t, 'uncharted-golden-abyss').flags = undefined; })).toContain('undated links must carry the needs-time flag');
     expect(errorsAfter((t) => { link(t, 'assassins-creed-ii').time_type = 'era'; })).toContain('time_type era needs an era_id');
@@ -50,7 +50,7 @@ describe('FIFA series once verified', () => {
   const t = structuredClone(tables);
   t.links.filter((l) => l.game_id.startsWith('fifa-1')).forEach((l) => (l.status = 'verified'));
   const atlas = buildAtlas(t);
-  const hits = visiblePlacements(atlas.games, { range: { from: 2017, to: 2019 }, roles: new Set(['arena']), showCoarse: true, showStrategy: false, showUndated: false });
+  const hits = visiblePlacements(atlas.games, { range: { from: 2017, to: 2019 }, roles: new Set(['venue']), showCoarse: true, showStrategy: false, showUndated: false });
   it('collapses shared stadiums into one entry per place', () => {
     const anfield = groupEntries(hits, true).filter((e) => e[0].link.place === 'Anfield');
     expect(anfield).toHaveLength(1);

@@ -57,6 +57,14 @@ describe('pipeline rules', () => {
     expect(errorsAfter((t) => { const l = byId(t, vc); l.flags = 'real-world-model'; }).join('\n')).toContain('add the inferred-time flag');
   });
 
+  it('taxonomy: depiction, venues at landmarks, strategy maps at regions', () => {
+    expect(errorsAfter((t) => { byId(t, vc).depiction = 'inspired'; }).join('\n')).toContain('depiction "inspired" must be one of real, fictionalized');
+    expect(errorsAfter((t) => { byId(t, vc).depiction = 'real'; }).join('\n')).toContain('fictional_name is only for fictionalized places');
+    expect(errorsAfter((t) => { byId(t, 'gallipoli-2026/gallipoli').role = 'venue'; }).join('\n')).toContain('a venue is a stadium, arena, circuit or track: place type landmark, not region');
+    expect(errorsAfter((t) => { byId(t, 'civilization-vi/world').place_id = 'france'; }).join('\n')).toContain('place type region, not country');
+    expect(errorsAfter((t) => { byId(t, 'gallipoli-2026/gallipoli').role = 'map'; })).toEqual([]); // a multiplayer map may be a region
+  });
+
   it('country pins say why nothing smaller was used', () => {
     expect(errorsAfter((t) => { byId(t, 'goldeneye-007/cuba').note = undefined; }).join('\n')).toContain('country pins are a last resort');
   });

@@ -199,3 +199,13 @@ Lifting the sports freeze, the road-trip feature, IGDB playtime, and any change 
 ## 9. Credits
 
 Parts of the verification design adapt principles from a private engineering-guidance collection: producer and verifier kept independent, with the verifier given evidence rather than the producer's conclusion (fact-checker, 3.6); verified throughput capped by verification capacity (backpressure, 3.9); a skipped check counted as uncertainty, never success (blocked sources stay off the map); keeping a checksum of received source data and reconciling counts before and after a load (evidence records, the migration's count check); regression scenarios with deterministic graders (golden tests). The ideas are restated in my own words; no files are copied. Phase 1 adds the same acknowledgement to `docs/credits.md`, without naming the author or the repository.
+
+## 10. Throughput (decided 2026-11-05)
+
+The binding constraint is review time, by design (backpressure at 40 open items); fetch limits, CI, Netlify and the candidate pool are not.
+
+- **Burn-in:** 5 games a day, one run. Every auto-verified link is an audit item, so more games only trip backpressure sooner.
+- **After burn-in:** 10 a day, as two runs of 5. Scale by runs, not batch size: smaller contexts, a failed run loses 5 games, and each data PR stays skimmable.
+- **Ceiling:** about 20 a day (four runs), only if the pilot shows under about 0.5 `needs-human` items per game, plan usage has room, and audits have reached reduced mode.
+
+`docs/plans/scheduled-run.md` will set the frequency from the pilot's measured numbers.

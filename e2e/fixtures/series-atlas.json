@@ -4,17 +4,17 @@
   "games": [
     { "id": "f11", "title": "Fixture FIFA 11", "year": 2010, "series": "fifa", "links": [
       { "place": "Johan Cruyff Arena", "placeType": "landmark", "placeWikidata": "Q207109", "lat": 52.3143, "lon": 4.9419, "approxPlace": false,
-        "role": "arena", "nameInGame": "Amsterdam ArenA", "timeType": "fixed", "span": { "from": 2010, "to": 2011 },
+        "role": "venue", "nameInGame": "Amsterdam ArenA", "timeType": "fixed", "span": { "from": 2010, "to": 2011 },
         "sources": ["https://example.org/fifa-11"], "confidence": "medium", "flags": [] } ] },
     { "id": "f20", "title": "Fixture FIFA 20", "year": 2019, "series": "fifa", "links": [
       { "place": "Johan Cruyff Arena", "placeType": "landmark", "placeWikidata": "Q207109", "lat": 52.3143, "lon": 4.9419, "approxPlace": false,
-        "role": "arena", "nameInGame": "Johan Cruijff ArenA", "timeType": "fixed", "span": { "from": 2019, "to": 2020 },
+        "role": "venue", "nameInGame": "Johan Cruijff ArenA", "timeType": "fixed", "span": { "from": 2019, "to": 2020 },
         "sources": ["https://example.org/fifa-20"], "confidence": "medium", "flags": [] },
       { "place": "Anfield", "placeType": "landmark", "placeWikidata": "Q45671", "lat": 53.4308, "lon": -2.9608, "approxPlace": false,
-        "role": "arena", "timeType": "fixed", "span": { "from": 2019, "to": 2020 },
+        "role": "venue", "timeType": "fixed", "span": { "from": 2019, "to": 2020 },
         "sources": ["https://example.org/fifa-20"], "confidence": "medium", "flags": [] } ] },
     { "id": "vc", "title": "Fixture Vice City", "year": 2002, "links": [
-      { "place": "Miami", "placeType": "city", "lat": 25.77, "lon": -80.19, "approxPlace": false, "role": "inspiration", "fictionalName": "Vice City",
+      { "place": "Miami", "placeType": "city", "lat": 25.77, "lon": -80.19, "approxPlace": false, "role": "world", "fictionalized": true, "fictionalName": "Vice City",
         "timeType": "fixed", "span": { "from": 1986, "to": 1986 }, "sources": ["https://example.org/vc"], "confidence": "medium", "flags": [] } ] }
   ]
 }

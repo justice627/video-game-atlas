@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { expect, type Page } from '@playwright/test';
 import type { Atlas, Role } from '../src/types.ts';
-import { ROLES } from '../src/types.ts';
+import { ROLES, DEFAULT_ROLES as APP_DEFAULT_ROLES } from '../src/types.ts';
 import { visiblePlacements, byGame, undatedGames, type Filters } from '../src/filter.ts';
 import { MIN_YEAR, MAX_YEAR, type Range } from '../src/timeline.ts';
 
@@ -9,7 +9,7 @@ import { MIN_YEAR, MAX_YEAR, type Range } from '../src/timeline.ts';
 export const atlas = (): Atlas => JSON.parse(readFileSync(new URL('../public/atlas.json', import.meta.url), 'utf8'));
 
 /** Mirrors the page's defaults (src/main.ts): venues and strategy off, approximate pins on, all of time. */
-export const DEFAULT_ROLES: Role[] = ['setting', 'level', 'inspiration'];
+export const DEFAULT_ROLES: Role[] = APP_DEFAULT_ROLES;
 export function filters(o: Partial<Filters> = {}): Filters {
   return { range: { from: MIN_YEAR, to: MAX_YEAR }, roles: new Set(DEFAULT_ROLES), showCoarse: true, showStrategy: false, showUndated: false, ...o };
 }

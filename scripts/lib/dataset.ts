@@ -1,7 +1,7 @@
 // Validates the tables against docs/data-rules.md and builds public/atlas.json from verified and auto-verified links.
 import type { Atlas, Game, Link, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
 import { resolve, type Chronology } from './chronology.ts';
-import { CONFIDENCE, FLAGS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
+import { CONFIDENCE, DEPICTIONS, FLAGS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
 
 type Row = { _row?: number };
 const at = (sheet: string, r: Row) => `${sheet} row ${r._row ?? '?'}`;
@@ -114,7 +114,12 @@ export function validate(t: Tables): string[] {
     if (!games.has(l.game_id)) errs.push(`${w}: game_id "${l.game_id ?? ''}" is not on the Games sheet`);
     if (!places.has(l.place_id)) errs.push(`${w}: place_id "${l.place_id ?? ''}" is not on the Places sheet`);
     if (!has(ROLES, l.role)) errs.push(`${w}: role "${l.role ?? ''}" must be one of ${ROLES.join(', ')}`);
-    if (l.role === 'inspiration' && !l.fictional_name) errs.push(`${w}: role inspiration needs a fictional_name`);
+    if (!has(DEPICTIONS, l.depiction)) errs.push(`${w}: depiction "${l.depiction ?? ''}" must be one of ${DEPICTIONS.join(', ')}`);
+    if (l.depiction === 'fictionalized' && !l.fictional_name) errs.push(`${w}: depiction fictionalized needs a fictional_name`);
+    if (l.depiction === 'real' && l.fictional_name) errs.push(`${w}: fictional_name is only for fictionalized places; use name_in_game for a level or an old name`);
+    const pt = places.get(l.place_id)?.type;
+    if (l.role === 'venue' && pt && pt !== 'landmark') errs.push(`${w}: a venue is a stadium, arena, circuit or track: place type landmark, not ${pt}`);
+    if (l.role === 'strategy' && pt && pt !== 'region') errs.push(`${w}: a strategy map covers a region (or the world): place type region, not ${pt}`);
     if (!has(STATUSES, l.status)) errs.push(`${w}: status "${l.status ?? ''}" must be one of ${STATUSES.join(', ')}`);
     if (l.status === 'excluded' && !l.note) errs.push(`${w}: excluded links need the reason in note`);
     if (l.status === 'excluded') continue; // kept for the record; nothing else to check
@@ -178,7 +183,7 @@ export function buildAtlas(t: Tables): Atlas {
     const link: Link = {
       place: p.name, placeType: p.type as PlaceType, lat: loc.lat, lon: loc.lon,
       approxPlace: loc.inherited || p.type === 'country' || p.type === 'region',
-      role: l.role as Role, timeType: l.time_type as TimeType,
+      role: l.role as Role, ...(l.depiction === 'fictionalized' ? { fictionalized: true } : {}), timeType: l.time_type as TimeType,
       sources: urls(l.sources), confidence: l.confidence as Confidence, flags: flagsOf(l.flags),
       ...(p.wikidata ? { placeWikidata: p.wikidata } : {}),
       ...(p.bbox ? { bbox: parseBbox(p.bbox)! } : {}),

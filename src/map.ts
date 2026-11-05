@@ -13,10 +13,11 @@ import { ROLE_LABEL } from './types.ts';
 import { formatSpan, formatYear } from './timeline.ts';
 
 export const ROLE_COLOR: Record<Role, string> = {
-  setting: '#2a6fdb',
+  world: '#2a6fdb',
   level: '#d9771e',
-  arena: '#1f9d63',
-  inspiration: '#9b45c2',
+  map: '#6b5bd6',
+  venue: '#1f9d63',
+  stage: '#b0457a',
   strategy: '#d23c4b',
 };
 

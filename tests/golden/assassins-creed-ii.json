@@ -9,7 +9,7 @@
         "lat": 43.771388888889,
         "lon": 11.254166666667,
         "approxPlace": false,
-        "role": "setting",
+        "role": "world",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
@@ -29,7 +29,7 @@
         "lat": 45.439722222222,
         "lon": 12.331944444444,
         "approxPlace": false,
-        "role": "setting",
+        "role": "world",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
@@ -49,7 +49,7 @@
         "lat": 43.36698535,
         "lon": 11.21803615,
         "approxPlace": false,
-        "role": "setting",
+        "role": "world",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
@@ -69,7 +69,7 @@
         "lat": 43.467719,
         "lon": 11.043221,
         "approxPlace": false,
-        "role": "setting",
+        "role": "world",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"
@@ -89,7 +89,7 @@
         "lat": 44.222777777778,
         "lon": 12.041388888889,
         "approxPlace": false,
-        "role": "setting",
+        "role": "world",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Assassin%27s_Creed_II"

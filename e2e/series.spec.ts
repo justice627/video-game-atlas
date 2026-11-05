@@ -11,6 +11,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test('grouping by series nests games and merges a shared stadium into one popup', async ({ page }) => {
+  // Old role names in the URL (before the 2026-11 taxonomy) still work: setting -> world, arena -> venue.
   const errors = await open(page, 'roles=setting,level,arena,inspiration');
   await expect(page.locator('#count')).toHaveAttribute('data-games', '3');
   await page.locator('#group').check();
@@ -34,5 +35,5 @@ test('grouping by series nests games and merges a shared stadium into one popup'
 test('venue games stay hidden until the venues chip is on', async ({ page }) => {
   await open(page);
   await expect(page.locator('#count')).toHaveAttribute('data-games', '1');
-  await expect(page.locator('.chip[data-kind=arena] .chip-n')).toHaveText('2');
+  await expect(page.locator('.chip[data-kind=venue] .chip-n')).toHaveText('2');
 });

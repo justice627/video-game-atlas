@@ -32,17 +32,17 @@ test('strategy and sandbox games appear only with their switch on', async ({ pag
 
 test('venues chip is off by default and adds venue games when switched on', async ({ page }) => {
   await open(page);
-  const chip = page.locator('.chip[data-kind=arena]');
+  const chip = page.locator('.chip[data-kind=venue]');
   await expect(chip).toHaveAttribute('aria-pressed', 'false');
   await chip.click();
   await expect(chip).toHaveAttribute('aria-pressed', 'true');
-  const roles = new Set<Role>([...DEFAULT_ROLES, 'arena']);
+  const roles = new Set<Role>([...DEFAULT_ROLES, 'venue']);
   expect(await listedTitles(page)).toEqual(expectedTitles(atlas(), filters({ roles })));
 });
 
 test('each role chip count matches the data', async ({ page }) => {
   await open(page);
-  for (const role of ['setting', 'level', 'arena', 'inspiration'] as Role[]) {
+  for (const role of ['world', 'level', 'map', 'venue'] as Role[]) {
     const n = expectedTitles(atlas(), filters({ roles: new Set([role]) })).length;
     await expect(page.locator(`.chip[data-kind=${role}] .chip-n`)).toHaveText(String(n));
   }
@@ -56,6 +56,6 @@ test('hiding approximate locations removes games that only have approximate pins
 });
 
 test('all roles and switches together list every timeline game', async ({ page }) => {
-  await open(page, 'roles=setting,level,arena,inspiration&strategy=1');
+  await open(page, 'roles=world,level,map,venue,stage&strategy=1');
   expect(await listedCount(page)).toBe(expectedTitles(atlas(), filters({ roles: ALL_ROLES, showStrategy: true })).length);
 });

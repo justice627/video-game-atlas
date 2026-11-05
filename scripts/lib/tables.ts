@@ -4,7 +4,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parseCsv, toCsv } from './csv.ts';
 
-export const ROLES = ['setting', 'level', 'arena', 'inspiration', 'strategy'] as const;
+export const ROLES = ['world', 'level', 'map', 'venue', 'stage', 'strategy'] as const;
+export const DEPICTIONS = ['real', 'fictionalized'] as const;
 export const PLACE_TYPES = ['landmark', 'city', 'region', 'country'] as const;
 export const TIME_TYPES = ['fixed', 'era', 'sandbox', 'undated'] as const;
 export const CONFIDENCE = ['high', 'medium', 'low'] as const;
@@ -24,7 +25,7 @@ export interface PlaceRow {
   lat?: number; lon?: number; bbox?: string; note?: string;
 }
 export interface LinkRow {
-  id: string; game_id: string; place_id: string; role: string; fictional_name?: string; name_in_game?: string;
+  id: string; game_id: string; place_id: string; role: string; depiction: string; fictional_name?: string; name_in_game?: string;
   time_type: string; from?: number; to?: number; era_id?: string; sources?: string;
   quote?: string; accessed?: string; confidence?: string; status: string; flags?: string; note?: string;
 }
@@ -79,7 +80,8 @@ export const TABLES: TableDef[] = [
     { key: 'game_id', width: 22, help: 'Game id from the Games sheet.' },
     { key: 'place_id', width: 22, help: 'Place id from the Places sheet.' },
     { key: 'role', width: 11, help: 'How the game uses the place (rules section 3).', list: ROLES },
-    { key: 'fictional_name', width: 16, help: 'Required for role inspiration: the fictional place, e.g. Vice City.' },
+    { key: 'depiction', width: 13, help: 'real: shown under its real name. fictionalized: a fictional place a source says is based on this one (rules section 3).', list: DEPICTIONS },
+    { key: 'fictional_name', width: 16, help: 'Required when depiction is fictionalized: the fictional place, e.g. Vice City.' },
     { key: 'name_in_game', width: 22, help: 'Level, mission or track name, or the name the game uses for the place (old venue name, historical city name).' },
     { key: 'time_type', width: 10, help: 'Rules section 4.', list: TIME_TYPES },
     { key: 'from', width: 8, help: 'First year (fixed, or sandbox with known dates). Negative = BCE.', numeric: true },
