@@ -1,13 +1,17 @@
 // Shapes of public/atlas.json. Field meanings follow docs/data-rules.md.
-export type Role = 'setting' | 'level' | 'arena' | 'inspiration' | 'strategy';
-export const ROLES: Role[] = ['setting', 'level', 'arena', 'inspiration', 'strategy'];
+/** How the game uses the place (docs/data-rules.md, section 3). */
+export type Role = 'world' | 'level' | 'map' | 'venue' | 'stage' | 'strategy';
+export const ROLES: Role[] = ['world', 'level', 'map', 'venue', 'stage', 'strategy'];
 export const ROLE_LABEL: Record<Role, string> = {
-  setting: 'Setting',
+  world: 'World',
   level: 'Level',
-  arena: 'Venues (sports, racing)',
-  inspiration: 'Fictional inspiration',
+  map: 'Multiplayer maps',
+  venue: 'Venues (sports, racing)',
+  stage: 'Stage backdrops',
   strategy: 'Strategy map',
 };
+/** Roles shown by default; the rest are behind their chip or switch. */
+export const DEFAULT_ROLES: Role[] = ['world', 'level'];
 export type TimeType = 'fixed' | 'era' | 'sandbox' | 'undated';
 export type PlaceType = 'landmark' | 'city' | 'region' | 'country';
 export type Confidence = 'high' | 'medium' | 'low';
@@ -26,6 +30,8 @@ export interface Link {
   /** [west, south, east, north] for places drawn as an area. */
   bbox?: [number, number, number, number];
   role: Role;
+  /** A fictional place based on this real one; fictionalName holds its name. */
+  fictionalized?: boolean;
   fictionalName?: string;
   nameInGame?: string;
   timeType: TimeType;

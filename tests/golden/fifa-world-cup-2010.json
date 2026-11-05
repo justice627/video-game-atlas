@@ -9,7 +9,7 @@
         "lat": -26.234806,
         "lon": 27.982378,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -30,7 +30,7 @@
         "lat": -26.1975,
         "lon": 28.060833333333,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -51,7 +51,7 @@
         "lat": -33.903461111111,
         "lon": 18.411152777778,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -72,7 +72,7 @@
         "lat": -33.937778,
         "lon": 25.598889,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -93,7 +93,7 @@
         "lat": -29.829,
         "lon": 31.0303,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -114,7 +114,7 @@
         "lat": -25.753189,
         "lon": 28.223014,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -135,7 +135,7 @@
         "lat": -29.117222222222,
         "lon": 26.208888888889,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -156,7 +156,7 @@
         "lat": -25.578611111111,
         "lon": 27.160833333333,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -177,7 +177,7 @@
         "lat": -23.924689,
         "lon": 29.468765,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",
@@ -198,7 +198,7 @@
         "lat": -25.461888888889,
         "lon": 30.929777777778,
         "approxPlace": false,
-        "role": "arena",
+        "role": "venue",
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game)",

@@ -9,7 +9,8 @@
         "lat": 25.774166666667,
         "lon": -80.193611111111,
         "approxPlace": false,
-        "role": "inspiration",
+        "role": "world",
+        "fictionalized": true,
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City"

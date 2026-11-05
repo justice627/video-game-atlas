@@ -4,7 +4,7 @@ import { visiblePlacements, byGame, undatedGames, groupEntries, type Filters } f
 import type { Game, Link } from '../src/types.ts';
 
 const link = (o: Partial<Link>): Link => ({
-  place: 'X', placeType: 'city', lat: 0, lon: 0, approxPlace: false, role: 'setting', timeType: 'fixed',
+  place: 'X', placeType: 'city', lat: 0, lon: 0, approxPlace: false, role: 'world', timeType: 'fixed',
   sources: ['https://example.org'], confidence: 'medium', flags: [], ...o,
 });
 const ac2: Game = { id: 'ac2', title: "Assassin's Creed II", links: [
@@ -16,7 +16,7 @@ const civ: Game = { id: 'civ', title: 'Civilization VI', links: [
 ] };
 const country: Game = { id: 'c', title: 'Country game', links: [link({ place: 'Italy', placeType: 'country', approxPlace: true, span: { from: 1500, to: 1500 } })] };
 const all = [ac2, hitman, civ, country];
-const base: Filters = { range: { from: 1400, to: 1600 }, roles: new Set(['setting', 'level', 'arena', 'inspiration']), showCoarse: true, showStrategy: false, showUndated: false };
+const base: Filters = { range: { from: 1400, to: 1600 }, roles: new Set(['world', 'level', 'venue', 'map']), showCoarse: true, showStrategy: false, showUndated: false };
 const titles = (f: Partial<Filters>) => [...byGame(visiblePlacements(all, { ...base, ...f })).keys()].map((g) => g.title);
 
 describe('filter (docs/data-rules.md section 4)', () => {
@@ -51,11 +51,11 @@ describe('filter (docs/data-rules.md section 4)', () => {
 });
 
 describe('series grouping (docs/data-rules.md section 5)', () => {
-  const arena = (o: Partial<Link>) => link({ role: 'arena', placeType: 'landmark', placeWikidata: 'Q207109', place: 'Johan Cruijff ArenA', lat: 52.31, lon: 4.94, span: { from: 2010, to: 2010 }, ...o });
+  const arena = (o: Partial<Link>) => link({ role: 'venue', placeType: 'landmark', placeWikidata: 'Q207109', place: 'Johan Cruijff ArenA', lat: 52.31, lon: 4.94, span: { from: 2010, to: 2010 }, ...o });
   const fifa = (id: string, nameInGame: string): Game => ({ id, title: id, series: 'fifa', links: [arena({ nameInGame })] });
   const games = [fifa('FIFA 11', 'Amsterdam ArenA'), fifa('FIFA 20', 'Johan Cruijff ArenA'),
     { id: 'other', title: 'Other', links: [arena({})] }];
-  const hits = visiblePlacements(games, { ...base, roles: new Set(['arena']), range: { from: 2000, to: 2020 } });
+  const hits = visiblePlacements(games, { ...base, roles: new Set(['venue']), range: { from: 2000, to: 2020 } });
   it('keeps one entry per game when not collapsed', () => expect(groupEntries(hits, false)).toHaveLength(3));
   it('merges a series at one place into one entry, but never games without a series', () => {
     const e = groupEntries(hits, true);

@@ -31,23 +31,31 @@ A game qualifies when a source says it depicts a real-world place, or a fictiona
 - **Country pins are a last resort.** Use one only when the source names nothing smaller. They show as approximate pins.
 - **For historical settings, never pin a modern state.** Ancient China is not the People's Republic of China. Use the specific city, or a historical region item that has coordinates. If the place's name has changed, put the place under its modern identity and the name the game uses in the link (Istanbul, shown as "Constantinople").
 
-## 3. Roles
+## 3. Roles and depiction
 
-Each link has exactly one role.
+Each link has exactly one role, for how the game uses the place, and one depiction, for how faithfully it shows it.
 
-| Role | Use when | Example |
+| Role | Use when | Place type | Example |
+| --- | --- | --- | --- |
+| `world` | A continuous, explorable world: an open world, or the one place the whole game happens in | any | Forza Horizon 5 in Guanajuato; What Remains of Edith Finch on Orcas Island |
+| `level` | A discrete story mission, chapter or stage among others, linear or not | any | Hitman 3 in Dubai; Uncharted 3's Cartagena prologue |
+| `map` | A multiplayer or competitive map with no story: shooters, battle royales | any | Gallipoli's battlefields |
+| `venue` | A licensed real venue in a sports or racing game: stadium, arena, circuit, track, pitch | `landmark` | FNB Stadium in 2010 FIFA World Cup South Africa |
+| `stage` | A backdrop the player fights or plays in front of, not through, in games built around such backdrops | any | A fighting game's stages |
+| `strategy` | A grand-strategy or sandbox map covering a region. One link per game, place = the region | `region` | Civilization VI → the world |
+
+| Depiction | Use when | Example |
 | --- | --- | --- |
-| `setting` | The game takes place there as a continuous world | Forza Horizon 5 in Guanajuato |
-| `level` | A discrete mission, stage or level is there, among others elsewhere | Hitman 3 in Dubai |
-| `arena` | A licensed real venue: stadium, arena, circuit or track. Also multiplayer maps based on a real location | FNB Stadium in 2010 FIFA World Cup South Africa |
-| `inspiration` | A fictional place a source says is based on this real place. The fictional name is required | Vice City → Miami |
-| `strategy` | A grand-strategy or sandbox map covering a region. One link per game, place = the region | Civilization VI → the world |
+| `real` | The game shows the place under its real name | Florence in Assassin's Creed II |
+| `fictionalized` | A fictional place that a source says is based on this real place. `fictional_name` is required | Vice City → Miami (`world`); The Sceptre → Burj Khalifa (`level`) |
 
-**Setting or level?** An open, continuous world is `setting`. Separate missions in separate places are `level`.
+**World or level?** An open, continuous world, or a single continuous place, is `world`. Separate missions or chapters in separate places are `level`, even when they're all in one city.
+
+**Edge cases.** Open-world racing on public roads (Forza Horizon) is `world`. A licensed street circuit (Monaco) is a `venue` at the circuit. Point-to-point rally stages on real roads are `venue` when licensed and named, otherwise left out like other generic venues. A distant prologue in an open-world game (GTA V's North Yankton) is `level`. A boss arena in a story game is `level`; `stage` is only for games built around backdrops.
 
 **Venues in sports and racing games:**
 
-- Every licensed real venue in the game gets its own `arena` link, at the venue itself (type `landmark`), never at its city.
+- Every licensed real venue in the game gets its own `venue` link, at the venue itself (type `landmark`), never at its city.
 - **Only licensed venues are included.** A licensed venue is a real stadium, arena, circuit or track that the game shows under its real name, under licence. Generic venues are left out entirely, with no link of any kind. That covers fictional stadiums, and real ones shown under a made-up name because the game lacks the licence. When a source doesn't make clear whether a venue is licensed, it stays out until one does.
 - The venue list needs a source: the game's own list (Wikipedia, official site, or a fan wiki at `low`), or a source for "the game has the tournament's venues" plus one for which venues those were.
 - Venues change names. The place row uses the venue's current name; the link's `name_in_game` holds the name the game uses (place Johan Cruijff ArenA, shown in an older game as "Amsterdam ArenA").
@@ -76,7 +84,7 @@ Further rules for time:
 - **A chain needs a start.** Sourced intervals between games (Gold and Silver are "three years after" Red and Blue) give no year until one game in the chain has a year, sourced or from the present-day rule. The note always records the interval.
 - **A real-world model is a weak date.** When a fictional place is modelled on a real place *at a certain time* (Hisui is Hokkaido "during early Japanese colonization"), that period dates the inspiration, not the game. Use it only when nothing better exists: `era` (or `fixed` with the period's years), flagged `inferred-time`, at `low`, with the note saying it dates the model.
 - **What stays undated.** Games with no contemporary world and no period at all (Super Mario Odyssey's kingdoms), and prequels or sequels whose only link to a dated game is an unbounded "before" or "after" with nothing to close the range.
-- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. So are `arena` links, the venues of sports and racing games: they're numerous and would crowd out story settings. `undated` links have no time to match, so they appear only when the range is "All time" (the default) or the "Show undated games" switch is on; the list then marks them "Undated" and draws their pins as approximate. In any narrower window without the switch, the panel names them in a note instead. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
+- **Display:** links with role `strategy` or time `sandbox` are hidden by default, with a switch to show them. So are `venue`, `map` and `stage` links (sports and racing venues, multiplayer maps and fighting-game backdrops), each behind its own chip: they're numerous or not story places, and would crowd out the worlds and levels. `undated` links have no time to match, so they appear only when the range is "All time" (the default) or the "Show undated games" switch is on; the list then marks them "Undated" and draws their pins as approximate. In any narrower window without the switch, the panel names them in a note instead. Wide `era` links show as approximate in time, the same way coarse pins are approximate in place.
 
 ## 5. Series
 
@@ -120,13 +128,13 @@ A game is done when it has at least one link with a role, a place carrying an ID
 
 All five checked against their Wikipedia articles on 2026-11-04. Each is a golden test (`tests/golden.test.ts`) that asserts its exact built output, together with the Pokémon chain (no anchor, stays undated).
 
-**Grand Theft Auto: Vice City.** One link: Miami, `inspiration`, fictional name Vice City, `fixed` 1986, confidence `medium`. Wikipedia: "Set in 1986 within the fictional Vice City (based on Miami)" ([source](https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City)). Fits cleanly.
+**Grand Theft Auto: Vice City.** One link: Miami, `world`, `fictionalized` as Vice City, `fixed` 1986, confidence `medium`. Wikipedia: "Set in 1986 within the fictional Vice City (based on Miami)" ([source](https://en.wikipedia.org/wiki/Grand_Theft_Auto:_Vice_City)). Fits cleanly.
 
-**Assassin's Creed II.** Five links: Florence, Venice, Monteriggioni, San Gimignano and Forlì, each `setting`, `fixed` 1476–1499, confidence `medium`. Wikipedia: the story "takes place at the height of the Renaissance in Italy from 1476 to 1499", with the open world "comprising several Italian cities, including Florence, Venice, Monteriggioni, San Gimignano, and Forlì" ([source](https://en.wikipedia.org/wiki/Assassin%27s_Creed_II)). The article gives no year or place for the modern-day frame story, so it gets no link until a source does. v0.1 had this game at a single year, 1476.
+**Assassin's Creed II.** Five links: Florence, Venice, Monteriggioni, San Gimignano and Forlì, each `world`, `fixed` 1476–1499, confidence `medium`. Wikipedia: the story "takes place at the height of the Renaissance in Italy from 1476 to 1499", with the open world "comprising several Italian cities, including Florence, Venice, Monteriggioni, San Gimignano, and Forlì" ([source](https://en.wikipedia.org/wiki/Assassin%27s_Creed_II)). The article gives no year or place for the modern-day frame story, so it gets no link until a source does. v0.1 had this game at a single year, 1476.
 
-**Hitman 3.** Six links, `level`: Dubai, Dartmoor, Berlin, Chongqing, Mendoza and the Carpathian Mountains (`region`, parent Romania), plus one `inspiration`: the Burj Khalifa, as the Dubai level's fictional Sceptre. Wikipedia lists exactly these six locations ([source](https://en.wikipedia.org/wiki/Hitman_3)) but gives no in-game year. The year comes from a chain: Hitman (2016) has a prologue "In 1999" and its main story "Twenty years later" (2019), Hitman 2 is set "Following the events of Hitman", and Hitman 3 "during the events of Hitman 2". Two steps give no interval, so every link is `fixed` 2019–2020, flagged `derived-time`, at `low`. The Andaman Sea location added after launch is fictional and has no stated real counterpart, so it gets no link. v0.1 used an unsourced 2020; the first version of this example had the links `undated`.
+**Hitman 3.** Six links, `level`: Dubai, Dartmoor, Berlin, Chongqing, Mendoza and the Carpathian Mountains (`region`, parent Romania), plus one fictionalized `level`: the Burj Khalifa, as the Dubai level's Sceptre. Wikipedia lists exactly these six locations ([source](https://en.wikipedia.org/wiki/Hitman_3)) but gives no in-game year. The year comes from a chain: Hitman (2016) has a prologue "In 1999" and its main story "Twenty years later" (2019), Hitman 2 is set "Following the events of Hitman", and Hitman 3 "during the events of Hitman 2". Two steps give no interval, so every link is `fixed` 2019–2020, flagged `derived-time`, at `low`. The Andaman Sea location added after launch is fictional and has no stated real counterpart, so it gets no link. v0.1 used an unsourced 2020; the first version of this example had the links `undated`.
 
-**2010 FIFA World Cup South Africa.** Ten links, `arena`, one per tournament stadium (each a `landmark`), `fixed` 2010, hidden until venues are switched on. Wikipedia: "The game includes all 10 venues used at the 2010 FIFA World Cup" ([source](https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game))). The article doesn't list the ten stadiums, so each stadium link needs a second source (the tournament's Wikipedia article). The generic and qualifying-region stadiums get no links. v0.1 had this as one pin on the country of Japan.
+**2010 FIFA World Cup South Africa.** Ten links, `venue`, one per tournament stadium (each a `landmark`), `fixed` 2010, hidden until venues are switched on. Wikipedia: "The game includes all 10 venues used at the 2010 FIFA World Cup" ([source](https://en.wikipedia.org/wiki/2010_FIFA_World_Cup_South_Africa_(video_game))). The article doesn't list the ten stadiums, so each stadium link needs a second source (the tournament's Wikipedia article). The generic and qualifying-region stadiums get no links. v0.1 had this as one pin on the country of Japan.
 
 **Civilization VI.** One link: the world, `strategy`, `sandbox`. Wikipedia says players develop their civilization "between ancient times and the near future" ([source](https://en.wikipedia.org/wiki/Civilization_VI)). That gives the eras but not the years, so the link needs "ancient times" and "near future" entries on the era list. v0.1 used an unsourced 4000 BCE–2100. Because it's `strategy` and `sandbox`, it stays off the map unless you switch those games on.
 

@@ -153,7 +153,8 @@
         "lat": 25.197222222222,
         "lon": 55.274166666667,
         "approxPlace": false,
-        "role": "inspiration",
+        "role": "level",
+        "fictionalized": true,
         "timeType": "fixed",
         "sources": [
           "https://en.wikipedia.org/wiki/Hitman_3",
