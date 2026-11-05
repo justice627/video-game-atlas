@@ -13,7 +13,9 @@ describe('data/*.csv against docs/data-rules.md', () => {
 
   it('ships only series that verified games use', () => {
     const atlas = buildAtlas(tables);
-    expect(atlas.series.map((s) => s.id).sort()).toEqual(['assassins-creed', 'civilization', 'fifa', 'grand-theft-auto', 'hitman']);
+    const used = new Set(atlas.games.map((g) => g.series).filter(Boolean));
+    expect(new Set(atlas.series.map((s) => s.id))).toEqual(used);
+    expect(used.has('fifa-world-cup')).toBe(false); // its only game is set aside as draft
   });
 
   it('shows only verified links', () => {
