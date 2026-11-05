@@ -65,7 +65,7 @@ write('freeze.csv', 'freeze', [
 write('grandfathered.csv', 'grandfathered', out.filter((r) => r.status === 'verified').map((r) => ({ link_id: r.id, note: '' })));
 
 // Reconcile.
-const count = (rs: { status: string }[]) => JSON.stringify(Object.entries(rs.reduce<Record<string, number>>((m, r) => ((m[r.status] = (m[r.status] ?? 0) + 1), m), {})).sort());
+const count = (rs: Record<string, string>[]) => JSON.stringify(Object.entries(rs.reduce<Record<string, number>>((m, r) => ((m[r.status] = (m[r.status] ?? 0) + 1), m), {})).sort());
 const before = lines.map((r) => ({ status: r[header.indexOf('status')] }));
 if (count(before) !== count(out) || before.length !== out.length) throw new Error('reconciliation failed');
 console.log(`links: ${out.length} in, ${out.length} out, by status ${count(out)}`);
