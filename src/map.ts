@@ -1,5 +1,12 @@
-import maplibregl, { type GeoJSONSource, type MapGeoJSONFeature, type StyleSpecification } from 'maplibre-gl';
+import * as maplibregl from 'maplibre-gl';
+import type { GeoJSONSource, MapGeoJSONFeature, StyleSpecification } from 'maplibre-gl';
+import type { Point } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
+// MapLibre 6 runs its tile parsing in a module worker that the app must point it to.
+// Vite copies the self-contained worker file into the build and gives back its URL.
+import workerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?url';
+
+maplibregl.setWorkerUrl(workerUrl);
 import type { Hit } from './filter.ts';
 import type { Role } from './types.ts';
 import { ROLE_LABEL } from './types.ts';
@@ -137,11 +144,11 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         const src = map.getSource('pins') as GeoJSONSource;
         const id = f.properties!.cluster_id as number;
         const leaves = (await src.getClusterLeaves(id, 200, 0)) as MapGeoJSONFeature[];
-        const coords = leaves.map((l) => (l.geometry as GeoJSON.Point).coordinates);
+        const coords = leaves.map((l) => (l.geometry as Point).coordinates);
         const samePlace = coords.every((c) => Math.abs(c[0] - coords[0][0]) < 1e-3 && Math.abs(c[1] - coords[0][1]) < 1e-3);
         if (samePlace) return showPopup(coords[0] as [number, number], featureHits(leaves));
         const zoom = await src.getClusterExpansionZoom(id);
-        map.easeTo({ center: (f.geometry as GeoJSON.Point).coordinates as [number, number], zoom });
+        map.easeTo({ center: (f.geometry as Point).coordinates as [number, number], zoom });
       });
       for (const l of ['pins', 'clusters']) {
         map.on('mouseenter', l, () => (map.getCanvas().style.cursor = 'pointer'));
