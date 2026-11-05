@@ -53,13 +53,13 @@ function hitHtml(h: Hit): string {
     : esc(h.game.title);
   const when = l.span
     ? (l.span.label ? `${esc(l.span.label)} (${formatSpan(l.span)})` : formatSpan(l.span))
-    : l.timeType === 'sandbox' ? 'Across eras (sandbox), years not yet set' : 'Not dated';
+    : l.timeType === 'sandbox' ? 'Across eras (sandbox), years not yet set' : 'Undated: no sourced year';
   const sources = l.sources.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(host(u))}</a>`).join(', ');
   return `<div class="pop-item">
     <div class="pop-title">${title}${h.game.year ? ` <span class="muted">(${h.game.year})</span>` : ''}</div>
     <div><span class="dot" style="background:${ROLE_COLOR[l.role]}"></span>${ROLE_LABEL[l.role]}${l.nameInGame ? `: ${esc(l.nameInGame)}` : ''}</div>
     <div>${where}${l.approxPlace ? ' <span class="muted">· approximate location</span>' : ''}</div>
-    <div class="muted">${l.timeType === 'sandbox' ? when : `Set in ${when}`}${h.approxTime && l.span ? ' · broad period' : ''}</div>
+    <div class="muted">${l.timeType === 'sandbox' || !l.span ? when : `Set in ${when}`}${h.approxTime && l.span ? ' · broad period' : ''}</div>
     <div class="muted">Source (${l.confidence} confidence): ${sources}</div>
   </div>`;
 }

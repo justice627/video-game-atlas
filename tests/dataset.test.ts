@@ -50,7 +50,7 @@ describe('FIFA series once verified', () => {
   const t = structuredClone(tables);
   t.links.filter((l) => l.game_id.startsWith('fifa-1')).forEach((l) => (l.status = 'verified'));
   const atlas = buildAtlas(t);
-  const hits = visiblePlacements(atlas.games, { range: { from: 2017, to: 2019 }, roles: new Set(['arena']), showCoarse: true, showStrategy: false });
+  const hits = visiblePlacements(atlas.games, { range: { from: 2017, to: 2019 }, roles: new Set(['arena']), showCoarse: true, showStrategy: false, showUndated: false });
   it('collapses shared stadiums into one entry per place', () => {
     const anfield = groupEntries(hits, true).filter((e) => e[0].link.place === 'Anfield');
     expect(anfield).toHaveLength(1);

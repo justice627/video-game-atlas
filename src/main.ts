@@ -2,7 +2,7 @@ import './style.css';
 import type { Atlas, Role } from './types.ts';
 import { ROLES, ROLE_LABEL } from './types.ts';
 import { mountTimeline, MIN_YEAR, MAX_YEAR, type Range } from './timeline.ts';
-import { visiblePlacements, undatedGames, isStrategyLike, groupEntries, type Filters } from './filter.ts';
+import { visiblePlacements, undatedGames, undatedShown, isStrategyLike, groupEntries, type Filters } from './filter.ts';
 import { mountMap, ROLE_COLOR } from './map.ts';
 import { renderList } from './list.ts';
 
@@ -18,7 +18,7 @@ function readHash(): Filters {
   const roles = q.get('roles')?.split(',').filter((k): k is Role => CHIP_ROLES.includes(k as Role));
   let range: Range = { from: num('from', MIN_YEAR), to: num('to', MAX_YEAR) };
   if (range.from > range.to) range = { from: range.to, to: range.from };
-  return { range, roles: new Set(q.has('roles') ? roles : DEFAULT_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1' };
+  return { range, roles: new Set(q.has('roles') ? roles : DEFAULT_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1', showUndated: q.get('undated') === '1' };
 }
 
 let collapse = new URLSearchParams(location.hash.slice(1)).get('series') === '1';
@@ -31,6 +31,7 @@ function writeHash(f: Filters) {
   if (!sameSet(f.roles, DEFAULT_ROLES)) q.set('roles', [...f.roles].join(','));
   if (!f.showCoarse) q.set('coarse', '0');
   if (f.showStrategy) q.set('strategy', '1');
+  if (f.showUndated) q.set('undated', '1');
   history.replaceState(null, '', q.size ? `#${q}` : location.pathname + location.search);
 }
 
@@ -48,9 +49,11 @@ async function main() {
       <span class="dot" style="background:${ROLE_COLOR[r]}"></span>${ROLE_LABEL[r]}<span class="chip-n"></span></button>`).join('');
   const coarse = $<HTMLInputElement>('#coarse');
   const strategy = $<HTMLInputElement>('#strategy');
+  const showUndated = $<HTMLInputElement>('#undated');
   const strategyCount = atlas.games.filter((g) => g.links.some(isStrategyLike)).length;
   $('#strategy-n').textContent = String(strategyCount);
   const undated = undatedGames(atlas.games);
+  $('#undated-n').textContent = String(undated.length);
   $('#meta').textContent = `${atlas.games.length} verified game${atlas.games.length === 1 ? '' : 's'}`;
 
   let frame = 0;
@@ -59,10 +62,11 @@ async function main() {
     frame = requestAnimationFrame(() => {
       coarse.checked = filters.showCoarse;
       strategy.checked = filters.showStrategy;
+      showUndated.checked = filters.showUndated;
       group.checked = collapse;
       const hits = visiblePlacements(atlas.games, filters);
       map.setHits(groupEntries(hits, collapse));
-      renderList($('#list'), $('#count'), hits, undated, (gh) => map.focus(gh), { collapse, seriesName });
+      renderList($('#list'), $('#count'), hits, undatedShown(filters) ? [] : undated, (gh) => map.focus(gh), { collapse, seriesName });
       // Per-role counts ignore the role filter itself, so you can see what turning one on would add.
       const all = visiblePlacements(atlas.games, { ...filters, roles: new Set(ROLES) });
       chips.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => {
@@ -90,6 +94,7 @@ async function main() {
   });
   coarse.addEventListener('change', () => { filters.showCoarse = coarse.checked; update(); });
   strategy.addEventListener('change', () => { filters.showStrategy = strategy.checked; update(); });
+  showUndated.addEventListener('change', () => { filters.showUndated = showUndated.checked; update(); });
   group.addEventListener('change', () => { collapse = group.checked; update(); });
   update();
 }

@@ -14,7 +14,8 @@ export interface ListOptions {
 function when(hits: Hit[]): string {
   const spans = [...new Map(hits.filter((h) => h.matched).map((h) => [`${h.matched!.from}:${h.matched!.to}`, h.matched!])).values()]
     .sort((a, b) => a.from - b.from);
-  return spans.length ? spans.slice(0, 3).map(formatSpan).join(', ') + (spans.length > 3 ? '…' : '') : 'Across eras';
+  if (spans.length) return spans.slice(0, 3).map(formatSpan).join(', ') + (spans.length > 3 ? '…' : '');
+  return hits.every((h) => h.link.timeType === 'undated') ? 'Undated' : 'Across eras';
 }
 function where(hits: Hit[]): string {
   const w = [...new Set(hits.map((h) => h.link.fictionalName ?? h.link.place))];
@@ -27,7 +28,7 @@ export function renderList(root: HTMLElement, count: HTMLElement, hits: Hit[], u
   count.textContent = `${games.length} game${games.length === 1 ? '' : 's'} · ${places} place${places === 1 ? '' : 's'}`;
   count.dataset.games = String(games.length);
   const undatedNote = undated.length
-    ? `<p class="note">Not on the timeline yet (no sourced date): ${undated.map((g) => esc(g.title)).join(', ')}.</p>`
+    ? `<p class="note">Undated, shown under &ldquo;All time&rdquo; or with the undated switch: ${undated.map((g) => esc(g.title)).join(', ')}.</p>`
     : '';
   if (!games.length) {
     root.innerHTML = `<p class="empty">No verified games in this range with these filters.</p>${undatedNote}`;

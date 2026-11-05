@@ -11,7 +11,7 @@ export const atlas = (): Atlas => JSON.parse(readFileSync(new URL('../public/atl
 /** Mirrors the page's defaults (src/main.ts): venues and strategy off, approximate pins on, all of time. */
 export const DEFAULT_ROLES: Role[] = ['setting', 'level', 'inspiration'];
 export function filters(o: Partial<Filters> = {}): Filters {
-  return { range: { from: MIN_YEAR, to: MAX_YEAR }, roles: new Set(DEFAULT_ROLES), showCoarse: true, showStrategy: false, ...o };
+  return { range: { from: MIN_YEAR, to: MAX_YEAR }, roles: new Set(DEFAULT_ROLES), showCoarse: true, showStrategy: false, showUndated: false, ...o };
 }
 export const ALL_ROLES = new Set<Role>(ROLES);
 
