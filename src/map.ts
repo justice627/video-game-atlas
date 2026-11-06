@@ -12,6 +12,7 @@ import { distinctBoxes, withoutRelief } from './map-style.ts';
 import type { Role } from './types.ts';
 import { ROLE_LABEL } from './types.ts';
 import { formatSpan, formatYear } from './timeline.ts';
+import { parseTokenId, tokenId, tokenImage } from './tokens.ts';
 
 export const ROLE_COLOR: Record<Role, string> = {
   world: '#2a6fdb',
@@ -21,6 +22,11 @@ export const ROLE_COLOR: Record<Role, string> = {
   stage: '#b0457a',
   strategy: '#d23c4b',
 };
+
+/** Pins cross-fade from colored dots to pixel tokens over this zoom band. Below it the world view stays calm. */
+const TOKEN_FADE: [number, number] = [3.5, 4.5];
+const fadeOut = (v: maplibregl.ExpressionSpecification | number) =>
+  ['interpolate', ['linear'], ['zoom'], TOKEN_FADE[0], v, TOKEN_FADE[1], 0] as maplibregl.ExpressionSpecification;
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
@@ -134,14 +140,35 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         paint: {
           'circle-radius': ['case', ['get', 'coarse'], 7, 6],
           'circle-color': color,
-          'circle-opacity': ['case', ['get', 'coarse'], 0.12, 0.95],
+          'circle-opacity': fadeOut(['case', ['get', 'coarse'], 0.12, 0.95]),
           'circle-stroke-color': color,
           'circle-stroke-width': ['case', ['get', 'coarse'], 2, 1.5],
-          'circle-stroke-opacity': ['case', ['get', 'coarse'], 0.7, 1],
+          'circle-stroke-opacity': fadeOut(['case', ['get', 'coarse'], 0.7, 1]),
+        },
+      });
+      // Tokens are drawn on first use: the image id encodes sprite, hue and role (src/tokens.ts).
+      map.on('styleimagemissing', (e) => {
+        const spec = parseTokenId(e.id);
+        if (spec && !map.hasImage(e.id)) map.addImage(e.id, tokenImage(spec, ROLE_COLOR), { pixelRatio: 2 });
+      });
+      map.addLayer({
+        id: 'tokens', type: 'symbol', source: 'pins', minzoom: TOKEN_FADE[0], filter: ['!', ['has', 'point_count']],
+        layout: {
+          'icon-image': ['get', 'token'],
+          'icon-allow-overlap': true, 'icon-ignore-placement': true,
+          // Exact pins above approximate ones where they overlap.
+          'symbol-sort-key': ['case', ['get', 'coarse'], 1, 2],
+        },
+        paint: {
+          'icon-opacity': ['interpolate', ['linear'], ['zoom'], TOKEN_FADE[0], 0, TOKEN_FADE[1], ['case', ['get', 'coarse'], 0.55, 1]],
         },
       });
 
-      map.on('click', 'pins', (e) => showPopup(e.lngLat, featureHits(map.queryRenderedFeatures(e.point, { layers: ['pins'] }))));
+      // Dots and tokens differ in size, so a click on either counts; one popup per pin.
+      map.on('click', ['pins', 'tokens'], (e) => {
+        const fs = map.queryRenderedFeatures(e.point, { layers: ['pins', 'tokens'] });
+        showPopup(e.lngLat, featureHits([...new Map(fs.map((f) => [f.properties!.i as number, f])).values()]));
+      });
       map.on('click', 'clusters', async (e) => {
         const f = e.features![0];
         const src = map.getSource('pins') as GeoJSONSource;
@@ -153,7 +180,7 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         const zoom = await src.getClusterExpansionZoom(id);
         map.easeTo({ center: (f.geometry as Point).coordinates as [number, number], zoom });
       });
-      for (const l of ['pins', 'clusters']) {
+      for (const l of ['pins', 'tokens', 'clusters']) {
         map.on('mouseenter', l, () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', l, () => (map.getCanvas().style.cursor = ''));
       }
@@ -163,6 +190,12 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
     });
   }));
 
+  // A collapsed series group gets the series' own sprite; a single game its own, in its series' hue.
+  const tokenFor = (e: Hit[]) => {
+    const g = e[0].game;
+    const group = new Set(e.map((h) => h.game.id)).size > 1;
+    return tokenId({ sprite: group && g.series ? g.series : g.id, hue: g.series ?? g.id, role: e[0].link.role });
+  };
   const toGeo = (es: Hit[][]) => ({
     pins: {
       type: 'FeatureCollection' as const,
@@ -170,7 +203,7 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
       features: es.map((e) => e[0]).flatMap((h, i) => (h.link.bbox ? [] : [{
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [h.link.lon, h.link.lat] },
-        properties: { i, kind: h.link.role, coarse: h.link.approxPlace || h.approxTime },
+        properties: { i, kind: h.link.role, coarse: h.link.approxPlace || h.approxTime, token: tokenFor(es[i]) },
       }])),
     },
     regions: {
