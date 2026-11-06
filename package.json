@@ -14,6 +14,7 @@
     "data:import": "tsx scripts/data-import.ts",
     "golden:update": "tsx scripts/golden-update.ts",
     "verify:sources": "tsx scripts/verify-sources.ts",
+    "pipeline": "tsx scripts/pipeline.ts",
     "sync:wikidata": "tsx scripts/sync-wikidata.ts",
     "place:lookup": "tsx scripts/place-lookup.ts",
     "test:e2e": "playwright test"
