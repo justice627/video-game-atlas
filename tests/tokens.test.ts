@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { GRID, SCALE, SPRITE, parseTokenId, spriteCells, tokenId, tokenImage } from '../src/tokens.ts';
+import { GRID, SCALE, SPRITE, STACK_SIZE, parseStackId, parseTokenId, spriteCells, stackId, stackImage, tokenId, tokenImage } from '../src/tokens.ts';
 import type { Role } from '../src/types.ts';
 
 // src/map.ts imports MapLibre, which doesn't load in Node; the frame only needs some role colors.
@@ -39,5 +39,29 @@ describe('pixel tokens', () => {
     const spec = { sprite: 'hitman-3', hue: 'hitman', role: 'world' as const };
     expect(parseTokenId(tokenId(spec))).toEqual(spec);
     expect(parseTokenId('marker-15')).toBeUndefined();
+  });
+
+  it('reads a stack id back, each token once and the card count clamped', () => {
+    const a = tokenId({ sprite: 'hitman-3', hue: 'hitman', role: 'world' });
+    const b = tokenId({ sprite: 'hitman-2', hue: 'hitman', role: 'level' });
+    const s = parseStackId(stackId(7, [a, b, a]))!;
+    expect(s.cards).toBe(3);
+    expect(s.tokens.map(tokenId)).toEqual([a, b]);
+    expect(parseStackId(a)).toBeUndefined();
+  });
+
+  it('puts the first token in front, centered, and fills missing games with card backs', () => {
+    const t = { sprite: 'a', hue: 'b', role: 'level' as const };
+    const img = stackImage({ cards: 3, tokens: [t] }, ROLE_COLOR);
+    expect(img.width).toBe(STACK_SIZE);
+    const card = GRID * SCALE;
+    const front = (STACK_SIZE - card) / 2;
+    const at = (x: number, y: number) => [...img.data.slice((y * STACK_SIZE + x) * 4, (y * STACK_SIZE + x) * 4 + 4)];
+    // The front card's role-color frame, undimmed, one cell in from its left edge.
+    expect(at(front + SCALE, front + card / 2)).toEqual([0xd9, 0x77, 0x1e, 255]);
+    // The last card back peeks out at the top right, behind the front card.
+    expect(at(STACK_SIZE - card / 2, SCALE + 1)[3]).toBe(255);
+    // Bottom-left corner of the image stays transparent: the fan only goes up and right.
+    expect(at(1, STACK_SIZE - 2)[3]).toBe(0);
   });
 });
