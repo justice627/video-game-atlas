@@ -48,4 +48,15 @@ export interface Link {
 export interface Series { id: string; name: string; wikidata?: string }
 export interface Game { id: string; title: string; series?: string; wikidata?: string; year?: number; wikipedia?: string; links: Link[] }
 
-export interface Atlas { built: string; series: Series[]; games: Game[] }
+/** A logo from Wikimedia Commons (docs/data-rules.md, section 8). src is relative to the site root. */
+export interface Logo {
+  src: string; page: string; licence: string; author?: string;
+  /** Ink of the image: dark goes on a light plate, light on a dark one, opaque brings its own background. */
+  tone?: 'dark' | 'light' | 'opaque';
+}
+
+export interface Atlas {
+  built: string; series: Series[]; games: Game[];
+  /** By game id and by series id. Absent in data built before logos existed. */
+  logos?: { games: Record<string, Logo>; series: Record<string, Logo> };
+}

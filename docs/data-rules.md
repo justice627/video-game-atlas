@@ -10,6 +10,7 @@ How a game gets into the atlas, and what a finished entry looks like. These rule
 | `games` | game | id, title, series, Wikidata ID, release year |
 | `places` | real-world place | id, name, Wikidata or GeoNames ID, coordinates, type, parent place |
 | `links` | game × place × time | id, game, place, role, time, level or landmark name, sources, quotes, accessed date, confidence, status, flags, note |
+| `logos` | game or series logo | the game or series, Commons file, licence, author, local image, checksum, accessed date, status |
 
 Almost all the work happens in `links`. Series, games and places are reference data, and a link is a claim: *this game uses this place, in this way, at this time, and here is the source.*
 
@@ -125,6 +126,18 @@ Wikidata alone is `low`. It's good for IDs and coordinates, not for claims.
 **Research reports.** When a question needs more than a game's own article (dating a whole series, settling conflicting sources), write it up as a report in `docs/research/`, named after the topic. The report gives one proposed row per game in the rules' terms (time type, years, flags, confidence) with a source and quote for each claim, and lists what was rejected and why. Links that rely on a report name it in their note. A report proposes; the links still go through `draft` and `verified` as usual.
 
 A game is done when it has at least one link with a role, a place carrying an ID and coordinates, a time type, a source with its quote and a confidence, and it is verified or auto-verified. A verified link can still carry a flag such as `needs-time`: it is correct, just incomplete.
+
+## 8. Logos
+
+A logo lets you recognize a game at a glance. Logos are shown in popups and the list, not on the map (decided 2026-11-06; the map may follow later as its own change).
+
+- **One source: Wikimedia Commons, through Wikidata.** A game's or series' logo is the Commons file named by the "logo image" (P154) statement on its Wikidata item. No other source: no cover art, store images, IGDB or SteamGridDB, and no lookalikes drawn by hand.
+- **Only free files.** A logo is used only if its Commons licence is public domain (including "too simple to be copyrighted"), CC0, CC BY or CC BY-SA, and the file page carries no deletion or missing-permission notice. Anything else stays out. A file whose origin looks doubtful (for example, a name pointing to a fan site) may be excluded by hand, with the reason in the note.
+- **Trademarks stay trademarks.** A free licence covers copyright only. Logos identify the game they name and nothing else, and the page says the atlas is not affiliated with or endorsed by any publisher.
+- **Stored, not hotlinked.** The fetch script (`npm run fetch:logos`) records each file in `data/logos.csv` with its licence, author, checksum and the date it was checked, and saves a rendering about 330 px wide (Commons' nearest standard size; smaller originals as they are) in `data/logos/`. The build copies those files to the site; visitors never call Wikimedia. The images keep their own licences: `data/logos/` is not covered by the CC BY-SA licence of the tables (`data/LICENSE.md`).
+- **Attribution.** A logo in a popup links to its Commons file page, which names the author and licence; every logo's tooltip gives the licence and author, and the panel says where logos come from. List rows are buttons, so their logos carry the tooltip but no link.
+- **Status.** `ok` rows passed the licence check and are shown; `excluded` rows are kept, with the reason in the note, so the file isn't fetched again. A popup shows the game's logo, else its series' logo. A game with neither shows no logo.
+- **Blocked fetches.** When Commons refuses or rate-limits the script, it stops, says so, and writes nothing for the files it couldn't check (hard rule 1).
 
 ## Worked examples
 

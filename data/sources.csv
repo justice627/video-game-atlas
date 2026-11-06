@@ -22,3 +22,4 @@ bulbapedia.bulbagarden.net,Bulbapedia,low,mediawiki,/w/api.php,blocked,2000,CC B
 strategywiki.org,StrategyWiki,low,mediawiki,/w/api.php,needs-review,2000,CC BY-SA 4.0,Level and mission lists
 giantbomb.com,Giant Bomb,low,none,,needs-review,18000,Terms unchecked,"API has a locations resource; needs a key and a terms check. 200 requests per resource per hour"
 mobygames.com,MobyGames,low,none,,paid,10000,Terms unchecked,API reported paid since 2024
+wikimedia.org,Wikimedia Commons (logos only),low,mediawiki,/w/api.php,ok,1000,per file,"Logos only (rules section 8), not a source for links. Covers commons.wikimedia.org and upload.wikimedia.org. 2026-11-06: API answered HTTP 429 to single requests from the research container; fetch:logos stops on it"
