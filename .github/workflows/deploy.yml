@@ -1,0 +1,51 @@
+name: Deploy
+# Production ships only from here: pushes to main build nothing on Netlify (scripts/netlify-ignore.sh).
+# Monday and Thursday, or by hand. scripts/deploy-gate.ts skips when production already runs main,
+# stops at the cycle's deploy cap, and opens a blocker issue instead of failing.
+on:
+  schedule:
+    - cron: '17 6 * * 1,4'   # 06:17 UTC, Monday and Thursday
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Deploy even if production already runs main
+        type: boolean
+        default: false
+      override_cap:
+        description: Deploy past this cycle's cap (15 credits each; the site pauses at 300)
+        type: boolean
+        default: false
+permissions:
+  contents: read
+  issues: write
+concurrency: { group: deploy, cancel-in-progress: false }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - id: gate
+        run: npx tsx scripts/deploy-gate.ts
+        env:
+          NETLIFY_BUILD_HOOK: ${{ secrets.NETLIFY_BUILD_HOOK }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE: ${{ vars.NETLIFY_SITE }}
+          NETLIFY_CYCLE_START_DAY: ${{ vars.NETLIFY_CYCLE_START_DAY }}
+          NETLIFY_DEPLOY_CAP: ${{ vars.NETLIFY_DEPLOY_CAP }}
+          MAIN_SHA: ${{ github.sha }}
+          FORCE: ${{ inputs.force }}
+          OVERRIDE_CAP: ${{ inputs.override_cap }}
+      - name: Open or update the blocker issue
+        if: steps.gate.outputs.blocker != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BODY: ${{ steps.gate.outputs.blocker }}
+        run: |
+          gh label create blocker --color B60205 --description "Something only the owner can fix" 2>/dev/null || true
+          title="Blocker: scheduled Netlify deploy"
+          n=$(gh issue list --label blocker --state open --search "\"$title\" in:title" --json number --jq '.[0].number')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$BODY"; else gh issue create --title "$title" --label blocker --body "$BODY"; fi
