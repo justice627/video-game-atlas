@@ -60,7 +60,9 @@ The worked examples in the data rules, plus the Pokémon chain, are golden tests
 
 ## Deploy
 
-Hosted on Netlify via `netlify.toml`: pull requests get deploy previews, and the build runs the tests first. A merge to `main` deploys to production unless it changes only data, docs or review files (`scripts/netlify-ignore.sh`); those reach production through the scheduled data deploy.
+Hosted on Netlify via `netlify.toml`. Pull requests get deploy previews, which are free; the build runs the tests first. Merging to `main` does not deploy. Production ships from the Deploy workflow (`.github/workflows/deploy.yml`) on Monday and Thursday, or when run by hand, through a Netlify build hook. It skips when production already runs `main`, and it stops at a cap of production deploys per billing cycle (the Free plan's 300 credits are a hard limit and each production deploy costs 15), opening a `blocker` issue instead.
+
+It needs two repository secrets, `NETLIFY_BUILD_HOOK` and `NETLIFY_AUTH_TOKEN` (read-only use: counting deploys), and reads the variables `NETLIFY_CYCLE_START_DAY` (day of month the Netlify billing cycle starts), `NETLIFY_DEPLOY_CAP` (default 16) and `NETLIFY_SITE` (default `jocular-llama-05cd7c.netlify.app`).
 
 ## Licence
 

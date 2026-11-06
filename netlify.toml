@@ -1,8 +1,8 @@
-# Netlify builds deploy previews for pull requests and production for main.
-# Tests run first: a failing test or invalid data (validate() in scripts/lib/dataset.ts)
-# fails the deploy. Production builds that change only data, docs or review files are
-# skipped by scripts/netlify-ignore.sh to save build credits; the scheduled data deploy
-# (Monday and Thursday, via a build hook) publishes them.
+# Netlify builds a deploy preview for every pull request (free). Production builds run only
+# when .github/workflows/deploy.yml calls the build hook (Monday and Thursday, or by hand);
+# scripts/netlify-ignore.sh skips every other production build, because the Free plan's 300
+# credits are a hard limit and each production deploy costs 15. Tests run first: a failing
+# test or invalid data (validate() in scripts/lib/dataset.ts) fails the deploy.
 [build]
   command = "npm test && npm run build"
   publish = "dist"

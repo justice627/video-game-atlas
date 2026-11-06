@@ -34,7 +34,7 @@ Claude Code scheduled session (daily, fresh)        GitHub Actions              
     pipeline commit -> push branch data/<date>-<run>  decisions     pinned-issue edits/comments
                                                       nightly       full validation of main
                                                       weekly        re-fetch every source
-                                                      deploy-data   Mon/Thu build hook
+                                                      deploy        Mon/Thu build hook, budget-capped
 ```
 
 Two changes from the brief follow from this split:
@@ -64,7 +64,7 @@ Two changes from the brief follow from this split:
 
 **3.10 Queue conflicts are resolved by regenerating, not merging.** Research runs and the decisions Action both write `review/queue.csv`, so data PRs will conflict. `queue.csv` is fully derived from the link statuses, the audit log, the backlog and the pending decisions, so `npm run queue:build` can always rebuild it. The `open-data-pr` workflow (in the shared concurrency group) merges `main` into a conflicting `data/*` branch, rebuilds the queue, re-runs the gate in check mode and pushes. A conflict in `links.csv` itself is not auto-resolved: the PR gets a comment and the next run redoes the game.
 
-**3.11 Netlify `ignore` must let the build hook through.** Netlify applies the `ignore` command to build-hook builds too, so a plain "data-only diff, skip" rule would skip the Monday/Thursday deploys as well. The script (`scripts/netlify-ignore.sh`) builds whenever `INCOMING_HOOK_TITLE` is set or `CONTEXT` isn't `production`, and otherwise skips when every path changed since `CACHED_COMMIT_REF` is in `data/`, `docs/` or `review/`. The scheduled deploy also skips calling the hook when no data changed since the last call: 9 deploys a month becomes "up to 9".
+**3.11 Production deploys only through the scheduled build hook (revised 2026-11-06).** Netlify Free has 300 credits a month as a hard limit: when they run out, every site is paused until the next cycle. A production deploy costs 15 credits; deploy previews cost nothing; traffic costs 20 credits per GB and 2 per 10,000 requests ([Netlify docs](https://docs.netlify.com/manage/accounts-and-billing/billing/billing-for-credit-based-plans/how-credits-work/)). So `scripts/netlify-ignore.sh` skips every production build that the build hook didn't start, code merges included, and `.github/workflows/deploy.yml` calls the hook on Monday and Thursday. `scripts/deploy-gate.ts` counts this cycle's production deploys through the Netlify API and stops at a cap (default 16, 240 credits, leaving 60 for traffic and margin), skips when production already runs `main`, and opens a `blocker` issue instead of failing. A manual run can force a deploy or override the cap.
 
 **3.12 Token usage is approximate.** The pipeline script can't see Claude's token counters. The `/research-batch` command records the usage the Agent tool reports for each subagent call in `review/runs/<date>-<run>.md`; the main session's own usage isn't visible to it. The pilot report states both and how each was measured.
 
@@ -155,7 +155,7 @@ Each phase is one PR, tests green, branch stacked on the previous one, base name
 - `ci.yml` (replaces `browser-tests.yml`): validate, `verify-sources --offline`, `gate --check`, unit, e2e. Job named `ci`.
 - `data-guard.yml`: job `data-guard` as in the brief.
 - `open-data-pr.yml`, `automerge.yml`: auto-merge only when the head branch starts with `data/`, `head.repo.full_name` equals this repo, and the author is `justice627` or the `PIPELINE_TOKEN` identity.
-- `nightly.yml`, `weekly-refetch.yml`, `deploy-data.yml` (Mon/Thu build hook; missing secret → `blocker` issue, exit 0).
+- `nightly.yml`, `weekly-refetch.yml`. (The deploy workflow landed early, 2026-11-06; see 3.11.)
 - All writing workflows share `concurrency: { group: repo-writer, cancel-in-progress: false }`.
 - Ruleset via `gh api` (from a workflow you trigger once, or a command for you to paste, since this session has no `gh` with admin scope): require PR; required checks `ci`, `data-guard`; block force pushes and deletion; no bypass actors; no required approvals. "Allow auto-merge" in repo settings.
 - Labels `rule-question`, `blocker`, `data`, `review-queue`.
@@ -175,7 +175,7 @@ Pilot on 5 games, proposed: **Kingdom Come: Deliverance** (clean story game, Wik
 | Auto-verified errors reach the public map | Auto marker, toggle, audits with automatic tightening, and a wrong audit pulls the link immediately |
 | A public commenter tries to drive the decisions Action | Hard-coded issue number and sender check; issue locked to collaborators; no LLM in the parser |
 | Excerpts from non-CC sources in a public repo | Context capped (D7), source URL kept, full pages never committed |
-| Netlify credit overrun | `ignore` script plus "no data change, no hook call"; nightly reports credits used if the Netlify API token is set (optional) |
+| Netlify credit overrun (the site pauses at 300) | No production build without the hook; the deploy gate caps deploys per cycle and skips unchanged `main`; previews are free |
 
 ## 7. Decisions that are yours
 
@@ -209,3 +209,11 @@ The binding constraint is review time, by design (backpressure at 40 open items)
 - **Ceiling:** about 20 a day (four runs), only if the pilot shows under about 0.5 `needs-human` items per game, plan usage has room, and audits have reached reduced mode.
 
 `docs/plans/scheduled-run.md` will set the frequency from the pilot's measured numbers.
+
+## 11. Deploy budget (decided 2026-11-06)
+
+Every push to `main` before this change was a production deploy: about 12 to 13 since Netlify was connected on 2026-11-04, so roughly 180 to 195 of this cycle's 300 credits are spent. From now on:
+
+- **Normal cycle:** cap 16 production deploys (240 credits), leaving 60 for traffic and margin. Two scheduled slots a week use about 9; the rest is room for a manual deploy after an urgent code fix.
+- **This cycle (burn-in):** the cap counts the deploys already made, so with about 12 used, 4 remain until the cycle resets. In practice that is roughly one deploy a week: a slot only deploys when `main` changed, and data reaches `main` slowly during burn-in.
+- **Code merges** no longer deploy on their own. They ship with the next scheduled slot, or by hand from the Deploy workflow when they can't wait.
