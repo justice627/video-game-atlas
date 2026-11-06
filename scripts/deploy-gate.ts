@@ -43,10 +43,22 @@ async function main() {
   if (missing.length) return stop(`missing secret(s) ${missing.join(', ')}`,
     `The scheduled Netlify deploy can't run: add the repository secret(s) ${missing.join(' and ')} (Settings → Secrets and variables → Actions). NETLIFY_BUILD_HOOK is the URL of a build hook (Netlify: Project configuration → Build & deploy → Build hooks); NETLIFY_AUTH_TOKEN is a personal access token (User settings → Applications), used read-only to count this cycle's deploys. Without them nothing deploys, which costs no credits.`);
   const site = env('NETLIFY_SITE') ?? 'jocular-llama-05cd7c.netlify.app';
+  const api = (path: string) => fetch(`https://api.netlify.com/api/v1/${path}`, { headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'video-game-atlas-deploy' } });
+  // Resolve the site to its ID first, so a failure says whether the token or the site is wrong.
+  // The repository is public, so logs never print account details or other sites' names.
+  const found = await api(`sites/${encodeURIComponent(site)}`);
+  if (!found.ok) {
+    const me = await api('user');
+    const why = me.ok
+      ? `the token is valid, but its account can't see the site "${site}" (HTTP ${found.status}). Set the repository variable NETLIFY_SITE to the Project ID from Netlify (Project configuration → General → Project details), or create the token from the account that owns the site.`
+      : `NETLIFY_AUTH_TOKEN was refused (HTTP ${me.status}): it may be mistyped, expired or revoked. Create a new personal access token (Netlify: User settings → Applications) and update the secret.`;
+    return stop(`could not resolve the Netlify site: ${why}`, `The scheduled deploy couldn't read the deploy history: ${why} Nothing was deployed.`);
+  }
+  const siteId = ((await found.json()) as { id: string }).id;
   const deploys: NetlifyDeploy[] = [];
   for (let page = 1; page <= 3; page++) {
-    const res = await fetch(`https://api.netlify.com/api/v1/sites/${encodeURIComponent(site)}/deploys?per_page=100&page=${page}`, { headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'video-game-atlas-deploy' } });
-    if (!res.ok) return stop(`Netlify API returned ${res.status} for site ${site}`, `The scheduled deploy couldn't read the deploy history (HTTP ${res.status} for ${site}). Check NETLIFY_AUTH_TOKEN and the NETLIFY_SITE variable. Nothing was deployed.`);
+    const res = await api(`sites/${siteId}/deploys?per_page=100&page=${page}`);
+    if (!res.ok) return stop(`Netlify API returned ${res.status} listing deploys`, `The scheduled deploy couldn't list the site's deploys (HTTP ${res.status}). Check that NETLIFY_AUTH_TOKEN has access to the site. Nothing was deployed.`);
     const batch = (await res.json()) as NetlifyDeploy[];
     deploys.push(...batch);
     if (batch.length < 100) break;
