@@ -5,7 +5,23 @@
       {
         "matcher": "Edit|Write|MultiEdit",
         "hooks": [
-          { "type": "command", "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/hooks/check-data.sh\"", "timeout": 60 }
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/hooks/check-data.sh\"",
+            "timeout": 60
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|NotebookEdit|Bash|Read|Grep|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/hooks/guard-agent.sh\"",
+            "timeout": 30
+          }
         ]
       }
     ]
@@ -21,7 +37,8 @@
       "Bash(npm run verify:sources:*)",
       "Bash(npm run sync:wikidata)",
       "Bash(npm run fetch:wikidata)",
-      "Bash(npm run place:lookup:*)"
+      "Bash(npm run place:lookup:*)",
+      "Bash(npm run pipeline:*)"
     ]
   }
 }

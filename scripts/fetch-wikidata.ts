@@ -2,14 +2,8 @@
 // Earth coordinates (P625) and a "set in period" (P2408). Output is a frozen snapshot;
 // the build never hits the network. Re-run manually to refresh.
 import { writeFileSync } from 'node:fs';
-import { sparql, qid } from './lib/sparql.ts';
+import { sparql, qid, GAME } from './lib/sparql.ts';
 
-// Direct instances of "video game" or "esports discipline" only. Following subclasses pulled in DLC,
-// expansions, bundles, demos and unfinished projects; editions and mods also carry an extra type, excluded here.
-const NOT_GAMES = ['Q60997816' /* video game edition */, 'Q61456428' /* total conversion mod */, 'Q209163' /* expansion */,
-  'Q1066707' /* DLC */, 'Q96240590' /* bundle */, 'Q16070115' /* compilation */, 'Q1755420' /* demo */,
-  'Q64170508' /* unfinished project */, 'Q73548809' /* non-existent game */];
-const GAME = `VALUES ?gameType { wd:Q7889 wd:Q112144412 } ?g wdt:P31 ?gameType . FILTER NOT EXISTS { ?g wdt:P31 ?notGame . VALUES ?notGame { ${NOT_GAMES.map((q) => 'wd:' + q).join(' ')} } }`;
 
 const placesQuery = `
 SELECT ?g ?gLabel ?enwiki (MIN(YEAR(?pub)) AS ?year) ?loc ?locLabel ?lat ?lon
