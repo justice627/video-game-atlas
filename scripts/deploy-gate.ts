@@ -42,7 +42,7 @@ async function main() {
   const missing = [!hook && 'NETLIFY_BUILD_HOOK', !token && 'NETLIFY_AUTH_TOKEN'].filter(Boolean);
   if (missing.length) return stop(`missing secret(s) ${missing.join(', ')}`,
     `The scheduled Netlify deploy can't run: add the repository secret(s) ${missing.join(' and ')} (Settings → Secrets and variables → Actions). NETLIFY_BUILD_HOOK is the URL of a build hook (Netlify: Project configuration → Build & deploy → Build hooks); NETLIFY_AUTH_TOKEN is a personal access token (User settings → Applications), used read-only to count this cycle's deploys. Without them nothing deploys, which costs no credits.`);
-  const site = env('NETLIFY_SITE') ?? 'jocular-llama-05cd7c.netlify.app';
+  const site = env('NETLIFY_SITE') ?? 'video-game-atlas.netlify.app';
   const api = (path: string) => fetch(`https://api.netlify.com/api/v1/${path}`, { headers: { Authorization: `Bearer ${token}`, 'User-Agent': 'video-game-atlas-deploy' } });
   // Resolve the site to its ID first, so a failure says whether the token or the site is wrong.
   // The repository is public, so logs never print account details or other sites' names.
