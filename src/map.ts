@@ -13,7 +13,6 @@ import type { Role } from './types.ts';
 import { ROLE_LABEL } from './types.ts';
 import { formatSpan, formatYear } from './timeline.ts';
 import { gameLogo, logoHtml, type Logos } from './logo.ts';
-import { STACK_MAX, parseStackId, parseTokenId, stackImage, tokenId, tokenImage } from './tokens.ts';
 
 export const ROLE_COLOR: Record<Role, string> = {
   world: '#2a6fdb',
@@ -23,13 +22,6 @@ export const ROLE_COLOR: Record<Role, string> = {
   stage: '#b0457a',
   strategy: '#d23c4b',
 };
-
-/** Pins cross-fade from colored dots to pixel tokens over this zoom band. Below it the world view stays calm. */
-const TOKEN_FADE: [number, number] = [3.5, 4.5];
-const fadeIn = (v: maplibregl.ExpressionSpecification | number) =>
-  ['interpolate', ['linear'], ['zoom'], TOKEN_FADE[0], 0, TOKEN_FADE[1], v] as maplibregl.ExpressionSpecification;
-const fadeOut = (v: maplibregl.ExpressionSpecification | number) =>
-  ['interpolate', ['linear'], ['zoom'], TOKEN_FADE[0], v, TOKEN_FADE[1], 0] as maplibregl.ExpressionSpecification;
 
 const STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const GLYPHS = 'https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf';
@@ -128,24 +120,11 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
       map.addLayer({ id: 'regions-fill', type: 'fill', source: 'regions', paint: { 'fill-color': ROLE_COLOR.strategy, 'fill-opacity': 0.05 } });
       map.addLayer({ id: 'regions-line', type: 'line', source: 'regions', paint: { 'line-color': ROLE_COLOR.strategy, 'line-opacity': 0.5, 'line-dasharray': [2, 2] } });
 
-      map.addSource('pins', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 36, clusterMaxZoom: 12,
-        // Each cluster's distinct token ids, ';'-joined and capped in length; the stack image is drawn from the first few.
-        clusterProperties: {
-          stack: [
-            ['case',
-              ['any',
-                ['in', ['concat', ';', ['get', 'stack'], ';'], ['concat', ';', ['accumulated'], ';']],
-                ['>', ['length', ['accumulated']], 160]],
-              ['accumulated'],
-              ['concat', ['accumulated'], ';', ['get', 'stack']]],
-            ['get', 'token'],
-          ],
-        },
-      });
+      map.addSource('pins', { type: 'geojson', data: { type: 'FeatureCollection', features: [] }, cluster: true, clusterRadius: 36, clusterMaxZoom: 12 });
       map.addLayer({
         id: 'clusters', type: 'circle', source: 'pins', filter: ['has', 'point_count'],
         paint: {
-          'circle-color': '#33415c', 'circle-opacity': fadeOut(0.85), 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5, 'circle-stroke-opacity': fadeOut(1),
+          'circle-color': '#33415c', 'circle-opacity': 0.85, 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5,
           'circle-radius': ['step', ['get', 'point_count'], 13, 10, 17, 50, 22, 150, 27],
         },
       });
@@ -153,7 +132,7 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         id: 'cluster-count', type: 'symbol', source: 'pins', filter: ['has', 'point_count'],
         // Always drawn: a count hidden by label collision would pop in and out while zooming.
         layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-allow-overlap': true, 'text-ignore-placement': true },
-        paint: { 'text-color': '#fff', 'text-opacity': fadeOut(1) },
+        paint: { 'text-color': '#fff' },
       });
       const color: maplibregl.ExpressionSpecification = ['match', ['get', 'kind'], ...Object.entries(ROLE_COLOR).flat(), '#666'] as never;
       map.addLayer({
@@ -161,62 +140,15 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         paint: {
           'circle-radius': ['case', ['get', 'coarse'], 7, 6],
           'circle-color': color,
-          'circle-opacity': fadeOut(['case', ['get', 'coarse'], 0.12, 0.95]),
+          'circle-opacity': ['case', ['get', 'coarse'], 0.12, 0.95],
           'circle-stroke-color': color,
           'circle-stroke-width': ['case', ['get', 'coarse'], 2, 1.5],
-          'circle-stroke-opacity': fadeOut(['case', ['get', 'coarse'], 0.7, 1]),
+          'circle-stroke-opacity': ['case', ['get', 'coarse'], 0.7, 1],
         },
-      });
-      // Tokens and stacks are drawn on first use: the image id encodes what to draw (src/tokens.ts).
-      // MapLibre 6: only the resolver can supply an image for the request that found it missing.
-      map.setMissingStyleImageResolver((id) => {
-        if (map.hasImage(id)) return;
-        const token = parseTokenId(id);
-        const stack = token ? undefined : parseStackId(id);
-        if (token) map.addImage(id, tokenImage(token, ROLE_COLOR), { pixelRatio: 2 });
-        else if (stack) map.addImage(id, stackImage(stack, ROLE_COLOR), { pixelRatio: 2 });
-      });
-      map.addLayer({
-        id: 'tokens', type: 'symbol', source: 'pins', minzoom: TOKEN_FADE[0], filter: ['!', ['has', 'point_count']],
-        layout: {
-          'icon-image': ['get', 'token'],
-          'icon-allow-overlap': true, 'icon-ignore-placement': true,
-          // Exact pins above approximate ones where they overlap.
-          'symbol-sort-key': ['case', ['get', 'coarse'], 1, 2],
-        },
-        paint: {
-          'icon-opacity': fadeIn(['case', ['get', 'coarse'], 0.55, 1]),
-        },
-      });
-      // Clusters become fanned stacks of their games' tokens, with the count on a badge at the front card's corner.
-      map.addLayer({
-        id: 'stacks', type: 'symbol', source: 'pins', minzoom: TOKEN_FADE[0], filter: ['has', 'point_count'],
-        layout: {
-          'icon-image': ['concat', 'stk|', ['to-string', ['min', ['get', 'point_count'], STACK_MAX]], '|', ['get', 'stack']],
-          'icon-allow-overlap': true, 'icon-ignore-placement': true,
-        },
-        paint: { 'icon-opacity': fadeIn(1) },
-      });
-      const BADGE: [number, number] = [15, 15];
-      map.addLayer({
-        id: 'cluster-badge', type: 'circle', source: 'pins', minzoom: TOKEN_FADE[0], filter: ['has', 'point_count'],
-        paint: {
-          'circle-radius': ['step', ['get', 'point_count'], 9, 10, 11, 100, 13], 'circle-translate': BADGE,
-          'circle-color': '#33415c', 'circle-opacity': fadeIn(1), 'circle-stroke-color': '#fff', 'circle-stroke-width': 1.5, 'circle-stroke-opacity': fadeIn(1),
-        },
-      });
-      map.addLayer({
-        id: 'cluster-badge-count', type: 'symbol', source: 'pins', minzoom: TOKEN_FADE[0], filter: ['has', 'point_count'],
-        layout: { 'text-field': ['get', 'point_count_abbreviated'], 'text-font': ['Noto Sans Regular'], 'text-size': 11, 'text-allow-overlap': true, 'text-ignore-placement': true },
-        paint: { 'text-color': '#fff', 'text-translate': BADGE, 'text-opacity': fadeIn(1) },
       });
 
-      // Dots and tokens differ in size, so a click on either counts; one popup per pin.
-      map.on('click', ['pins', 'tokens'], (e) => {
-        const fs = map.queryRenderedFeatures(e.point, { layers: ['pins', 'tokens'] });
-        showPopup(e.lngLat, featureHits([...new Map(fs.map((f) => [f.properties!.i as number, f])).values()]));
-      });
-      map.on('click', ['clusters', 'stacks', 'cluster-badge'], async (e) => {
+      map.on('click', 'pins', (e) => showPopup(e.lngLat, featureHits(map.queryRenderedFeatures(e.point, { layers: ['pins'] }))));
+      map.on('click', 'clusters', async (e) => {
         const f = e.features![0];
         const src = map.getSource('pins') as GeoJSONSource;
         const id = f.properties!.cluster_id as number;
@@ -227,7 +159,7 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
         const zoom = await src.getClusterExpansionZoom(id);
         map.easeTo({ center: (f.geometry as Point).coordinates as [number, number], zoom });
       });
-      for (const l of ['pins', 'tokens', 'clusters', 'stacks', 'cluster-badge']) {
+      for (const l of ['pins', 'clusters']) {
         map.on('mouseenter', l, () => (map.getCanvas().style.cursor = 'pointer'));
         map.on('mouseleave', l, () => (map.getCanvas().style.cursor = ''));
       }
@@ -237,12 +169,6 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
     });
   }));
 
-  // A collapsed series group gets the series' own sprite; a single game its own, in its series' hue.
-  const tokenFor = (e: Hit[]) => {
-    const g = e[0].game;
-    const group = new Set(e.map((h) => h.game.id)).size > 1;
-    return tokenId({ sprite: group && g.series ? g.series : g.id, hue: g.series ?? g.id, role: e[0].link.role });
-  };
   const toGeo = (es: Hit[][]) => ({
     pins: {
       type: 'FeatureCollection' as const,
@@ -250,7 +176,7 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
       features: es.map((e) => e[0]).flatMap((h, i) => (h.link.bbox ? [] : [{
         type: 'Feature' as const,
         geometry: { type: 'Point' as const, coordinates: [h.link.lon, h.link.lat] },
-        properties: { i, kind: h.link.role, coarse: h.link.approxPlace || h.approxTime, token: tokenFor(es[i]) },
+        properties: { i, kind: h.link.role, coarse: h.link.approxPlace || h.approxTime },
       }])),
     },
     regions: {
