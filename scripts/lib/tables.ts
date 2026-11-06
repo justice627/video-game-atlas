@@ -14,6 +14,10 @@ export const STATUSES = ['draft', 'auto-verified', 'needs-human', 'verified', 'e
 export const SHOWN = ['verified', 'auto-verified'] as const;
 export const FLAGS = ['needs-time', 'inferred-time', 'derived-time', 'contested', 'real-world-model', 'needs-review'] as const;
 export const FREEZE_KINDS = ['role', 'series'] as const;
+export const LOGO_KINDS = ['game', 'series'] as const;
+export const LOGO_STATUS = ['ok', 'excluded'] as const;
+/** Commons machine licence codes a logo may carry (rules section 8): public domain, CC0, CC BY, CC BY-SA. */
+export const LOGO_LICENCE = /^(pd|cc0|cc-by-\d(\.\d)?|cc-by-sa-\d(\.\d)?)$/;
 /** Separates quotes in links.quote (one per source, same order) and elided parts within one quote. */
 export const QUOTE_SEP = ' | ';
 export const ELISION = ' … ';
@@ -42,9 +46,13 @@ export interface ChronologyRow { from: string; to: string; relation: string; int
 export interface QueueInRow { title: string; wikidata?: string; wikipedia?: string; note?: string; added?: string }
 export interface FreezeRow { kind: string; value: string; note?: string }
 export interface GrandfatheredRow { link_id: string; note?: string }
+export interface LogoRow {
+  kind: string; id: string; file: string; licence?: string; licence_name?: string; author?: string;
+  image?: string; sha256?: string; accessed?: string; status: string; note?: string;
+}
 export interface Tables {
   series: SeriesRow[]; games: GameRow[]; places: PlaceRow[]; links: LinkRow[]; eras: EraRow[]; candidates: CandidateRow[];
-  chronology: ChronologyRow[]; sources: SourceRow[]; queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[];
+  chronology: ChronologyRow[]; sources: SourceRow[]; queueIn: QueueInRow[]; freeze: FreezeRow[]; grandfathered: GrandfatheredRow[]; logos: LogoRow[];
 }
 
 export interface Col { key: string; width: number; help: string; list?: readonly string[]; numeric?: boolean }
@@ -155,6 +163,19 @@ export const TABLES: TableDef[] = [
   { name: 'Grandfathered', file: 'grandfathered.csv', key: 'grandfathered', cols: [
     { key: 'link_id', width: 30, help: 'A link verified before quotes were required (2026-11). It may stay verified without a quote. Fixed list: never add rows.' },
     { key: 'note', width: 30, help: 'Free text.' },
+  ] },
+  { name: 'Logos', file: 'logos.csv', key: 'logos', cols: [
+    { key: 'kind', width: 8, help: 'Whose logo: a game or a series (rules section 8).', list: LOGO_KINDS },
+    { key: 'id', width: 24, help: 'Game id or series id.' },
+    { key: 'file', width: 36, help: 'Commons file name without "File:", from the Wikidata "logo image" (P154) statement.' },
+    { key: 'licence', width: 12, help: 'Commons machine licence code, e.g. pd, cc0, cc-by-sa-4.0. Required for ok.' },
+    { key: 'licence_name', width: 16, help: 'Licence as Commons names it, e.g. "Public domain".' },
+    { key: 'author', width: 24, help: 'Author or uploader credit from Commons, plain text.' },
+    { key: 'image', width: 28, help: 'File name in data/logos/. Required for ok.' },
+    { key: 'sha256', width: 20, help: 'Checksum of the image file. The build fails if the file does not match.' },
+    { key: 'accessed', width: 11, help: 'ISO date the licence was checked on Commons.' },
+    { key: 'status', width: 9, help: 'ok: passed the licence check, shown. excluded: kept with the reason in note, never shown or refetched.', list: LOGO_STATUS },
+    { key: 'note', width: 30, help: 'Why excluded, or anything odd about the file.' },
   ] },
 ];
 

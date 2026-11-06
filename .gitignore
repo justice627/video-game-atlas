@@ -6,3 +6,4 @@ playwright-report/
 data/atlas.xlsx
 ~$*.xlsx
 .cache/
+public/logos/

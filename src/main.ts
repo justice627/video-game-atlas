@@ -42,7 +42,7 @@ async function main() {
 
   const seriesById = new Map(atlas.series.map((s) => [s.id, s.name]));
   const seriesName = (id: string) => seriesById.get(id);
-  const map = mountMap($('#map'), seriesName);
+  const map = mountMap($('#map'), seriesName, atlas.logos);
   const group = $<HTMLInputElement>('#group');
   const chips = $('#kinds');
   chips.innerHTML = CHIP_ROLES.map((r) => `<button type="button" class="chip" data-kind="${r}">
@@ -66,7 +66,7 @@ async function main() {
       group.checked = collapse;
       const hits = visiblePlacements(atlas.games, filters);
       map.setHits(groupEntries(hits, collapse));
-      renderList($('#list'), $('#count'), hits, undatedShown(filters) ? [] : undated, (gh) => map.focus(gh), { collapse, seriesName });
+      renderList($('#list'), $('#count'), hits, undatedShown(filters) ? [] : undated, (gh) => map.focus(gh), { collapse, seriesName, logos: atlas.logos });
       // Per-role counts ignore the role filter itself, so you can see what turning one on would add.
       const all = visiblePlacements(atlas.games, { ...filters, roles: new Set(ROLES) });
       chips.querySelectorAll<HTMLButtonElement>('.chip').forEach((c) => {
