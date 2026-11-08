@@ -8,6 +8,7 @@
     "build": "npm run build:data && tsc --noEmit && vite build",
     "preview": "vite preview",
     "fetch:wikidata": "tsx scripts/fetch-wikidata.ts",
+    "fetch:logos": "tsx scripts/fetch-logos.ts",
     "build:data": "tsx scripts/build-data.ts",
     "test": "vitest run",
     "data:export": "tsx scripts/data-export.ts",

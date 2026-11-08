@@ -37,7 +37,7 @@ a { color: var(--accent); }
 .toggle { display: flex; align-items: center; gap: 6px; padding: 10px 12px 0; color: var(--muted); font-size: 13px; }
 .count { padding: 10px 12px 6px; font-weight: 600; border-bottom: 1px solid var(--line); }
 .list { list-style: none; margin: 0; padding: 0; overflow-y: auto; flex: 1; }
-.list button { display: grid; gap: 1px; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 8px 12px; color: inherit; font: inherit; cursor: pointer; }
+.list button { display: grid; grid-template-columns: 72px 1fr; column-gap: 10px; row-gap: 1px; align-items: center; width: 100%; text-align: left; background: none; border: 0; border-bottom: 1px solid var(--line); padding: 8px 12px; color: inherit; font: inherit; cursor: pointer; }
 .list button:hover, .list button:focus-visible { background: var(--accent-soft); outline: none; }
 .li-title { font-weight: 600; }
 .li-meta, .li-where { font-size: 12.5px; color: var(--muted); }
@@ -86,3 +86,17 @@ a { color: var(--accent); }
 .list li.series > button .li-title { color: var(--accent); }
 .pop-list { margin: 6px 0 0; padding-left: 16px; max-height: 180px; overflow-y: auto; }
 .pop-list li { margin: 2px 0; }
+
+/* Logos (docs/data-rules.md, section 8). The plate follows the logo's ink, not the theme, so both stay readable. */
+.logo { display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; line-height: 0; }
+.logo img { display: block; max-width: 100%; max-height: 100%; object-fit: contain; }
+.logo[data-tone="dark"] { background: #ffffff; }
+.logo[data-tone="light"] { background: #1d2430; }
+.logo[data-tone="dark"], .logo[data-tone="light"] { padding: 3px 5px; }
+.li-logo-slot { grid-row: 1 / span 3; width: 72px; height: 34px; display: flex; align-items: center; justify-content: center; }
+.li-logo { max-width: 72px; max-height: 34px; }
+.li-logo img { max-height: 28px; }
+.list button > :not(.li-logo-slot) { grid-column: 2; }
+.pop-logo { margin: 0 0 6px; max-width: 200px; height: 44px; }
+.pop-logo img { max-height: 38px; }
+.fineprint { margin: 0; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 11px; line-height: 1.35; color: var(--muted); }

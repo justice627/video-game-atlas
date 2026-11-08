@@ -12,6 +12,7 @@ import { distinctBoxes, withoutRelief } from './map-style.ts';
 import type { Role } from './types.ts';
 import { ROLE_LABEL } from './types.ts';
 import { formatSpan, formatYear } from './timeline.ts';
+import { gameLogo, logoHtml, type Logos } from './logo.ts';
 
 export const ROLE_COLOR: Record<Role, string> = {
   world: '#2a6fdb',
@@ -43,9 +44,11 @@ async function loadStyle(): Promise<string | StyleSpecification> {
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
+const POP_LOGO = { base: import.meta.env.BASE_URL, link: true, cls: 'pop-logo' };
+
 const host = (u: string) => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch { return u; } };
 
-function hitHtml(h: Hit): string {
+function hitHtml(h: Hit, logos?: Logos): string {
   const l = h.link;
   const where = l.fictionalName
     ? `${esc(l.fictionalName)} <span class="muted">(based on ${esc(l.place)})</span>`
@@ -58,6 +61,7 @@ function hitHtml(h: Hit): string {
     : l.timeType === 'sandbox' ? 'Across eras (sandbox), years not yet set' : 'Undated: no sourced year';
   const sources = l.sources.map((u) => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(host(u))}</a>`).join(', ');
   return `<div class="pop-item">
+    ${logoHtml(gameLogo(logos, h.game), h.game.title, POP_LOGO)}
     <div class="pop-title">${title}${h.game.year ? ` <span class="muted">(${h.game.year})</span>` : ''}</div>
     <div><span class="dot" style="background:${ROLE_COLOR[l.role]}"></span>${ROLE_LABEL[l.role]}${l.nameInGame ? `: ${esc(l.nameInGame)}` : ''}</div>
     <div>${where}${l.approxPlace ? ' <span class="muted">· approximate location</span>' : ''}</div>
@@ -67,8 +71,8 @@ function hitHtml(h: Hit): string {
 }
 
 /** Several games at one place in one series: one popup block listing each game and the name it uses. */
-function groupHtml(group: Hit[], seriesName: (id: string) => string | undefined): string {
-  if (group.length === 1) return hitHtml(group[0]);
+function groupHtml(group: Hit[], seriesName: (id: string) => string | undefined, logos?: Logos): string {
+  if (group.length === 1) return hitHtml(group[0], logos);
   const first = group[0].link;
   const series = group[0].game.series ? seriesName(group[0].game.series) : undefined;
   const items = [...group].sort((a, b) => (a.game.year ?? 0) - (b.game.year ?? 0)).map((h) => {
@@ -77,7 +81,9 @@ function groupHtml(group: Hit[], seriesName: (id: string) => string | undefined)
     const when = h.link.span ? ` · ${formatSpan(h.link.span)}` : '';
     return `<li>${t}${as}<span class="muted">${when}</span></li>`;
   }).join('');
+  const sid = group[0].game.series;
   return `<div class="pop-item">
+    ${logoHtml(sid ? logos?.series[sid] : undefined, series ?? group[0].game.title, POP_LOGO)}
     <div class="pop-title">${esc(series ?? group[0].game.title)} <span class="muted">(${group.length} games)</span></div>
     <div><span class="dot" style="background:${ROLE_COLOR[first.role]}"></span>${ROLE_LABEL[first.role]}: ${esc(first.place)}</div>
     <ul class="pop-list">${items}</ul>
@@ -91,7 +97,7 @@ export interface AtlasMap {
   ready: Promise<void>;
 }
 
-export function mountMap(container: HTMLElement, seriesName: (id: string) => string | undefined = () => undefined): AtlasMap {
+export function mountMap(container: HTMLElement, seriesName: (id: string) => string | undefined = () => undefined, logos?: Logos): AtlasMap {
   let entries: Hit[][] = [];
   let popup: maplibregl.Popup | null = null;
   let map!: maplibregl.Map;
@@ -101,7 +107,7 @@ export function mountMap(container: HTMLElement, seriesName: (id: string) => str
     const more = groups.length > 30 ? `<div class="muted">…and ${groups.length - 30} more</div>` : '';
     popup = new maplibregl.Popup({ maxWidth: '340px', className: 'atlas-pop' })
       .setLngLat(lngLat)
-      .setHTML(`<div class="pop-scroll">${groups.slice(0, 30).map((g) => groupHtml(g, seriesName)).join('')}${more}</div>`)
+      .setHTML(`<div class="pop-scroll">${groups.slice(0, 30).map((g) => groupHtml(g, seriesName, logos)).join('')}${more}</div>`)
       .addTo(map);
   };
   const featureHits = (fs: MapGeoJSONFeature[]) => fs.map((f) => entries[f.properties!.i as number]).filter(Boolean);

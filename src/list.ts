@@ -2,6 +2,7 @@ import type { Hit } from './filter.ts';
 import { byGame } from './filter.ts';
 import type { Game } from './types.ts';
 import { formatSpan } from './timeline.ts';
+import { gameLogo, logoHtml, type Logos } from './logo.ts';
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 
@@ -9,7 +10,12 @@ export interface ListOptions {
   /** Nest games under their series. */
   collapse: boolean;
   seriesName: (id: string) => string | undefined;
+  logos?: Logos;
 }
+
+const LIST_LOGO = { base: import.meta.env.BASE_URL, link: false, cls: 'li-logo' };
+/** A fixed-size slot, empty when there is no logo, so titles line up. */
+const slot = (html: string) => `<span class="li-logo-slot">${html}</span>`;
 
 function when(hits: Hit[]): string {
   const spans = [...new Map(hits.filter((h) => h.matched).map((h) => [`${h.matched!.from}:${h.matched!.to}`, h.matched!])).values()]
@@ -38,6 +44,7 @@ export function renderList(root: HTMLElement, count: HTMLElement, hits: Hit[], u
   const gameRow = ([game, gh]: [Game, Hit[]], nested = false) => {
     picks.push(gh);
     return `<li${nested ? ' class="nested"' : ''}><button type="button" data-i="${picks.length - 1}">
+      ${slot(logoHtml(gameLogo(opts.logos, game), game.title, LIST_LOGO))}
       <span class="li-title">${esc(game.title)}${nested && game.year ? ` <span class="muted">(${game.year})</span>` : ''}</span>
       <span class="li-meta">${when(gh)}</span>
       <span class="li-where">${where(gh)}</span>
@@ -59,6 +66,7 @@ export function renderList(root: HTMLElement, count: HTMLElement, hits: Hit[], u
       picks.push(all);
       const name = opts.seriesName(key.slice(2)) ?? key.slice(2);
       html += `<li class="series"><button type="button" data-i="${picks.length - 1}">
+        ${slot(logoHtml(opts.logos?.series[key.slice(2)], name, LIST_LOGO))}
         <span class="li-title">${esc(name)} <span class="muted">· ${members.length} games</span></span>
         <span class="li-meta">${when(all)}</span>
         <span class="li-where">${where(all)}</span>

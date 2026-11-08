@@ -1,8 +1,8 @@
 // Validates the tables against docs/data-rules.md and builds public/atlas.json from verified and auto-verified links.
-import type { Atlas, Game, Link, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
+import type { Atlas, Game, Link, Logo, PlaceType, Role, TimeType, Confidence } from '../../src/types.ts';
 import { resolve, type Chronology } from './chronology.ts';
 import { bankFor } from './sources.ts';
-import { ACCESS, CONFIDENCE, DEPICTIONS, FLAGS, SOURCE_STATUS, TIERS, FREEZE_KINDS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
+import { ACCESS, CONFIDENCE, DEPICTIONS, FLAGS, SOURCE_STATUS, TIERS, FREEZE_KINDS, LOGO_KINDS, LOGO_LICENCE, LOGO_STATUS, PLACE_TYPES, QUOTE_SEP, ROLES, SHOWN, STATUSES, TIME_TYPES, type PlaceRow, type Tables } from './tables.ts';
 
 type Row = { _row?: number };
 const at = (sheet: string, r: Row) => `${sheet} row ${r._row ?? '?'}`;
@@ -187,8 +187,30 @@ export function validate(t: Tables): string[] {
       default: errs.push(`${w}: time_type "${l.time_type ?? ''}" must be one of ${TIME_TYPES.join(', ')}`);
     }
   }
+  const logoSeen = new Map<string, Row>();
+  for (const g of (t.logos ?? []) as (Tables['logos'][number] & Row)[]) {
+    const w = at('Logos', g);
+    if (!has(LOGO_KINDS, g.kind)) { errs.push(`${w}: kind "${g.kind ?? ''}" must be one of ${LOGO_KINDS.join(', ')}`); continue; }
+    if (!(g.kind === 'game' ? games : series).has(g.id)) errs.push(`${w}: ${g.kind} "${g.id ?? ''}" is not on the ${g.kind === 'game' ? 'Games' : 'Series'} sheet`);
+    const key = `${g.kind}:${g.id}`;
+    if (logoSeen.has(key)) errs.push(`${w}: ${g.kind} "${g.id}" already has a logo on ${at('Logos', logoSeen.get(key)!)}`);
+    else logoSeen.set(key, g);
+    if (!g.file || /^file:/i.test(g.file)) errs.push(`${w}: file must be the Commons file name without "File:"`);
+    if (!has(LOGO_STATUS, g.status)) errs.push(`${w}: status "${g.status ?? ''}" must be one of ${LOGO_STATUS.join(', ')}`);
+    if (g.accessed && !isoDate(g.accessed)) errs.push(`${w}: accessed must be a date like 2026-11-06`);
+    if (g.status === 'excluded' && !g.note) errs.push(`${w}: an excluded logo needs the reason in note`);
+    if (g.status === 'ok') {
+      if (!g.licence || !LOGO_LICENCE.test(g.licence)) errs.push(`${w}: licence "${g.licence ?? ''}" is not public domain, CC0, CC BY or CC BY-SA (rules section 8)`);
+      if (!g.image || !/^[a-z0-9-]+\.(png|jpg|gif)$/.test(g.image)) errs.push(`${w}: image must be a file name in data/logos/ like game-hitman-3.png`);
+      if (!g.sha256 || !/^[0-9a-f]{64}$/.test(g.sha256)) errs.push(`${w}: sha256 must be the image's 64-character checksum`);
+      if (!g.accessed) errs.push(`${w}: accessed is required for ok`);
+    }
+  }
   return errs;
 }
+
+/** Commons file page for a logo file name. */
+export const commonsPage = (file: string) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(file.replace(/ /g, '_'))}`;
 
 /** Links shown on the map (verified and auto-verified), grouped by game. Assumes validate() returned no errors. */
 export function buildAtlas(t: Tables): Atlas {
@@ -227,5 +249,13 @@ export function buildAtlas(t: Tables): Atlas {
   games.sort((a, b) => a.title.localeCompare(b.title));
   const used = new Set(games.map((g) => g.series).filter(Boolean));
   const series = t.series.filter((s) => used.has(s.id)).map((s) => ({ id: s.id, name: s.name, ...(s.wikidata ? { wikidata: s.wikidata } : {}) }));
-  return { built: new Date().toISOString().slice(0, 10), series, games };
+  // Logos sit beside the games, not inside them, so a logo never changes a game's built output.
+  const shown = { game: new Set(games.map((g) => g.id)), series: new Set(series.map((s) => s.id)) };
+  const logos: Atlas['logos'] = { games: {}, series: {} };
+  for (const g of t.logos ?? []) {
+    if (g.status !== 'ok' || !shown[g.kind as 'game' | 'series']?.has(g.id)) continue;
+    const logo: Logo = { src: `logos/${g.image}`, page: commonsPage(g.file), licence: g.licence_name ?? g.licence!, ...(g.author ? { author: g.author } : {}) };
+    logos[g.kind === 'game' ? 'games' : 'series'][g.id] = logo;
+  }
+  return { built: new Date().toISOString().slice(0, 10), series, games, logos };
 }
