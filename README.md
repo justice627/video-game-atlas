@@ -38,7 +38,7 @@ Plain CSV tables in `data/` are the source of truth, shaped for a later move to 
 | `grandfathered.csv` | links verified before quotes were required; a fixed list |
 | `atlas.xlsx` | Excel editing view of all of the above, generated locally by `data:export` and not committed |
 
-Links with status `verified` or `auto-verified` reach the map; auto-verified ones are marked. Venues, multiplayer maps, stage backdrops, strategy maps and sandbox games are hidden by default and switched on in the panel; "Group games by series" collapses a series into one pin per place. The build checks every rule it can (sources present, inspiration has a fictional name, undated links flagged `needs-time`, and so on) and names the sheet and row of each problem.
+Links with status `verified` or `auto-verified` reach the map. Auto-verified links passed the automatic gate (quotes found in their sources, a medium or better source, a separate fact-check, nothing that needs judgment) and carry an "auto" tag; a switch hides them. Venues, multiplayer maps, stage backdrops, strategy maps and sandbox games are hidden by default and switched on in the panel; "Group games by series" collapses a series into one pin per place. The build checks every rule it can (sources present, inspiration has a fictional name, undated links flagged `needs-time`, and so on) and names the sheet and row of each problem.
 
 ```bash
 npm run data:export                       # tables -> data/atlas.xlsx
@@ -58,7 +58,7 @@ The worked examples in the data rules, plus the Pokémon chain, are golden tests
 
 | Path | Holds |
 | --- | --- |
-| `review/queue.csv` | everything waiting on you: changes to verified links, audits, `needs-human` links, blocked sources. Fill `decision` (approve, reject, edit, skip) and `decision_note`; the next run applies it |
+| `review/queue.csv` | everything waiting on you (also shown in the pinned "Review queue" issue, where ticks and one-line comments record decisions): changes to verified links, audits, `needs-human` links, blocked sources. Fill `decision` (approve, reject, edit, skip) and `decision_note`; the next run applies it |
 | `review/resolved.csv` | applied decisions |
 | `review/backlog.csv` | games a run couldn't finish, retried by later runs (twice at most) |
 | `review/blocked-sources.csv` | sources that refused automated fetching, with what to look for |

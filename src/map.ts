@@ -66,7 +66,8 @@ function hitHtml(h: Hit, logos?: Logos): string {
     <div><span class="dot" style="background:${ROLE_COLOR[l.role]}"></span>${ROLE_LABEL[l.role]}${l.nameInGame ? `: ${esc(l.nameInGame)}` : ''}</div>
     <div>${where}${l.approxPlace ? ' <span class="muted">· approximate location</span>' : ''}</div>
     <div class="muted">${l.timeType === 'sandbox' || !l.span ? when : `Set in ${when}`}${h.approxTime && l.span ? ' · broad period' : ''}</div>
-    <div class="muted">Source (${l.confidence} confidence): ${sources}</div>
+    <div class="muted">Source (${l.confidence} confidence): ${sources}</div>${l.auto ? `
+    <div class="auto-note">Auto-verified, not yet checked by hand</div>` : ''}
   </div>`;
 }
 

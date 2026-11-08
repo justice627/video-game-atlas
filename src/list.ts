@@ -41,12 +41,13 @@ export function renderList(root: HTMLElement, count: HTMLElement, hits: Hit[], u
     return;
   }
   const picks: Hit[][] = [];
+  const AUTO_TAG = '<span class="tag-auto" title="Passed the automatic source checks; not yet checked by hand">auto</span>';
   const gameRow = ([game, gh]: [Game, Hit[]], nested = false) => {
     picks.push(gh);
     return `<li${nested ? ' class="nested"' : ''}><button type="button" data-i="${picks.length - 1}">
       ${slot(logoHtml(gameLogo(opts.logos, game), game.title, LIST_LOGO))}
       <span class="li-title">${esc(game.title)}${nested && game.year ? ` <span class="muted">(${game.year})</span>` : ''}</span>
-      <span class="li-meta">${when(gh)}</span>
+      <span class="li-meta">${when(gh)}${gh.some((h) => h.link.auto) ? AUTO_TAG : ''}</span>
       <span class="li-where">${where(gh)}</span>
     </button></li>`;
   };

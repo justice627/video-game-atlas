@@ -16,7 +16,7 @@ const civ: Game = { id: 'civ', title: 'Civilization VI', links: [
 ] };
 const country: Game = { id: 'c', title: 'Country game', links: [link({ place: 'Italy', placeType: 'country', approxPlace: true, span: { from: 1500, to: 1500 } })] };
 const all = [ac2, hitman, civ, country];
-const base: Filters = { range: { from: 1400, to: 1600 }, roles: new Set(['world', 'level', 'venue', 'map']), showCoarse: true, showStrategy: false, showUndated: false };
+const base: Filters = { range: { from: 1400, to: 1600 }, roles: new Set(['world', 'level', 'venue', 'map']), showCoarse: true, showStrategy: false, showUndated: false, showAuto: true };
 const titles = (f: Partial<Filters>) => [...byGame(visiblePlacements(all, { ...base, ...f })).keys()].map((g) => g.title);
 
 describe('filter (docs/data-rules.md section 4)', () => {
@@ -61,5 +61,13 @@ describe('series grouping (docs/data-rules.md section 5)', () => {
     const e = groupEntries(hits, true);
     expect(e.map((x) => x.map((h) => h.game.id))).toEqual([['FIFA 11', 'FIFA 20'], ['other']]);
     expect(e[0].map((h) => h.link.nameInGame)).toEqual(['Amsterdam ArenA', 'Johan Cruijff ArenA']);
+  });
+});
+
+describe('auto-verified links', () => {
+  it('show by default and hide with the switch', () => {
+    const auto: Game = { id: 'a', title: 'Auto', links: [link({ place: 'Lisbon', auto: true, span: { from: 1500, to: 1500 } })] };
+    expect(visiblePlacements([auto], base)).toHaveLength(1);
+    expect(visiblePlacements([auto], { ...base, showAuto: false })).toHaveLength(0);
   });
 });
