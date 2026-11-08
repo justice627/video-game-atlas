@@ -66,7 +66,8 @@ function changedRefs(t: Tables): Set<string> {
   return out;
 }
 
-function recordBlocked(rows: Record<string, string>[]) {
+/** Adds or refreshes rows in review/blocked-sources.csv (one per URL and ref). */
+export function recordBlocked(rows: Record<string, string>[]) {
   const today = new Date().toISOString().slice(0, 10);
   const [h, ...old] = existsSync(BLOCKED) ? parseCsv(readFileSync(BLOCKED, 'utf8')) : [BLOCKED_COLS];
   const all = old.filter((r) => r.some(Boolean)).map((r) => Object.fromEntries(h.map((k, i) => [k, r[i] ?? ''])));

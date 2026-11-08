@@ -9,6 +9,7 @@ import { parseCsv } from '../lib/csv.ts';
 import { validate } from '../lib/dataset.ts';
 import { readTables } from '../lib/tables.ts';
 import { offline } from '../verify-sources.ts';
+import { mergeStaging, readStaging } from '../lib/staging.ts';
 
 const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 
@@ -34,6 +35,16 @@ export function changedLinkIds(dataDir: URL, root = ROOT): Set<string> {
 export function check(file: string, dataDir = pathToFileURL(`${ROOT}data/`), root = ROOT): { code: 0 | 2; message: string } {
   const rel = watched(file, root);
   if (!rel) return { code: 0, message: '' };
+  const staged = /^data\/staging\/([^/]+)\//.exec(rel);
+  if (staged) {
+    // A research run's staging tables: check them by merging into a copy of the real tables.
+    let r;
+    try { r = mergeStaging(readTables(dataDir), staged[1], readStaging(new URL(`staging/${staged[1]}/`, dataDir))); }
+    catch (e) { return { code: 2, message: `${rel}: ${(e as Error).message}` }; }
+    if (r.ok) return { code: 0, message: `${rel}: merges cleanly (${r.linkIds.length} link(s)${r.proposals.length ? `, ${r.proposals.length} proposed change(s) to verified links` : ''}).` };
+    // A staging folder is written file by file: a missing games.csv row or place may simply not be written yet.
+    return { code: 2, message: `${rel}: the staging for ${staged[1]} would not merge yet. Fix these, or write the missing rows next:\n  ${r.errors.slice(0, 30).join('\n  ')}` };
+  }
   let errs: string[];
   try { errs = validate(readTables(dataDir)); } catch (e) { return { code: 2, message: `${rel}: ${(e as Error).message}` }; }
   const t = readTables(dataDir);

@@ -217,3 +217,12 @@ Every push to `main` before this change was a production deploy: about 12 to 13 
 - **Normal cycle:** cap 16 production deploys (240 credits), leaving 60 for traffic and margin. Two scheduled slots a week use about 9; the rest is room for a manual deploy after an urgent code fix.
 - **This cycle (burn-in):** the cap counts the deploys already made, so with about 12 used, 4 remain until the cycle resets. In practice that is roughly one deploy a week: a slot only deploys when `main` changed, and data reaches `main` slowly during burn-in.
 - **Code merges** no longer deploy on their own. They ship with the next scheduled slot, or by hand from the Deploy workflow when they can't wait.
+
+## 12. Phase 5 notes (2026-11-06)
+
+- **Queue columns:** the brief's columns plus `link` (the link id: game and place alone are ambiguous, e.g. two GoldenEye links share both) and `proposed` (the `field=value` change a `change-to-verified` row would apply on approve).
+- **Blocked-source rows:** approve means "I found the quote on the page", reject "it isn't there" (the link goes to `needs-human`), edit sets fields from the note.
+- **`/research-batch` is a skill** (`.claude/skills/research-batch/SKILL.md`): Claude Code merged custom commands into skills, and the skill form is the documented one.
+- **Fact-check verdicts** are stored per draft link with a hash of the judged fields (`review/factcheck.csv`). Any later change to the link voids its verdict, so the gate (phase 6) only counts a pass for the exact row that was checked.
+- **Discovery** adds games published in the last 18 months with a narrative location (Wikidata P840 with coordinates). The full snapshot refresh stays manual and weekly at most.
+- The skill calls `npm run gate` and `npm run queue:build`, which arrive in phase 6.

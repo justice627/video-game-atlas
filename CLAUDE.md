@@ -27,6 +27,10 @@ npm run golden:update     # after a deliberate rule change; say in the PR which 
 npm run data:export       # local Excel editing view (gitignored); data:import writes it back
 ```
 
+## Research runs
+
+`/research-batch [n]` (`.claude/skills/research-batch/`) runs one batch: queue decisions, discovery, backpressure, then per game the `researcher` subagent (writes only `data/staging/<game>/` and `docs/research/`), `pipeline merge-staging`, `verify:sources --fetch --changed`, the `fact-checker` subagent (read-only, never sees the research) and the gate, then a data-only commit. The deterministic steps are `npm run pipeline -- <step>` (`scripts/pipeline.ts`). Hooks in `.claude/settings.json` and in each agent's frontmatter enforce both agents' limits.
+
 ## Hook
 
 Editing any `data/*.csv` runs `scripts/hooks/check-data.sh` (`.claude/settings.json`): full validation plus an offline quote check of the changed rows. If it reports problems, fix them before doing anything else.

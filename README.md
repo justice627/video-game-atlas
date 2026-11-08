@@ -54,6 +54,17 @@ The workbook is a local editing view, ignored by git. Export, edit, then run `da
 
 The worked examples in the data rules, plus the Pokémon chain, are golden tests: `tests/golden/*.json` holds their exact built output. After a deliberate rule or build change, run `npm run golden:update` and say in the PR which ones moved.
 
+## Review and research runs
+
+| Path | Holds |
+| --- | --- |
+| `review/queue.csv` | everything waiting on you: changes to verified links, audits, `needs-human` links, blocked sources. Fill `decision` (approve, reject, edit, skip) and `decision_note`; the next run applies it |
+| `review/resolved.csv` | applied decisions |
+| `review/backlog.csv` | games a run couldn't finish, retried by later runs (twice at most) |
+| `review/blocked-sources.csv` | sources that refused automated fetching, with what to look for |
+| `review/factcheck.csv` | the fact-checker's verdict per draft link |
+| `review/runs/` | one log and summary per research run |
+
 ## Claude Code
 
 `CLAUDE.md` holds the working rules. `.claude/settings.json` adds a hook: after any edit to `data/*.csv`, it validates the tables and checks the changed rows' quotes against `data/evidence/` (no network), and sends row-level problems back to Claude.
