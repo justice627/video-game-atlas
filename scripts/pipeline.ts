@@ -170,6 +170,12 @@ export function abandon(game: string, reason: string, title = '', root = ROOT) {
 
 // ---------- commit ----------
 function git(args: string[]) { return execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim(); }
+/** Paths from `git status --porcelain -z` (a rename's entry is followed by its old path, which is skipped). */
+export function changedPaths(z: string): string[] {
+  const parts = z.split('\0').filter(Boolean), out: string[] = [];
+  for (let i = 0; i < parts.length; i++) { const status = parts[i].slice(0, 2); out.push(parts[i].slice(3)); if (/[RC]/.test(status)) i++; }
+  return out;
+}
 export function renderRun(run: string, events: Record<string, unknown>[]): string {
   const of = (step: string) => events.filter((e) => e.step === step);
   const lines = [`# Research run ${run}`, ''];
@@ -191,7 +197,8 @@ export function renderRun(run: string, events: Record<string, unknown>[]): strin
 }
 export function commitRun(run: string) {
   if (!/^\d{4}-\d{2}-\d{2}-[\w-]+$/.test(run)) throw new Error('run id must look like 2026-11-07-0630');
-  const changed = git(['status', '--porcelain']).split('\n').filter(Boolean).map((l) => l.slice(3).replace(/^"|"$/g, '').split(' -> ').pop()!);
+  // -z: NUL-separated, unquoted paths; untrimmed, so each entry keeps its two status characters.
+  const changed = changedPaths(execFileSync('git', ['status', '--porcelain', '-z', '--untracked-files=all'], { cwd: ROOT, encoding: 'utf8' }));
   const outside = changed.filter((p) => !DATA_PATHS.test(p));
   if (outside.length) throw new Error(`refusing to commit: a research run may only change data paths, not ${outside.join(', ')}`);
   if (!changed.length) return { branch: '', pushed: false, note: 'nothing to commit' };

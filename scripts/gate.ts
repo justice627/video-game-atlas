@@ -110,7 +110,8 @@ export function apply(t: Tables, inp: GateInputs, q: Queue, opts: { game?: strin
         what_i_need_to_do: 'Check the claim against its source. Approve if it is right, reject with the reason if not, or edit the fields that are wrong.' });
     } else if (v.outcome === 'research') {
       r.research.push(l.id);
-      r.backlogGames.set(l.game_id, { reason: v.reasons.join('; '), attempt: true });
+      // Only a run that just researched this game (--game) counts as an attempt; a sweep over old drafts doesn't.
+      r.backlogGames.set(l.game_id, { reason: v.reasons.join('; '), attempt: !!opts.game });
     } else {
       r.wait.push(l.id);
       // A sweep over all drafts (no --game) sends unchecked ones back so a run fact-checks them.

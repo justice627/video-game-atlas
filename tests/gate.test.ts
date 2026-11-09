@@ -89,6 +89,15 @@ describe('gate', () => {
     expect(check(t, moved)[0]).toContain(`${l.id}: auto-verified but no longer passes`);
   });
 
+  it('only a research run counts as an attempt; a sweep over old drafts does not', () => {
+    const t = T(), l = candidate(t);
+    l.quote = undefined; l.accessed = undefined;
+    expect(apply(t, inputs(l), tmpQueue(), { run: 'sweep', auditLog: [], backlog: [] }).backlogGames.get(l.game_id)).toMatchObject({ attempt: false });
+    const t2 = T(), l2 = candidate(t2);
+    l2.quote = undefined; l2.accessed = undefined;
+    expect(apply(t2, inputs(l2), tmpQueue(), { game: l2.game_id, run: 'r1', auditLog: [], backlog: [] }).backlogGames.get(l2.game_id)).toMatchObject({ attempt: true });
+  });
+
   it('a game researched twice without passing goes to a human', () => {
     const t = T(), l = candidate(t), q = tmpQueue();
     l.quote = undefined; l.accessed = undefined;
