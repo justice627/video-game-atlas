@@ -1,0 +1,31 @@
+name: Data guard
+# A branch named data/* is a data PR and may auto-merge, so it may only touch data paths:
+# data/, docs/research/, docs/review/, review/. Any other branch passes this check.
+# Required on main by the ruleset (with ci).
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  data-guard:
+    name: data-guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 0 }
+      - name: Changed paths of a data branch stay in data paths
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          case "$HEAD_REF" in data/*) ;; *) echo "Not a data branch ($HEAD_REF): passes."; exit 0 ;; esac
+          git diff --name-only "$BASE_SHA...$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
+          cat "$RUNNER_TEMP/changed.txt"
+          bad=$(grep -v -E '^(data/|docs/research/|docs/review/|review/)' "$RUNNER_TEMP/changed.txt" || true)
+          if [ -n "$bad" ]; then
+            echo "::error::A data branch may only change data/, docs/research/, docs/review/ and review/. Outside: $(echo $bad)"
+            exit 1
+          fi
+          echo "Data paths only: passes."

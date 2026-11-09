@@ -80,7 +80,7 @@ export function recordBlocked(rows: Record<string, string>[]) {
   writeFileSync(BLOCKED, toCsv(BLOCKED_COLS, all));
 }
 
-async function fetchMode(t: Tables, mode: 'missing' | 'changed' | 'all') {
+export async function fetchMode(t: Tables, mode: 'missing' | 'changed' | 'all') {
   const today = new Date().toISOString().slice(0, 10);
   const changed = mode === 'changed' ? changedRefs(t) : undefined;
   const todo = pairs(t).filter((p) => mode === 'all' || (mode === 'changed' ? changed!.has(p.ref) : !hasEvidence(p)));
@@ -113,6 +113,7 @@ async function fetchMode(t: Tables, mode: 'missing' | 'changed' | 'all') {
   console.log(lines.join('\n'));
   const report = process.argv.find((a) => a.startsWith('--report='))?.slice(9);
   if (report) writeFileSync(report, lines.join('\n') + '\n');
+  return { found, notFound, blocked };
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {

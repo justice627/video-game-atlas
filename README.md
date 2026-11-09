@@ -65,6 +65,22 @@ The worked examples in the data rules, plus the Pokémon chain, are golden tests
 | `review/factcheck.csv` | the fact-checker's verdict per draft link |
 | `review/runs/` | one log and summary per research run |
 
+## Automation (GitHub Actions)
+
+| Workflow | When | Does |
+| --- | --- | --- |
+| CI (`ci`) | every PR and push to main | data rules, quotes against evidence, gate check, unit and browser tests |
+| Data guard (`data-guard`) | every PR | a `data/*` branch may only change `data/`, `docs/research/`, `docs/review/`, `review/` |
+| Auto-merge data | data PRs from this repo by the owner | turns on auto-merge (squash); never for other PRs |
+| Open data PR | push to `data/**` | takes in main (resolving review-file conflicts), rebuilds the queue, opens the PR |
+| Review issue / Review decisions | queue changes on main / owner's ticks and comments | the pinned "Review queue" issue |
+| Deploy | Monday and Thursday, or by hand | the only way to production, within the credit budget |
+| Nightly | every night | full validation of main and a `PIPELINE_TOKEN` expiry check; failures open a `blocker` issue |
+| Weekly re-check | Sundays | fetches every quoted source again; gone quotes go to review via a data PR |
+| Repository setup | by hand, once | ruleset on main (PR required, `ci` and `data-guard` must pass, no force pushes, nobody bypasses) and auto-merge |
+
+`main` takes changes only through PRs. Code PRs wait for the owner; data PRs merge themselves when the checks pass.
+
 ## Claude Code
 
 `CLAUDE.md` holds the working rules. `.claude/settings.json` adds a hook: after any edit to `data/*.csv`, it validates the tables and checks the changed rows' quotes against `data/evidence/` (no network), and sends row-level problems back to Claude.

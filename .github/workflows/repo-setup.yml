@@ -1,0 +1,25 @@
+name: Repository setup
+# Run once by hand (Actions → Repository setup → Run workflow), after PIPELINE_TOKEN exists with
+# Administration: read and write. Creates or updates the ruleset on main (.github/rulesets/main.json):
+# a PR is required, ci and data-guard must pass, no force pushes, no deletion, nobody bypasses,
+# no approvals required. Turns on "Allow auto-merge" and deletes head branches after merging.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - name: Ruleset and merge settings
+        env:
+          GH_TOKEN: ${{ secrets.PIPELINE_TOKEN }}
+        run: |
+          [ -n "$GH_TOKEN" ] || { echo "::error::PIPELINE_TOKEN is not set (needs Administration: read and write on this repository)."; exit 1; }
+          gh api -X PATCH "repos/$GITHUB_REPOSITORY" -F allow_auto_merge=true -F delete_branch_on_merge=true -F allow_squash_merge=true > /dev/null
+          id=$(gh api "repos/$GITHUB_REPOSITORY/rulesets" --jq '.[] | select(.name == "main protection") | .id')
+          if [ -n "$id" ]; then gh api -X PUT "repos/$GITHUB_REPOSITORY/rulesets/$id" --input .github/rulesets/main.json > /dev/null; echo "Updated ruleset $id."
+          else gh api -X POST "repos/$GITHUB_REPOSITORY/rulesets" --input .github/rulesets/main.json --jq '"Created ruleset \(.id)."'; fi
+          gh api "repos/$GITHUB_REPOSITORY" --jq '"allow_auto_merge=\(.allow_auto_merge) delete_branch_on_merge=\(.delete_branch_on_merge)"'

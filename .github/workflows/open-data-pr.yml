@@ -1,0 +1,54 @@
+name: Open data PR
+# A research run (or the weekly re-check) pushes a data/<run> branch; this takes in main, resolves
+# the expected review-file conflicts (scripts/merge-data.ts), rebuilds the queue, and opens the PR
+# with the run summary as its body. A conflict in a data table is not resolved: the PR gets a comment.
+on:
+  push:
+    branches: ['data/**']
+permissions:
+  contents: write
+  pull-requests: write
+concurrency: { group: repo-writer, cancel-in-progress: false }
+jobs:
+  open:
+    if: github.event.deleted == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      BRANCH: ${{ github.ref_name }}
+      GH_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+          token: ${{ secrets.PIPELINE_TOKEN || github.token }}
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Take in main
+        id: main
+        run: |
+          git config user.name "data-pipeline"
+          git config user.email "data-pipeline@users.noreply.github.com"
+          git fetch origin main
+          if git merge-base --is-ancestor origin/main HEAD; then echo "Up to date with main."; exit 0; fi
+          if git merge --no-edit origin/main; then :;
+          elif npx tsx scripts/merge-data.ts; then git commit --no-edit;
+          else git merge --abort; echo "conflict=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          npm run queue:build
+          git add review
+          git diff --cached --quiet || git commit -m "Rebuild the review queue after taking in main"
+          git push origin "HEAD:$BRANCH"
+      - name: Open the PR
+        run: |
+          n=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')
+          run=${BRANCH#data/}
+          if [ -z "$n" ]; then
+            if [ -f "review/runs/$run.md" ]; then cp "review/runs/$run.md" "$RUNNER_TEMP/body.md"; else echo "Data from $BRANCH." > "$RUNNER_TEMP/body.md"; fi
+            printf '\n---\nData only: merges on its own once ci and data-guard pass.\n' >> "$RUNNER_TEMP/body.md"
+            n=$(gh pr create --base main --head "$BRANCH" --title "Data: $run" --body-file "$RUNNER_TEMP/body.md" | sed 's#.*/##')
+          fi
+          if [ "${{ steps.main.outputs.conflict }}" = "true" ]; then
+            gh pr comment "$n" --body "This branch conflicts with main in a data table, which isn't resolved automatically. Either resolve it by hand or close this PR; the next research run redoes the games."
+          fi

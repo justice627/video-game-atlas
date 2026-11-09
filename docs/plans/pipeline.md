@@ -233,3 +233,13 @@ Every push to `main` before this change was a production deploy: about 12 to 13 
 - **First sweep.** After this phase merges, one `npm run gate -- --apply` over all drafts goes in its own data PR. Dry run on 2026-11-08: of 299 drafts, 240 are frozen venues; of the other 59, 33 go back to research (mostly no quote yet), 25 wait for a fact-check and join the backlog with the reason "needs a fact-check" (not counted as a failed attempt), and 1 (The House of Hikmah, flagged `needs-review`) goes to you.
 - **Blocked sources.** Approving a blocked-source item stores your confirmation as evidence; `quote q12 "<text>"` stores the text you found. If the link's quote isn't in that text and the link isn't verified, your text becomes the quote and the link goes back to the gate.
 - **The issue.** `.github/workflows/review-issue.yml` creates, pins and locks the issue on the first queue change on `main` (or by hand), and comments once per push that adds items. `.github/workflows/decisions.yml` acts only on that issue (label `review-queue`, marker in the body) and only for `justice627`, writes decisions to `data/decisions` and keeps one PR open for them. Until `PIPELINE_TOKEN` exists (phase 7), that PR's checks won't run and it needs a manual merge.
+
+## 14. Phase 7 notes (2026-11-09)
+
+- **`ci`** replaces `browser-tests.yml` and adds validation, the offline quote check and `gate --check` before the unit and browser tests.
+- **`data-guard`** passes any non-data branch and fails a `data/*` branch that touches anything outside the data paths.
+- **Auto-merge** is turned on by `PIPELINE_TOKEN`, so the merge is the owner's and the push to `main` triggers the review-issue refresh; a merge by `GITHUB_TOKEN` would trigger nothing.
+- **Conflicts** between a data branch and `main` in review files are resolved mechanically (`scripts/merge-data.ts`): the id counter takes the higher value, the queue keeps decided rows over open ones, logs are unioned. A conflict in a data table is left alone with a comment on the PR.
+- **Weekly re-check:** a quote that's gone sends a non-verified link to `needs-human`; a verified link gets a `change-to-verified` item with no proposal (approve keeps it, edit sets a new quote). Links without quotes aren't checked.
+- **The ruleset** is applied by a workflow (`repo-setup.yml`) instead of a terminal command, so it can be run from a phone. It needs `PIPELINE_TOKEN` with Administration rights; that permission can be removed from the token afterwards.
+- **`PIPELINE_TOKEN`** (decision D2): a fine-grained personal access token for this repository only, 1-year expiry, with Contents, Pull requests and Issues read and write, and Administration read and write for the setup run. The nightly check warns 14 days before it expires.
