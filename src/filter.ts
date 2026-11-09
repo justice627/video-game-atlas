@@ -1,7 +1,7 @@
 import type { Game, Link, Role, Span } from './types.ts';
 import { MIN_YEAR, MAX_YEAR, type Range } from './timeline.ts';
 
-export interface Filters { range: Range; roles: Set<Role>; showCoarse: boolean; showStrategy: boolean; showUndated: boolean }
+export interface Filters { range: Range; roles: Set<Role>; showCoarse: boolean; showStrategy: boolean; showUndated: boolean; showAuto: boolean }
 export interface Hit { game: Game; link: Link; index: number; matched?: Span; approxTime: boolean }
 
 export const overlaps = (s: Span, r: Range) => s.from <= r.to && s.to >= r.from;
@@ -21,6 +21,7 @@ export function visiblePlacements(games: Game[], f: Filters): Hit[] {
   const window = f.range.to - f.range.from + 1;
   for (const game of games) {
     game.links.forEach((link, index) => {
+      if (link.auto && !f.showAuto) return;                // passed the automatic gate, not yet checked by hand
       if (link.timeType === 'undated' && !undatedShown(f)) return;
       if (isStrategyLike(link)) { if (!f.showStrategy) return; }
       else if (!f.roles.has(link.role)) return;

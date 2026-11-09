@@ -1,0 +1,63 @@
+name: Review decisions
+# Applies ticks and one-line commands from the pinned "Review queue" issue (scripts/review-decisions.ts,
+# deterministic, no LLM). Acts only on that issue and only for the owner; everyone else is ignored
+# without a reply. Decisions go to review/queue.csv on the branch data/decisions, rebuilt from main
+# each time with any decisions already waiting there, and one PR carries them (auto-merged as data).
+on:
+  issues:
+    types: [edited]
+  issue_comment:
+    types: [created]
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+concurrency: { group: repo-writer, cancel-in-progress: false }
+jobs:
+  decide:
+    if: >-
+      github.event.issue.pull_request == null &&
+      contains(github.event.issue.labels.*.name, 'review-queue') &&
+      ((github.event_name == 'issues' && github.event.sender.login == 'justice627') ||
+       (github.event_name == 'issue_comment' && github.event.comment.user.login == 'justice627'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ secrets.PIPELINE_TOKEN || github.token }}
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Carry decisions already waiting on data/decisions
+        id: carry
+        run: |
+          if git fetch origin data/decisions 2>/dev/null; then
+            git show FETCH_HEAD:review/queue.csv > "$RUNNER_TEMP/carried.csv"
+            echo "path=$RUNNER_TEMP/carried.csv" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Read ticks and commands
+        id: decide
+        run: npx tsx scripts/review-decisions.ts "$GITHUB_EVENT_PATH" "$GITHUB_EVENT_NAME" "${{ steps.carry.outputs.path }}" > "$RUNNER_TEMP/reply.md"
+      - name: Push the decisions PR
+        if: steps.decide.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
+        run: |
+          git config user.name "review-decisions"
+          git config user.email "review-decisions@users.noreply.github.com"
+          git checkout -B data/decisions
+          git add review/queue.csv
+          git diff --cached --quiet || git commit -m "Review decisions from the pinned issue"
+          git push -f origin data/decisions
+          if [ -z "$(gh pr list --head data/decisions --state open --json number --jq '.[0].number // empty')" ]; then
+            gh pr create --base main --head data/decisions --title "Review decisions" \
+              --body "Decisions from the pinned Review queue issue. Data only: applied by the next research run."
+          fi
+      - name: Reply
+        if: steps.decide.outputs.reply == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh issue comment "${{ github.event.issue.number }}" --body-file "$RUNNER_TEMP/reply.md"

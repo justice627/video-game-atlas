@@ -4,6 +4,7 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { parseCsv, toCsv } from './csv.ts';
 import type { LinkRow, Tables } from './tables.ts';
+import { normalize as normalizeForMatch } from './sources.ts';
 
 export const QUEUE_COLS = ['id', 'kind', 'priority', 'link', 'game', 'place', 'claim', 'source', 'quote', 'reason', 'proposed',
   'what_i_need_to_do', 'decision', 'decision_note', 'added'] as const;
@@ -51,6 +52,15 @@ export class Queue {
     this.save([...rows, row]);
     return row;
   }
+}
+
+/** One line a reviewer can read on a phone: place, role, time, confidence. */
+export function describeLink(t: Tables, l: LinkRow): string {
+  const place = t.places.find((p) => p.id === l.place_id)?.name ?? l.place_id;
+  const game = t.games.find((g) => g.id === l.game_id)?.title ?? l.game_id;
+  const where = l.depiction === 'fictionalized' && l.fictional_name ? `${l.fictional_name} (based on ${place})` : place;
+  const when = l.time_type === 'undated' ? 'undated' : l.from !== undefined ? (l.from === l.to ? String(l.from) : `${l.from}–${l.to}`) : l.era_id ? `era ${l.era_id}` : l.time_type;
+  return `${game}: ${where}, ${l.role}${l.name_in_game ? ` "${l.name_in_game}"` : ''}, ${when}, ${l.confidence ?? '?'} confidence`;
 }
 
 /** Sorts by kind priority, keeping each kind's order (skip moves a row to the end of its kind). */
@@ -116,7 +126,19 @@ function applyOne(t: Tables, r: QueueRow, log: { audit: (row: QueueRow, result: 
   if (d === 'skip') return 'skipped';
   if (r.kind === 'blocked-source') {
     // Resolved by the owner checking the page by hand: approve = "the quote is there", reject = "it isn't".
-    if (d === 'approve') return 'confirmed by hand';
+    if (d === 'approve') {
+      // Optional pasted text (phone: quote <id> "<text>"). If the link's own quote isn't in it and the link
+      // isn't verified, the pasted text becomes the quote for that source, and the link goes back to the gate.
+      const text = parseAssignments(r.decision_note).find(([k]) => k === 'quote')?.[1];
+      const l = r.link.includes('/') ? t.links.find((x) => x.id === r.link) : undefined;
+      if (text && l && l.status !== 'verified' && r.quote && !normalizeForMatch(text).includes(normalizeForMatch(r.quote))) {
+        const urls = (l.sources ?? '').split(/\s+/).filter(Boolean);
+        const qs = (l.quote ?? '').split(' | ');
+        const i = urls.indexOf(r.source);
+        if (i >= 0) { while (qs.length < urls.length) qs.push(''); qs[i] = text; l.quote = qs.join(' | '); l.accessed = new Date().toISOString().slice(0, 10); l.status = 'draft'; return 'quote replaced by the text found by hand'; }
+      }
+      return 'confirmed by hand';
+    }
     if (d === 'reject') { if (r.link.includes('/')) { const l = linkOf(t, r); if (l.status !== 'verified') { l.status = 'needs-human'; } } return 'quote not found by hand'; }
     if (d === 'edit') { const l = linkOf(t, r); setFields(l, parseAssignments(r.decision_note)); if (l.status !== 'verified') l.status = 'draft'; return 'edited'; }
   }

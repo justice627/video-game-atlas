@@ -14,8 +14,8 @@ import { execFileSync } from 'node:child_process';
 import { appendFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { parseCsv, toCsv } from './lib/csv.ts';
 import { validate } from './lib/dataset.ts';
-import { applyDecisions, BACKPRESSURE, byPriority, Queue, type QueueRow } from './lib/queue.ts';
-import { sha256 } from './lib/sources.ts';
+import { applyDecisions, BACKPRESSURE, byPriority, parseAssignments, Queue, type QueueRow } from './lib/queue.ts';
+import { evidenceKey, sha256 } from './lib/sources.ts';
 import { mergeStaging, readStaging } from './lib/staging.ts';
 import { readTables, writeTables, type LinkRow, type Tables } from './lib/tables.ts';
 import { recordBlocked } from './verify-sources.ts';
@@ -66,6 +66,19 @@ export function applyQueueDecisions(t: Tables, q: Queue, run = today()) {
     results.push(res.results[0]);
   }
   return { tables: current, remaining: byPriority(remaining), resolved, results, audits };
+}
+
+/** Evidence for a blocked source the owner checked by hand: their pasted text, or their confirmation. */
+export function writeOwnerEvidence(rows: { source: string; quote: string; decision_note: string; id: string; outcome: string }[], dir = new URL('data/evidence/', ROOT)) {
+  mkdirSync(dir, { recursive: true });
+  for (const r of rows) {
+    let text = '';
+    try { text = parseAssignments(r.decision_note).find(([k]) => k === 'quote')?.[1] ?? ''; } catch { /* free-text note */ }
+    const quote = r.outcome.startsWith('quote replaced') ? text : r.quote;
+    if (!quote) continue;
+    const ev = { url: r.source, quote, accessed: today(), content_sha256: '', method: `owner (justice627, review ${r.id})`, context: text || `Confirmed on the page by the owner in review ${r.id}.` };
+    writeFileSync(new URL(`${evidenceKey(r.source, quote)}.json`, dir), JSON.stringify(ev, null, 2) + '\n');
+  }
 }
 
 // ---------- pick ----------
@@ -208,6 +221,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       writeTables(r.tables);
       q.save(r.remaining, r.resolved);
       if (r.audits.length) writeCsv('docs/review/audit-log.csv', AUDIT_COLS, [...csvRows('docs/review/audit-log.csv'), ...r.audits]);
+      writeOwnerEvidence(r.resolved.filter((x) => x.kind === 'blocked-source' && (x.outcome.startsWith('confirmed') || x.outcome.startsWith('quote replaced'))));
       const failed = r.results.filter((x) => x.error);
       logEvent(run, { step: 'decisions', applied: r.results.length - failed.length, failed: failed.length });
       say(r.results);

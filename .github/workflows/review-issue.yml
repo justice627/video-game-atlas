@@ -1,0 +1,44 @@
+name: Review issue
+# Keeps the pinned "Review queue" issue in step with review/queue.csv on main, and comments once
+# when new items arrive (one notification per merged run). Edits made with GITHUB_TOKEN don't
+# trigger workflows, so refreshing the body can't loop into the decisions workflow.
+on:
+  push:
+    branches: [main]
+    paths: ['review/queue.csv', 'docs/review/audit-log.csv']
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency: { group: review-issue, cancel-in-progress: false }
+jobs:
+  issue:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Render, create or update, and announce new items
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          npx tsx scripts/review-issue.ts body > "$RUNNER_TEMP/body.md"
+          git show HEAD~1:review/queue.csv > "$RUNNER_TEMP/old.csv" 2>/dev/null || : > "$RUNNER_TEMP/old.csv"
+          new=$(npx tsx scripts/review-issue.ts new "$RUNNER_TEMP/old.csv")
+          gh label create review-queue --color 0E8A16 --description "The pinned review queue" 2>/dev/null || true
+          n=$(gh issue list --label review-queue --state open --json number,title --jq '[.[] | select(.title == "Review queue")][0].number // empty')
+          if [ -z "$n" ]; then
+            url=$(gh issue create --title "Review queue" --label review-queue --body-file "$RUNNER_TEMP/body.md")
+            n=${url##*/}
+            gh issue pin "$n" || echo "::warning::could not pin issue $n"
+            gh issue lock "$n" || echo "::warning::could not lock issue $n"
+          else
+            gh issue edit "$n" --body-file "$RUNNER_TEMP/body.md"
+          fi
+          if [ -n "$new" ]; then
+            count=$(wc -w <<<"$new")
+            gh issue comment "$n" --body "$count new item(s): $new"
+          fi

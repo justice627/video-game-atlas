@@ -18,7 +18,7 @@ function readHash(): Filters {
   const roles = [...new Set(q.get('roles')?.split(',').map((k) => OLD_ROLES[k] ?? k).filter((k): k is Role => CHIP_ROLES.includes(k as Role)))];
   let range: Range = { from: num('from', MIN_YEAR), to: num('to', MAX_YEAR) };
   if (range.from > range.to) range = { from: range.to, to: range.from };
-  return { range, roles: new Set(q.has('roles') ? roles : DEFAULT_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1', showUndated: q.get('undated') === '1' };
+  return { range, roles: new Set(q.has('roles') ? roles : DEFAULT_ROLES), showCoarse: q.get('coarse') !== '0', showStrategy: q.get('strategy') === '1', showUndated: q.get('undated') === '1', showAuto: q.get('auto') !== '0' };
 }
 
 let collapse = new URLSearchParams(location.hash.slice(1)).get('series') === '1';
@@ -32,6 +32,7 @@ function writeHash(f: Filters) {
   if (!f.showCoarse) q.set('coarse', '0');
   if (f.showStrategy) q.set('strategy', '1');
   if (f.showUndated) q.set('undated', '1');
+  if (!f.showAuto) q.set('auto', '0');
   history.replaceState(null, '', q.size ? `#${q}` : location.pathname + location.search);
 }
 
@@ -50,11 +51,14 @@ async function main() {
   const coarse = $<HTMLInputElement>('#coarse');
   const strategy = $<HTMLInputElement>('#strategy');
   const showUndated = $<HTMLInputElement>('#undated');
+  const showAuto = $<HTMLInputElement>('#auto');
+  const autoGames = atlas.games.filter((g) => g.links.some((l) => l.auto)).length;
+  $('#auto-n').textContent = String(autoGames);
   const strategyCount = atlas.games.filter((g) => g.links.some(isStrategyLike)).length;
   $('#strategy-n').textContent = String(strategyCount);
   const undated = undatedGames(atlas.games);
   $('#undated-n').textContent = String(undated.length);
-  $('#meta').textContent = `${atlas.games.length} verified game${atlas.games.length === 1 ? '' : 's'}`;
+  $('#meta').textContent = `${atlas.games.length} game${atlas.games.length === 1 ? '' : 's'}${autoGames ? ` (${autoGames} with auto-verified places)` : ' verified'}`;
 
   let frame = 0;
   const update = () => {
@@ -63,6 +67,7 @@ async function main() {
       coarse.checked = filters.showCoarse;
       strategy.checked = filters.showStrategy;
       showUndated.checked = filters.showUndated;
+      showAuto.checked = filters.showAuto;
       group.checked = collapse;
       const hits = visiblePlacements(atlas.games, filters);
       map.setHits(groupEntries(hits, collapse));
@@ -95,6 +100,7 @@ async function main() {
   coarse.addEventListener('change', () => { filters.showCoarse = coarse.checked; update(); });
   strategy.addEventListener('change', () => { filters.showStrategy = strategy.checked; update(); });
   showUndated.addEventListener('change', () => { filters.showUndated = showUndated.checked; update(); });
+  showAuto.addEventListener('change', () => { filters.showAuto = showAuto.checked; update(); });
   group.addEventListener('change', () => { collapse = group.checked; update(); });
   update();
 }

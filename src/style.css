@@ -100,3 +100,7 @@ a { color: var(--accent); }
 .pop-logo { margin: 0 0 6px; max-width: 200px; height: 44px; }
 .pop-logo img { max-height: 38px; }
 .fineprint { margin: 0; padding: 8px 12px; border-top: 1px solid var(--line); font-size: 11px; line-height: 1.35; color: var(--muted); }
+
+/* Auto-verified: passed the automatic gate, not yet checked by hand (docs/plans/pipeline.md, D3). */
+.tag-auto { display: inline-block; margin-left: 6px; padding: 0 5px; border: 1px solid #8a94a6; border-radius: 3px; font-size: 10px; line-height: 15px; color: #5b6475; vertical-align: 1px; text-transform: uppercase; letter-spacing: .04em; }
+.auto-note { margin-top: 2px; font-size: 12px; color: #5b6475; font-style: italic; }
