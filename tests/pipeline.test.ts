@@ -8,7 +8,7 @@ import { readTables, TABLES, type Tables } from '../scripts/lib/tables.ts';
 import { validate } from '../scripts/lib/dataset.ts';
 import { applyDecisions, parseAssignments, Queue, QUEUE_COLS, type QueueRow } from '../scripts/lib/queue.ts';
 import { mergeStaging, readStaging } from '../scripts/lib/staging.ts';
-import { applyQueueDecisions, DATA_PATHS, linkHash, pick, recordFactcheck, renderRun } from '../scripts/pipeline.ts';
+import { applyQueueDecisions, changedPaths, DATA_PATHS, linkHash, pick, recordFactcheck, renderRun } from '../scripts/pipeline.ts';
 import { guard } from '../scripts/hooks/guard-agent.ts';
 import { toCsv } from '../scripts/lib/csv.ts';
 import { spawnSync } from 'node:child_process';
@@ -191,6 +191,9 @@ describe('run summary and data paths', () => {
   it('data commits may touch only data paths', () => {
     expect(['data/links.csv', 'review/queue.csv', 'docs/research/x.md', 'docs/review/audit-log.csv'].every((p) => DATA_PATHS.test(p))).toBe(true);
     expect(['src/main.ts', 'docs/data-rules.md', '.github/workflows/ci.yml', 'scripts/pipeline.ts'].some((p) => DATA_PATHS.test(p))).toBe(false);
+  });
+  it('reads git status paths exactly, first line included', () => {
+    expect(changedPaths(' M data/links.csv\0 M review/queue.csv\0?? review/runs/x.md\0R  data/new.csv\0data/old.csv\0')).toEqual(['data/links.csv', 'review/queue.csv', 'review/runs/x.md', 'data/new.csv']);
   });
   it('renders the run log', () => {
     const md = renderRun('2026-11-07-0630', [{ step: 'pick', games: ['a'] }, { step: 'merge', game: 'a', links: 3 }, { step: 'tokens', game: 'a', value: '41000' }]);
