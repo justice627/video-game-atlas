@@ -1,0 +1,30 @@
+name: Auto-merge data
+# Turns on auto-merge (squash) for data PRs only: the head branch starts with data/, it lives in this
+# repository (not a fork), and the owner opened it (directly or through PIPELINE_TOKEN, which acts as
+# the owner). It merges once ci and data-guard pass. Never for any other PR.
+# PIPELINE_TOKEN enables it, so the merge counts as the owner's and the push to main triggers the
+# workflows that follow it (review issue refresh); a merge by GITHUB_TOKEN would trigger nothing.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  automerge:
+    if: >-
+      startsWith(github.head_ref, 'data/') &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.user.login == 'justice627' &&
+      !github.event.pull_request.draft
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
+          HAS_PIPELINE_TOKEN: ${{ secrets.PIPELINE_TOKEN != '' }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          [ "$HAS_PIPELINE_TOKEN" = "true" ] || echo "::warning::PIPELINE_TOKEN is missing: the merge will not trigger the review issue refresh."
+          gh pr merge --auto --squash "$PR" --repo "$GITHUB_REPOSITORY"

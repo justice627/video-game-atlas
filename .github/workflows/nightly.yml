@@ -1,0 +1,57 @@
+name: Nightly
+# Full validation of main every night, plus a check that PIPELINE_TOKEN exists and isn't about to
+# expire. A failure opens a blocker issue, or comments on the open one.
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  nightly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Validate everything
+        id: checks
+        run: |
+          fail=""
+          npm run build:data || fail="$fail build:data"
+          npm run verify:sources -- --offline || fail="$fail verify-sources"
+          npm run gate -- --check || fail="$fail gate"
+          npm test || fail="$fail unit-tests"
+          echo "failed=${fail# }" >> "$GITHUB_OUTPUT"
+      - name: Check PIPELINE_TOKEN
+        id: token
+        env:
+          TOKEN: ${{ secrets.PIPELINE_TOKEN }}
+        run: |
+          if [ -z "$TOKEN" ]; then echo "problem=PIPELINE_TOKEN is not set: data PRs don't run their checks and can't auto-merge." >> "$GITHUB_OUTPUT"; exit 0; fi
+          exp=$(curl -sSI -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY" | tr -d '\r' | awk -F': ' 'tolower($1)=="github-authentication-token-expiration"{print $2}')
+          status=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $TOKEN" "https://api.github.com/repos/$GITHUB_REPOSITORY")
+          if [ "$status" != "200" ]; then echo "problem=PIPELINE_TOKEN was refused (HTTP $status): replace it." >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ -n "$exp" ]; then
+            days=$(( ( $(date -d "$exp" +%s) - $(date +%s) ) / 86400 ))
+            [ "$days" -lt 14 ] && echo "problem=PIPELINE_TOKEN expires in $days day(s) ($exp): create a new one and update the secret." >> "$GITHUB_OUTPUT"
+          fi
+          exit 0
+      - name: Open or update the blocker issue
+        if: steps.checks.outputs.failed != '' || steps.token.outputs.problem != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILED: ${{ steps.checks.outputs.failed }}
+          TOKEN_PROBLEM: ${{ steps.token.outputs.problem }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh label create blocker --color B60205 --description "Something only the owner can fix" 2>/dev/null || true
+          body="Nightly check on main, $(date -u +%F):"
+          [ -n "$FAILED" ] && body="$body"$'\n'"- Failed: $FAILED. Log: $RUN_URL"
+          [ -n "$TOKEN_PROBLEM" ] && body="$body"$'\n'"- $TOKEN_PROBLEM"
+          title="Blocker: nightly check"
+          n=$(gh issue list --label blocker --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -n "$n" ]; then gh issue comment "$n" --body "$body"; else gh issue create --title "$title" --label blocker --body "$body"; fi

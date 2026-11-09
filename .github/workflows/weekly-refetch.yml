@@ -1,0 +1,46 @@
+name: Weekly re-check
+# Fetches every quoted source again (scripts/refetch.ts). A quote that's gone sends a link to
+# needs-human, or a verified link to a change-to-verified item; nothing verified changes on its own.
+# The result goes out as a data PR on data/<date>-refetch.
+on:
+  schedule:
+    - cron: '41 3 * * 0'   # Sunday 03:41 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency: { group: repo-writer, cancel-in-progress: false }
+jobs:
+  refetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GH_TOKEN: ${{ secrets.PIPELINE_TOKEN || github.token }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+          token: ${{ secrets.PIPELINE_TOKEN || github.token }}
+      - uses: actions/setup-node@v5
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Re-fetch and compare
+        run: |
+          run="$(date -u +%F)-refetch"
+          mkdir -p review/runs
+          { echo "# Weekly re-check $run"; echo; echo '```'; npx tsx scripts/refetch.ts; echo '```'; } > "review/runs/$run.md"
+          echo "RUN=$run" >> "$GITHUB_ENV"
+      - name: Push a data branch if anything changed
+        run: |
+          git config user.name "data-pipeline"
+          git config user.email "data-pipeline@users.noreply.github.com"
+          git add data review docs/review
+          if git diff --cached --quiet -- data review/queue.csv review/blocked-sources.csv; then echo "Nothing changed beyond the report."; exit 0; fi
+          outside=$(git diff --cached --name-only | grep -v -E '^(data/|docs/research/|docs/review/|review/)' || true)
+          [ -z "$outside" ] || { echo "::error::refusing to commit non-data paths: $outside"; exit 1; }
+          git checkout -b "data/$RUN"
+          git commit -m "Weekly re-check $RUN"
+          git push -u origin "data/$RUN"
+          if [ -z "$(gh pr list --head "data/$RUN" --state open --json number --jq '.[0].number // empty')" ]; then
+            gh pr create --base main --head "data/$RUN" --title "Data: $RUN" --body-file "review/runs/$RUN.md"
+          fi
